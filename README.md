@@ -9,13 +9,11 @@ For the project i'm going to work with (SBCL) a high performance Common Lisp com
 ["Integrate SBCL with Emacs"](https://github.com/slime/slime)
 
 #Run the examples  
-If you want to inspect what is doing the examples, you can compile the file or simply copy&paste into the SBCL command line for example:
+If you want to inspect what the examples are doing, you can compile the file or simply copy%paste it into the SBCL command line for example:
 ```
-*(list '(Hello World))
+~(list '(Hello World))
+~(HELLO WORLD)
 ```
 
-```
-(HELLO WORLD)
-```
 #Authors
 * **Reyes Fragoso Roberto** - [Portfolio](http://robertoreyes.me)
