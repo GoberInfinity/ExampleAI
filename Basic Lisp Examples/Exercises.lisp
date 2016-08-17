@@ -7,7 +7,7 @@
 ;c) Si el valor numerico asociado a la variable x es diferente de cero y además menor o igual que el valor asociado a la variable y (x =2, y=1)
 (AND (NOT (EQUAL 2 0)) (<= 2 1 ))
 ;d) Una lista con las dos soluciones reales de la ecuación
-(complex x y)
+(list -5/2 -1)
 
 ;Ejercicios parte 2
 a) (+ (* 2 4)(- 6 8))
@@ -34,3 +34,12 @@ C
 (B C)
 ;i) (cdadar '(((((1 2 3) z) y)(x 4)) 7 8 (a b c (5 (6 7 8)))))
 (4)
+
+;Ejercicio 4
+(defun Recombina (lista) (list (cons (list (rest (first lista)) (rest (second lista))) (first (first lista))) (cons (list (rest (second lista)) (rest (third lista))) (first (third lista))) (cons (list (rest (third  lista)) (rest (second lista)) (rest (first lista))) (first (second lista)))))
+
+;Ejercicio 5
+(defun NoCero (argumento) (plusp argumento))
+
+;Ejercicio 6
+(defun Analiza (X) (list (atom X) (numberp X) (listp X) (consp X) (null X)))
