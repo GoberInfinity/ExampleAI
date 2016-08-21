@@ -110,9 +110,40 @@
 
 (Testing '(((1)) 2 3 4 5 ))
 
+(defun multiply-two-matrices
+       (a-matrix
+        b-matrix)
+  (let ((result (make-array
+          (list (nth 0 (array-dimensions a-matrix))
+                (nth 1 (array-dimensions b-matrix))))) 
+	(m (nth 0 (array-dimensions a-matrix)))
+        (n (nth 1 (array-dimensions b-matrix)))
+        (common (nth 0 (array-dimensions b-matrix))))
+    (dotimes (i m result)
+      (dotimes (j n)
+        (setf (aref result i j) 0.0)
+        (dotimes (k common)
+          (incf (aref result i j)
+                (* (aref a-matrix i k) (aref b-matrix k j))))))))
+
+(multiply-two-matrices #2a((0 0 1) (0 1 0) (1 0 0))
+                       #2a((10 9) (8 7) (6 5)))
 
 
+(Matriz '((0 0 1)) '(0 1 0))
 
+(defun mm (&key fm sm)
+  (if (not (eq (length (first fm)) (length sm)))
+      (return-from mm nil))
+      (let* (( a (make-array (list (length fm)
+                    (length (first fm)))
+			     :initial-contents fm))
+	     ( b (make-array (list (length sm)
+                    (length (first sm)))
+			     :initial-contents sm)))
+	  (multiply-two-matrices a b)))
+
+(mm :fm '((1 2 3)(1 2 3)(1 2 3)) :sm '((1 2)(1 2)(1 2)))
 					;(defun Aplana (lista) 
 
    #|| (loop for i
