@@ -14,6 +14,8 @@
 
 (Termina-en 'd '(a b c))
 
+(defun Termina-EN (argumento lista)(let ((respuesta '()))(loop for i in (reverse lista) while(not (equal argumento i)) do( setq respuesta (cons i respuesta)))(list respuesta)))
+
 (defun Primer-impar (lista)
   (let ((contador -1))
   (loop for i in lista 
