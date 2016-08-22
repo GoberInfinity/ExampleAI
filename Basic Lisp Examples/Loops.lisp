@@ -15,11 +15,11 @@
 (Termina-en 'd '(a b c))
 
 (defun Primer-impar (lista)
-  (let ((respuesta '()) (indice -1))
-    (dolist (elemento lista respuesta)
-      (setq indice (+ indice 1))
-      (when (oddp elemento)
-      (setq respuesta(cons indice (cons elemento respuesta)))))))
+  (let ((contador -1))
+  (loop for i in lista 
+  do(setq contador(+ contador 1))
+  if (oddp i)
+  return (list i contador))))
 
 (Primer-impar '(2 3 2 5 7))
 
