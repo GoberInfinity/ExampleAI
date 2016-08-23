@@ -56,3 +56,6 @@
 (trace Pegaycambiaaux)
 (trace Cambia)
 (PegaYCambia '(a a c d) '(a a a a) 'a 'x) ;=>(X X C D X X X X)
+
+(defun Qsort (lista)
+  
