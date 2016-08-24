@@ -49,11 +49,96 @@
 (Ultimo '(2 3 2 3 -2)) ;=>(2 3)
 
 ;Ejercicio 6 
+(defun Conteo (l &optional n s)
+  (cond ((null l) (list n s))
+	((numberp (car l)) (Conteo (cdr l) (+ n 1) (+ s 0)))
+	((listp (car l)) (Conteo (cdr l) (+ n 0) (+ s 1)))
+	(t (Conteo (cdr l) (+ n 0) (+ s 0)))))
 
+(Conteo '((1 2) 1 2 3 (1 1 1)) 0 0) ;=> (3 2)
 
+;Ejercicio 7
+(defun Aplana (l)
+  (cond ((null l) nil)
+        ((atom (car l)) (cons (car l) (Aplana (cdr l))))
+        (t (append (Aplana (car l)) (Aplana (cdr l))))))
+
+(Aplana '((a b) c d ((e f g)) h)) ;=> (A B C D E F G H)
+
+;Ejercicio 8
+(defun Diagonal (l &optional c)
+  (cond ((null l) nil)
+        ((listp (car l)) (cons (nth c (car l)) (Diagonal (cdr l) (+ c 1))))
+        (t (Diagonal (car l) (+ c 0)))))
+
+(Diagonal '((a b) (c d)) 0) ;=> (A D)
+
+;Ejercicio 9
+(defun tipo (l)
+  (cond ((null l) nil)
+	((null (car l)) (cons 'N (Tipo (cdr l))))
+        ((listp (car l)) (cons 'L (Tipo (cdr l))))
+        (t (cons 'A (Tipo (cdr l))))))
+
+(Tipo '(1 ( ) a  (1 2 a) b c)) ;=> (A N A L A A)
+
+;Ejercicio 10 
+(defun SumaNumerica (l)
+  (cond ((null l) 0)
+	((not(numberp (car l))) (SumaNumerica (cdr l)))
+        (t (+ (car l) (SumaNumerica (cdr l))))))
+
+(Sumanumerica '(1 a 2 c 4 d));=> 7
+
+;Ejercicio 11
+(defun FiltraVocales (l)
+  (cond ((null l) nil)
+        ((atom (car l)) (if (or (equal 'a (car l))
+       				(equal 'e (car l))
+       				(equal 'i (car l))
+       				(equal 'o (car l))
+       				(equal 'u (car l)))
+       			    (FiltraVocales (cdr l))
+       			    (cons (car l) (Filtravocales (cdr l)))))
+        (t (append (FiltraVocales (car l)) (FiltraVocales (cdr l))))))
+
+(FiltraVocales '((A E I) 1 2 a u u)) ;=> (1 2)
+
+;Ejercicio 12
+(defun FiltraMultiplos (l n)
+  (cond ((null l) nil)
+	((eql n (car l)) (FiltraMultiplos (cdr l) n))
+        (t (cons (car l) (FiltraMultiplos (cdr l) n)))))
+
+(Filtramultiplos '(1 2 3 3 4 6) 3) ;=> (1 2 4 6)
+
+;Ejercicio 13
+(defun Celdas (l &optional n)
+  (cond ((null l) n)
+       	((atom (car l)) (Celdas(cdr l) (+ n 1)))
+       	(t (+ (Celdas (car l) (+ n 0)) (Celdas (cdr l) (+ n 1))))))
+
+(Celdas '(((1)) 2 3 4 5) 0) ;=> 7
+
+;Ejercicio 14
+(defun Implica (&rest a)
+  (cond ((null a) t)
+       	(t (AND (car a) (Implica (cdr a))))))
+
+(Implica T T nil t) ;=> Nil
+
+;Ejercicio 15
+(defun matrix-multiply (m1 m2)
+ (mapcar
+  (lambda (row)
+   (apply #'mapcar
+    (lambda (&rest column)
+      (apply #'+ (mapcar #'* row column))) m2)) m1))
+
+(matrix-multiply '((1 2) (3 4)) '((-3 -8 3) (-2 1 4))) ;=> ((-7 -6 11) (-17 -20 25))
 
 ;Ejercicio 16
-(defun Encontrar (elem lista)
+(defun Encontrar (&rest argumentos)
   (cond ((null lista) nil)
 	((eql elem (car lista)) lista)
 	(t (append(Encontrar elem (cdr lista))))))
