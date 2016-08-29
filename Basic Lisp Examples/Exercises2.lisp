@@ -61,18 +61,29 @@
 
 ;Ejercicio 7
 (defun Aplana (l)
-  (cond ((null l) nil)
-        ((atom (car l)) (cons (car l) (Aplana (cdr l))))
-        (t (append (Aplana (car l)) (Aplana (cdr l))))))
+  (let ((res nil))
+    (loop for x in l
+       if (listp x)
+       do (loop while (not (equal x nil))
+	     do (setf x (reduce #'append
+				(loop for y in x
+				   if (atom y)
+				   do (setq res (append res (cons y nil)))
+				   else
+				   collect y))))
+       else
+       do (setq res (append res (cons x nil)))
+       finally (return res))))
 
 (Aplana '((a b) c d ((e f g)) h)) ;=> (A B C D E F G H)
-	
+
+
 ;Ejercicio 8
 (defun Diagonal (lista)
   (loop for i from 0 for elemento in lista
      collect ( nth i elemento)))
 
-(Diagonal '((a b) (c d)) ;=> (A D)
+(Diagonal '((a b) (c d))) ;=> (A D)
 
 ;Ejercicio 9 
 (defun TipoLista (lista)
