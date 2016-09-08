@@ -74,7 +74,7 @@
 (defun Level (lista cadena)
   (LevelAux lista cadena 0))
 
-(Level '(colonia (alemana) cuidad perrito) "alemana")
+(Level '(colonia (alemana) cuidad perrito) "alemana") ;=> 1
   
 ;Problema 9
 (defun encode (list)
@@ -88,6 +88,22 @@
         (encode-run (first list) 1 (rest list)))))
 
 (encode '(a a a a b c c a a d e e e e)) ; => ((4 A) (1 B) (2 C) (2 A) (1 D) (4 E))
+
+;Problema 10 
+(defun StrCypherAux (cadena code ct)
+  (cond ((equal (length cadena) ct) (return-from StrCypherAux cadena))
+	(t (StrCypherAux (substitute (char code ct) (char cadena ct) cadena) code (+ ct 1)))))
+
+(defun StrCypher (c cc)
+  (StrCypherAux c cc 0))
+
+(StrCypher "Clor" "abcd") ;=> "abcd"
+
+
+(subseq "Hola" 1 4)
+(equalp "" "")
+(aref "Hola" 0)
+(length "Hola")
 
 
 ;Problema 14
