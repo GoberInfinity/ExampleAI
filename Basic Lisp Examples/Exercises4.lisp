@@ -31,12 +31,12 @@
 (2palindrome "oossoo") ; T
 
 ;Problema 4
-(defun iterativepalindrome (lista)
+(defun iterativepalindrome (l)
        (loop for i from 0
-       	     for a in lista
-	           for b in (reverse lista)
+       	     for a in l
+	           for b in (reverse l)
 	           always (equal a b)
-	           until (> i(/(length lista)2))))
+	           until (> i(/(length l)2))))
 
 (iterativepalindrome '(a b a)) ; T
 
@@ -111,12 +111,6 @@
 
 (StrCypher "Clor" "abcd") ;=> "abcd"
 
-
-(subseq "Hola" 1 4)
-(equalp "" "")
-(aref "Hola" 0)
-(length "Hola")
-
 ;Problema 11
 (defun mmul (A B)
   (if (not (equal (car (array-dimensions A)) (car (array-dimensions B))))
@@ -134,11 +128,6 @@
     C))
 
 (mmul #2a((1 2) (3 4)) #2a((5 6 7) (8 9 10))) ;=> #2A((21 24 27) (47 54 61))
-
-(length #2a((1 2) (3 4)))
-(equal (array-dimensions #2a((1 2) (3 4))) (array-dimensions #2a((1 2) (1 2))))
-(car (array-dimensions #2a((1 2) (3 4))))
-(car (array-dimensions #2a((-3 -8 3) (-2 1 4))))
 
 ;Problema 12
 (defun tree-depth (tree)
@@ -195,13 +184,3 @@
 	   (print "NumeroNegativo")))))
 	   
 (If-positive 10) ; => Numero Positivo 
-
-(print-2d-array-as-table #2a((1 2) ( 3 4)))
-
-(defun print-2d-array-as-table (array)
-  (loop for i from 0 below (array-dimension array 0)
-        do (loop for j from 0 below (array-dimension array 1)
-                 do (princ (aref array i j))
-                    (if (= j (1- (array-dimension array 1)))
-                        (terpri)
-                        (princ #\Space)))))
