@@ -40,7 +40,6 @@
 
 (iterativepalindrome '(a b a)) ; T
 
-
 ;Problema 5
 (defun listRotate (l &key (right nil) (left nil))
   (if right
@@ -53,6 +52,19 @@
       (nconc (subseq list count) (subseq list 0 count))))
 
 (listRotate '(a b c d e f g h) :right 3) ; => (D E F G H A B C) 
+
+;Problema 6 
+(defun Max&Pos (a)
+       (let* ((dim (array-dimensions a))
+       (f (first dim))
+       (c (second dim)))
+       (loop for i from 0 to (- c 1)
+       	     collect(let ((elem 0) (pos 0))
+	     		 (dotimes(j (- f 1) (cons elem pos))
+			 	    (if (< elem (aref a j i)) (setq pos j))
+					(setq elem (max elem (aref a j
+								   i))))))))
+(Max&Pos #2a((1 2) ( 3 4))) ;=> (1.0) (2.0) 
 
 ;Problema 7 
 (defun Combine (fun l)
@@ -128,6 +140,24 @@
 (car (array-dimensions #2a((1 2) (3 4))))
 (car (array-dimensions #2a((-3 -8 3) (-2 1 4))))
 
+;Problema 12
+(defun tree-depth (tree)
+  (cond ((atom tree) 0)
+	(t (+ 1 (max (tree-depth
+		      (car tree))
+		     (tree-depth (cdr tree)))))))
+
+(defun BTreeAux (e l ct val)
+  (cond ((null l) (return-from BTreeAux (cons e (cdr l))))
+	((eql e (car l)) (return-from BTreeAux nil))
+	((equal ct val) (return-from BTreeAux cons e (car l)))
+	(t (BTreeAux e (cdr l) (+ ct 1) val))))
+
+(defun BTree (e l)
+  (tree-depth (append (BTreeAux e l 0 (length l)) l)))
+
+(Btree 9 '(1 (2 (3) (4)) (5 (6) (7)))) ;=> 8
+
 ;Problema 13 
 (defun recorta (l n)
   (cond ((equal 0 n) nil)
@@ -166,5 +196,12 @@
 	   
 (If-positive 10) ; => Numero Positivo 
 
+(print-2d-array-as-table #2a((1 2) ( 3 4)))
 
-
+(defun print-2d-array-as-table (array)
+  (loop for i from 0 below (array-dimension array 0)
+        do (loop for j from 0 below (array-dimension array 1)
+                 do (princ (aref array i j))
+                    (if (= j (1- (array-dimension array 1)))
+                        (terpri)
+                        (princ #\Space)))))
