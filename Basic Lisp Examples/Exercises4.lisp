@@ -1,11 +1,11 @@
 ;Reyes Fragoso Roberto
 
 ;Problema 1
-(defun Collect (p l)
-  (cond ((null l) nil)
-	(t (Collect (funcall fun (car l) (cadr l))))))
+(defun Collect (fun l)
+  (cond ((null l) 0)
+        ( t (funcall fun (Collect fun (cddr l)) (car l) (cadr l)))))
 
-(Combine #'+ '(1 2 3 4)) ;=> 10
+(Collect #'+ '(1 2 3 4)) ;=> 10
 
 ;Problema 2
 (defun ultimoElemento (l)
@@ -71,7 +71,7 @@
   (cond ((null l) 0)
 	( t (funcall fun (Combine fun (cddr l)) (car l) (cadr l)))))
 
-(Combine #'+ '(1 2 3 4)); => 7
+(Combine #'+ '(1 2 3 4)) ; => 7
 
 ;Problema 8 
 (defun LevelAux (l cad cont)
