@@ -1,6 +1,8 @@
+;Reyes Fragoso Roberto
 (defparameter *fronteraBusqueda* '())
 (defparameter *memoria* '())
 
+;Definicion de Operadores
 (defparameter *operadores*	'((:Persona-Zorro (1 1 0 0))
                               (:Persona-Oveja (1 0 1 0))
                               (:Persona-Lechuga (1 0 0 1))
@@ -20,38 +22,37 @@
 (defun insertarAFronteraDeBusqueda (estado operador metodoBusqueda)
 	(let ((nodo (crearNodo estado operador)))
 		(cond ((eql metodoBusqueda :depth-first)
-			(push nodo *fronteraBusqueda*))
-		((eql metodoBusqueda :breath-first)
-			(setq *fronteraBusqueda* (append *fronteraBusqueda* (list nodo))))
-		(T Nil))))
+           (push nodo *fronteraBusqueda*))
+          ((eql metodoBusqueda :breath-first)
+           (setq *fronteraBusqueda* (append *fronteraBusqueda* (list nodo))))
+          (T Nil))))
 
 (defun obtenerDeFronteraDeBusqueda ()
 	(pop *fronteraBusqueda*))
 
+;Para validar nuestro Operador, tenemos que ver si hay granjero, zorro, oveja o lechuga
 (defun operadorValido? (operador estado)
 	(let* ((orillaActual (dondeEstaBarca estado))
-		(granjero (first (nth orillaActual estado)))
-		(zorro (second (nth orillaActual estado)))
-		(oveja (third (nth orillaActual estado)))
-		(lechuga (fourth (nth orillaActual estado))))
-	(or (= granjero (first (second operador)))
-		(= zorro (second (second operador)))
-		(= oveja (third (second operador)))
-		(= lechuga (fourth (second operador))))))
+         (granjero (first (nth orillaActual estado)))
+         (zorro (second (nth orillaActual estado)))
+         (oveja (third (nth orillaActual estado)))
+         (lechuga (fourth (nth orillaActual estado))))
+    (or (= granjero (first (second operador)))
+      (= zorro (second (second operador)))
+      (= oveja (third (second operador)))
+      (= lechuga (fourth (second operador))))))
 
+;Para validar nuestro estado vemos que no exista oveja con zorro, ni lechuga con oveja
 (defun estadoValido? (estado)
 	(let ((zorroOrigen (second (first estado)))
         (ovejaOrigen (third (first estado)))
         (orilla1 (first estado))
         (orilla2 (second estado))
-		(lechugaOrigen (fourth (first estado)))
-		(zorroDestino (second (second estado)))
-		(ovejaDestino (third (second estado)))
-		(lechugaDestino (fourth (second estado))))
+        (lechugaOrigen (fourth (first estado)))
+        (zorroDestino (second (second estado)))
+        (ovejaDestino (third (second estado)))
+        (lechugaDestino (fourth (second estado))))
 	  (and (not (equal orilla1 '(0 1 1 0 0))) (not (equal orilla2 '(0 1 1 0 0))) (not (equal orilla1 '(0 0 1 1 0))) (not (equal orilla2 '(0 0 1 1 0))))))
-
-(defun voltear (bit) 
-	(boole BOOLE-XOR bit 1))
 
 (defun aplicarOperador (operador estado)
 	(let* ((orilla0 (first estado))
@@ -151,10 +152,6 @@
                   (loop for element in sucesores do
                        (insertarAFronteraDeBusqueda (first element) (second element) metodo)))))))
 
-
-
-(trace busquedaCiega)
-(trace insertarAFronteraDeBusqueda)
-(busquedaCiega '((1 1 1 1 1)(0 0 0 0 0)) '((0 0 0 0 0)(1 1 1 1 1)) :depth-first)
-(busquedaCiega '((1 1 1 1 1)(0 0 0 0 0)) '((0 0 0 0 0)(1 1 1 1 1)) :breath-first)
+(time (busquedaCiega '((1 1 1 1 1)(0 0 0 0 0)) '((0 0 0 0 0)(1 1 1 1 1)) :depth-first))
+(time (busquedaCiega '((1 1 1 1 1)(0 0 0 0 0)) '((0 0 0 0 0)(1 1 1 1 1)) :breath-first))
 
