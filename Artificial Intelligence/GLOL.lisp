@@ -12,8 +12,16 @@
 (defparameter *ancestro* nil)
 (defparameter *solucion* nil)
 
+;contadores para poder saber como fue nuestra solucion
+(defparameter *contadorNodos* 0)
+(defparameter *contadorExpandir* 0)
+(defparameter *contadorFronteraBusqueda* 0)
+(defparameter *tiempoInicial* 0)
+(defparameter *tiempoFinal* 0)
+
 (defun crearNodo (estado operador)
 	(incf *id*)
+  (incf *contadorNodos*)
 	(list (1- *id*) estado *ancestro* (first operador)))
 
 (defun dondeEstaBarca (estado)
@@ -28,7 +36,7 @@
           (T Nil))))
 
 (defun obtenerDeFronteraDeBusqueda ()
-	(pop *fronteraBusqueda*))
+  (pop *fronteraBusqueda*))
 
 ;Para validar nuestro Operador, tenemos que ver si hay granjero, zorro, oveja o lechuga
 (defun operadorValido? (operador estado)
@@ -83,6 +91,7 @@
       (T "Error"))))
 
 (defun expandir (estado)
+  (incf *contadorExpandir*)
   (let ((descendientes nil)
         (nuevoEstado nil))
     (dolist (op *operadores* descendientes)
@@ -96,7 +105,7 @@
         ((equal estado (second (first memoria))) T)
         (T (recuerdasElEstado? estado (rest memoria)))))
 
-(defun  filtraMemoria (listaDeEstadosYOperadores) 
+(defun  filtraMemoria (listaDeEstadosYOperadores)
   (cond ((null  listaDeEstadosYOperadores)  nil)
         ((recuerdasElEstado? (first (first  listaDeEstadosYOperadores)) *memoria* )
          (filtraMemoria (rest  listaDeEstadosYOperadores)))
@@ -114,7 +123,12 @@
     *solucion*))
 
 (defun mostrarSolucion (listaNodos)
-  (format  t  "Solucion con ~A  pasos~%" (1- (length  listaNodos)))
+  (setq *tiempoFinal* (get-internal-real-time))
+  (format  t "Nodos creados ~A ~%" *contadorNodos*)
+  (format  t "Nodos expandidos ~A ~%" *contadorExpandir*)
+  (format  t "Longitud maxima de frontera de busqueda ~A ~%" *contadorFronteraBusqueda*)
+  (format  t "Tiempo para encontrar la solucion: ~A~%" (/ (- *tiempoFinal* *tiempoInicial*) internal-time-units-per-second))
+  (format  t "Longitud de solucion ~A ~%" (1- (length  listaNodos)))
   (let ((nodo nil))
     (dotimes (i (length listaNodos))
       (setq nodo (nth i listaNodos))
@@ -126,11 +140,17 @@
   (setq  *fronteraBusqueda*  nil)
   (setq  *memoria*  nil)
   (setq  *id*  0)
+  (setq *contadorNodos* 0)
+  (setq *contadorExpandir* 0)
+  (setq *contadorFronteraBusqueda* 0)
+  (setq *tiempoInicial* 0)
+  (setq *tiempoFinal* 0)
   (setq  *ancestro*  nil)
   (setq  *solucion*  nil))
 
 (defun busquedaCiega (inicial final metodo)
   (reset-all)
+  (setq *tiempoInicial* (get-internal-real-time))
   (let ((nodo nil)
         (estado nil)
         (sucesores '())
@@ -142,6 +162,7 @@
                estado (second nodo)
                operador (third nodo))
          (push nodo *memoria*)
+         (incf *contadorFronteraBusqueda*)
          (cond ((equal final estado)
                 (format  t  "Exito. Meta encontrada en ~A  intentos~%" (first  nodo))
                 (mostrarSolucion (extraerSolucion nodo))
@@ -152,6 +173,7 @@
                   (loop for element in sucesores do
                        (insertarAFronteraDeBusqueda (first element) (second element) metodo)))))))
 
-(time (busquedaCiega '((1 1 1 1 1)(0 0 0 0 0)) '((0 0 0 0 0)(1 1 1 1 1)) :depth-first))
-(time (busquedaCiega '((1 1 1 1 1)(0 0 0 0 0)) '((0 0 0 0 0)(1 1 1 1 1)) :breath-first))
+
+(busquedaCiega '((1 1 1 1 1)(0 0 0 0 0)) '((0 0 0 0 0)(1 1 1 1 1)) :depth-first)
+(busquedaCiega '((1 1 1 1 1)(0 0 0 0 0)) '((0 0 0 0 0)(1 1 1 1 1)) :breath-first)
 
