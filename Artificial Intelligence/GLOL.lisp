@@ -176,4 +176,3 @@
 
 (busquedaCiega '((1 1 1 1 1)(0 0 0 0 0)) '((0 0 0 0 0)(1 1 1 1 1)) :depth-first)
 (busquedaCiega '((1 1 1 1 1)(0 0 0 0 0)) '((0 0 0 0 0)(1 1 1 1 1)) :breath-first)
-
