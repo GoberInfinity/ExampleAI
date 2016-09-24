@@ -24,13 +24,20 @@
 
 ;[Validacion] Nos permite saber en donde esta el 0
 (defun dondeEstaEspacioEnBlanco (estado)
-  (let* ((filaDelEspacioEnBlanco 0))
+  (let*((filaDelEspacioEnBlanco 0)
+        (casillaDelEspacioEnBlanco 0))
     (dolist (fila estado filaDelEspacioEnBlanco)
-      (print (first fila))
     (if (or (zerop(first fila)) (zerop(second fila)) (zerop(third fila)))
-        (return)
-        (setq filaDelEspacioEnBlanco (1+ filaDelEspacioEnBlanco))))
-(format  t "Nodos expandidos ~A ~%" filaDelEspacioEnBlanco)))
+        (cond ((zerop (first fila)) (return (list
+                                             filaDelEspacioEnBlanco
+                                             casillaDelEspacioEnBlanco)))
+              ((zerop (second fila)) (return (list
+                                              filaDelEspacioEnBlanco
+                                              (setq casillaDelEspacioEnBlanco (1+ casillaDelEspacioEnBlanco)))))
+              (T (return (list
+                          filaDelEspacioEnBlanco
+                          (setq casillaDelEspacioEnBlanco (+ 2 casillaDelEspacioEnBlanco)))))))
+        (setq filaDelEspacioEnBlanco (1+ filaDelEspacioEnBlanco)))))
 
 ;[Operador] Aplicamos el operador Arriba
 (defun operadorArriba (operador estado)
@@ -39,7 +46,7 @@
 
     ))
 
-(dondeEstaEspacioEnBlanco '((1 1 3)(4 5 6)(7 1 0)))
+(dondeEstaEspacioEnBlanco '((1 2 1)(1 5 2 )(7 1 0)))
 
 (substitute 'xx 2 '(0 2 3))
 
