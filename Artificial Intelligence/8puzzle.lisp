@@ -41,14 +41,104 @@
 
 ;[Operador] Aplicamos el operador Arriba
 (defun operadorArriba (operador estado)
-  (let ((espacioEnBlanco (dondeEstaEspacioEnBlanco (estado))))
+  (let* ((filaDelEspacioEnBlanco (first(dondeEstaEspacioEnBlanco estado)))
+         (elementoDelEspacioEnBlanco (second(dondeEstaEspacioEnBlanco estado)))
+         (filaACambiarPorEspacio (nth (1- filaDelEspacioEnBlanco) estado))
+         (elementoACambiarPorEspacio (nth elementoDelEspacioEnBlanco filaACambiarPorEspacio))
+         (filaACambiarSinEspacio (nth filaDelEspacioEnBlanco estado)))
 
+    (if (= filaDelEspacioEnBlanco 2)
+        (list (first estado)
+              (substitute 0 elementoACambiarPorEspacio filaACambiarPorEspacio)
+              (substitute elementoACambiarPorEspacio 0 filaACambiarSinEspacio))
+        (list (substitute 0 elementoACambiarPorEspacio filaACambiarPorEspacio)
+              (substitute elementoACambiarPorEspacio 0 filaACambiarSinEspacio)
+              (third estado)))))
 
-    ))
+;[Operador] Aplicamos el operador Abajo
+(defun operadorAbajo (operador estado)
+  (let* ((filaDelEspacioEnBlanco (first(dondeEstaEspacioEnBlanco estado)))
+         (elementoDelEspacioEnBlanco (second(dondeEstaEspacioEnBlanco estado)))
+         (filaACambiarPorEspacio (nth (1+ filaDelEspacioEnBlanco) estado))
+         (elementoACambiarPorEspacio (nth elementoDelEspacioEnBlanco filaACambiarPorEspacio))
+         (filaACambiarSinEspacio (nth filaDelEspacioEnBlanco estado)))
+
+    (if (= filaDelEspacioEnBlanco 0)
+        (list (substitute elementoACambiarPorEspacio 0 filaACambiarSinEspacio)
+              (substitute 0 elementoACambiarPorEspacio filaACambiarPorEspacio)
+              (third estado))
+        (list (first estado)
+              (substitute elementoACambiarPorEspacio 0 filaACambiarSinEspacio)
+              (substitute 0 elementoACambiarPorEspacio filaACambiarPorEspacio)))))
+
+;[Operador] Aplicamos el operador Izquierda
+(defun operadorDerecha (operador estado)
+  (let* ((filaDelEspacioEnBlanco (first(dondeEstaEspacioEnBlanco estado)))
+         (elementoDelEspacioEnBlanco (second(dondeEstaEspacioEnBlanco estado)))
+         (filaACambiarPorEspacio (nth filaDelEspacioEnBlanco estado))
+         (elementoACambiarPorEspacio (nth (1+ elementoDelEspacioEnBlanco) filaACambiarPorEspacio)))
+
+    (format  t  "Esto es el primero~A%" (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio))
+    (format  t  "Esto es el segundo~A%" (substitute 0 elementoACambiarPorEspacio
+                                                    (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1 :from-end t))
+
+    (cond ((= filaDelEspacioEnBlanco 0)
+           (list (substitute 0 elementoACambiarPorEspacio
+                             (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1 :from-end t)
+                 (second estado)
+                 (third estado)))
+          ((= filaDelEspacioEnBlanco 1)
+           (list (first estado)
+                 (substitute 0 elementoACambiarPorEspacio
+                             (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1 :from-end t)
+                 (third estado)))
+          (T (list (first estado)
+                   (second estado)
+                   (substitute 0 elementoACambiarPorEspacio
+                               (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1 :from-end t))))))
+
+;[Operador] Aplicamos el operador Izquierdo
+(defun operadorIzquierda (operador estado)
+  (let* ((filaDelEspacioEnBlanco (first(dondeEstaEspacioEnBlanco estado)))
+         (elementoDelEspacioEnBlanco (second(dondeEstaEspacioEnBlanco estado)))
+         (filaACambiarPorEspacio (nth filaDelEspacioEnBlanco estado))
+         (elementoACambiarPorEspacio (nth (1- elementoDelEspacioEnBlanco) filaACambiarPorEspacio)))
+
+    (format  t  "Esto es el primero~A%" (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio))
+    (format  t  "Esto es el segundo~A%" (substitute 0 elementoACambiarPorEspacio
+                                                    (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1))
+
+    (cond ((= filaDelEspacioEnBlanco 0)
+           (list (substitute 0 elementoACambiarPorEspacio
+                             (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1 )
+                 (second estado)
+                 (third estado)))
+          ((= filaDelEspacioEnBlanco 1)
+           (list (first estado)
+                 (substitute 0 elementoACambiarPorEspacio
+                             (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1)
+                 (third estado)))
+          (T (list (first estado)
+                   (second estado)
+                   (substitute 0 elementoACambiarPorEspacio
+                               (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1 ))))))
+
+;[Validacion] Nos permite saber si el operador arriba se puede aplicar
+(defun operadorValido? (operador estado)
+  (let* ((filaDelEspacioEnBlanco (first(dondeEstaEspacioEnBlanco estado)))
+         (casillaDelEspacioEnBlanco (second(dondeEstaEspacioEnBlanco estado))))
+    (cond ((equal operador :Arriba) (if(= filaDelEspacioEnBlanco 0) nil T))
+          ((equal operador :Abajo) (if (= filaDelEspacioEnBlanco 2) nil T))
+          ((equal operador :Izquierda) (if (= casillaDelEspacioEnBlanco 0) nil T))
+          (T (if (= casillaDelEspacioEnBlanco 2) nil T)))))
+
+;[Operador] Aplicamos los diferentes Operadores
+(defun aplicaOperador (operador estado))
 
 (dondeEstaEspacioEnBlanco '((1 2 1)(1 5 2 )(7 1 0)))
-
+(operadorIzquierda 0 '((1 2 2)(2 0 3)(7 10 8)))
 (substitute 'xx 2 '(0 2 3))
+(operadorValido? :Izquierda '((1 2 1)(1 0 1)(1 1 1))) 
 
 
 
