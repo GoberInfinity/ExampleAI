@@ -40,7 +40,7 @@
         (setq filaDelEspacioEnBlanco (1+ filaDelEspacioEnBlanco)))))
 
 ;[Operador] Aplicamos el operador Arriba
-(defun operadorArriba (operador estado)
+(defun operadorArriba (estado)
   (let* ((filaDelEspacioEnBlanco (first(dondeEstaEspacioEnBlanco estado)))
          (elementoDelEspacioEnBlanco (second(dondeEstaEspacioEnBlanco estado)))
          (filaACambiarPorEspacio (nth (1- filaDelEspacioEnBlanco) estado))
@@ -56,7 +56,7 @@
               (third estado)))))
 
 ;[Operador] Aplicamos el operador Abajo
-(defun operadorAbajo (operador estado)
+(defun operadorAbajo (estado)
   (let* ((filaDelEspacioEnBlanco (first(dondeEstaEspacioEnBlanco estado)))
          (elementoDelEspacioEnBlanco (second(dondeEstaEspacioEnBlanco estado)))
          (filaACambiarPorEspacio (nth (1+ filaDelEspacioEnBlanco) estado))
@@ -72,7 +72,7 @@
               (substitute 0 elementoACambiarPorEspacio filaACambiarPorEspacio)))))
 
 ;[Operador] Aplicamos el operador Izquierda
-(defun operadorDerecha (operador estado)
+(defun operadorDerecha (estado)
   (let* ((filaDelEspacioEnBlanco (first(dondeEstaEspacioEnBlanco estado)))
          (elementoDelEspacioEnBlanco (second(dondeEstaEspacioEnBlanco estado)))
          (filaACambiarPorEspacio (nth filaDelEspacioEnBlanco estado))
@@ -98,7 +98,7 @@
                                (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1 :from-end t))))))
 
 ;[Operador] Aplicamos el operador Izquierdo
-(defun operadorIzquierda (operador estado)
+(defun operadorIzquierda (estado)
   (let* ((filaDelEspacioEnBlanco (first(dondeEstaEspacioEnBlanco estado)))
          (elementoDelEspacioEnBlanco (second(dondeEstaEspacioEnBlanco estado)))
          (filaACambiarPorEspacio (nth filaDelEspacioEnBlanco estado))
@@ -133,14 +133,43 @@
           (T (if (= casillaDelEspacioEnBlanco 2) nil T)))))
 
 ;[Operador] Aplicamos los diferentes Operadores
-(defun aplicaOperador (operador estado))
+(defun aplicarOperador (operador estado)
+  (let* ((operador (first (first operador))))
+    (case operador
+      (:Arriba (operadorArriba estado))
+      (:Abajo (operadorAbajo estado))
+      (:Izquierda (operadorIzquierda estado))
+      (:Derecha (operadorDerecha estado))
+      (T "Error"))))
 
-(dondeEstaEspacioEnBlanco '((1 2 1)(1 5 2 )(7 1 0)))
+;[Funcion] Permite saber el numero de casillas desordenadas 
+(defun insertarAFronteraDeBusqueda (estado operador metodoDeBusqueda))
+
+;[Busqueda] Permite saber cuantos estan desacomodados 
+(defun numeroDeElementosDesacomodados (estado meta)
+  (auxNumeroDeElementosDesacomodados (aplanaLista estado) (aplanaLista meta) 0))
+
+;[Aux] Permite aplanar la lista
+(defun aplanaLista (l)
+  (cond ((null l) nil)
+        ((atom (car l)) (cons (car l) (Aplana (cdr l))))
+        (t (append (Aplana (car l)) (Aplana (cdr l))))))
+
+;[Aux] Permite saber el numero de desordenados segun el estado meta
+(defun auxNumeroDeElementosDesacomodados (estado meta contador)
+  (cond ((null estado) contador)
+        ((= (car estado) (car meta)) ( + (cuantosElementosDesordenados (cdr estado ) (cdr meta) contador)))
+        (T (+ (cuantosElementosDesordenados(cdr estado) (cdr meta) (1+ contador))))))
+
+
+(numeroDeElementosDesacomodados '((1 2 3)(4 5 6 )(7 8 0)) '((2 1 3)(4 5 6 )(7 8 0)))
 (operadorIzquierda 0 '((1 2 2)(2 0 3)(7 10 8)))
 (substitute 'xx 2 '(0 2 3))
-(operadorValido? :Izquierda '((1 2 1)(1 0 1)(1 1 1))) 
-
-
+(operadorValido? :Izquierda '((1 2 3)(4 0 5)(6 7 8)))
+(aplicarOperador '((:Izquierda nil)) '((1 2 3)(4 0 5)(6 7 8)))
+(aplicarOperador '((:Derecha nil)) '((1 2 3)(4 0 5)(6 7 8)))
+(aplicarOperador '((:Arriba nil)) '((1 2 3)(4 0 5)(6 7 8)))
+(aplicarOperador '((:Abajo nil)) '((1 2 3)(4 0 5)(6 7 8)))
 
 
 
