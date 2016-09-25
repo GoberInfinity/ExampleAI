@@ -78,10 +78,6 @@
          (filaACambiarPorEspacio (nth filaDelEspacioEnBlanco estado))
          (elementoACambiarPorEspacio (nth (1+ elementoDelEspacioEnBlanco) filaACambiarPorEspacio)))
 
-    (format  t  "Esto es el primero~A%" (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio))
-    (format  t  "Esto es el segundo~A%" (substitute 0 elementoACambiarPorEspacio
-                                                    (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1 :from-end t))
-
     (cond ((= filaDelEspacioEnBlanco 0)
            (list (substitute 0 elementoACambiarPorEspacio
                              (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1 :from-end t)
@@ -104,10 +100,6 @@
          (filaACambiarPorEspacio (nth filaDelEspacioEnBlanco estado))
          (elementoACambiarPorEspacio (nth (1- elementoDelEspacioEnBlanco) filaACambiarPorEspacio)))
 
-    (format  t  "Esto es el primero~A%" (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio))
-    (format  t  "Esto es el segundo~A%" (substitute 0 elementoACambiarPorEspacio
-                                                    (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1))
-
     (cond ((= filaDelEspacioEnBlanco 0)
            (list (substitute 0 elementoACambiarPorEspacio
                              (substitute elementoACambiarPorEspacio 0 filaACambiarPorEspacio ) :count 1 )
@@ -126,15 +118,17 @@
 ;[Validacion] Nos permite saber si el operador arriba se puede aplicar
 (defun operadorValido? (operador estado)
   (let* ((filaDelEspacioEnBlanco (first(dondeEstaEspacioEnBlanco estado)))
-         (casillaDelEspacioEnBlanco (second(dondeEstaEspacioEnBlanco estado))))
+         (casillaDelEspacioEnBlanco (second(dondeEstaEspacioEnBlanco estado)))
+         (operador (first operador)))
     (cond ((equal operador :Arriba) (if(= filaDelEspacioEnBlanco 0) nil T))
           ((equal operador :Abajo) (if (= filaDelEspacioEnBlanco 2) nil T))
           ((equal operador :Izquierda) (if (= casillaDelEspacioEnBlanco 0) nil T))
           (T (if (= casillaDelEspacioEnBlanco 2) nil T)))))
+(trace operadorValido?)
 
 ;[Operador] Aplicamos los diferentes Operadores
 (defun aplicarOperador (operador estado)
-  (let* ((operador (first (first operador))))
+  (let* ((operador (first operador)))
     (case operador
       (:Arriba (operadorArriba estado))
       (:Abajo (operadorAbajo estado))
@@ -142,10 +136,10 @@
       (:Derecha (operadorDerecha estado))
       (T "Error"))))
 
-;[Funcion] Permite saber el numero de casillas desordenadas 
+;[Funcion] Permite saber el numero de casillas desordenadas
 (defun insertarAFronteraDeBusqueda (estado operador metodoDeBusqueda))
 
-;[Busqueda] Permite saber cuantos estan desacomodados 
+;[Busqueda] Permite saber cuantos estan desacomodados
 (defun numeroDeElementosDesacomodados (estado meta)
   (auxNumeroDeElementosDesacomodados (aplanaLista estado) (aplanaLista meta) 0))
 
@@ -161,6 +155,17 @@
         ((= (car estado) (car meta)) ( + (cuantosElementosDesordenados (cdr estado ) (cdr meta) contador)))
         (T (+ (cuantosElementosDesordenados(cdr estado) (cdr meta) (1+ contador))))))
 
+;[Funcion] Permite expandir el estado
+(defun expandir (estado)
+  (let ((descendientes nil)
+        (nuevoEstado nil))
+    (dolist (operador *operadores* descendientes)
+      (print operador)
+      (if (operadorValido? operador estado)
+          (progn
+            (setq nuevoEstado (aplicarOperador operador estado))
+            (setq descendientes (cons (list nuevoEstado operador) descendientes)))))))
+
 
 (numeroDeElementosDesacomodados '((1 2 3)(4 5 6 )(7 8 0)) '((2 1 3)(4 5 6 )(7 8 0)))
 (operadorIzquierda 0 '((1 2 2)(2 0 3)(7 10 8)))
@@ -170,6 +175,10 @@
 (aplicarOperador '((:Derecha nil)) '((1 2 3)(4 0 5)(6 7 8)))
 (aplicarOperador '((:Arriba nil)) '((1 2 3)(4 0 5)(6 7 8)))
 (aplicarOperador '((:Abajo nil)) '((1 2 3)(4 0 5)(6 7 8)))
+(trace expandir)
+(expandir '((1 2 3)(4 0 5)(6 7 8)))
+(expandir '((1 0 3)(4 2 5)(6 7 8)))
+(dondeEstaEspacioEnBlanco '((1 0 3)(4 2 5)(6 7 8)))
 
 
 
