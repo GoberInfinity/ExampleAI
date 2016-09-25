@@ -13,6 +13,7 @@
 (defparameter *id* 0)
 (defparameter *ancestro* nil)
 (defparameter *solucion* nil)
+(defparameter *estadoMeta* nil)
 
 
 ;Contadores para poder saber como fue nuestra solucion
@@ -166,6 +167,15 @@
             (setq nuevoEstado (aplicarOperador operador estado))
             (setq descendientes (cons (list nuevoEstado operador) descendientes)))))))
 
+;[Funcion] Permite crear el nodo con la esctructura id - estado - ancestro - operador - desacomodados
+(defun crearNodo (estado operador desacomodados)
+  (incf *id*)
+  (incf *contadorNodos*)
+  (list (1- *id*) estado *ancestro* operador (numeroDeElementosDesacomodados desacomodados *estadoMeta*)))
+
+;[Funcion] Permite insertar a frontera de Busqueda
+(defun insertarAFronteraDeBusqueda (estado operador metodoBusqueda)
+  (let ((nodo (crearNodo estado operador)))))
 
 (numeroDeElementosDesacomodados '((1 2 3)(4 5 6 )(7 8 0)) '((2 1 3)(4 5 6 )(7 8 0)))
 (operadorIzquierda 0 '((1 2 2)(2 0 3)(7 10 8)))
