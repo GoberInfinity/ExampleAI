@@ -133,7 +133,9 @@
     (cond ((equal operador :Arriba) (if(= filaDelEspacioEnBlanco 0) nil T))
           ((equal operador :Abajo) (if (= filaDelEspacioEnBlanco 2) nil T))
           ((equal operador :Izquierda) (if (= casillaDelEspacioEnBlanco 0) nil T))
-          (T (if (= casillaDelEspacioEnBlanco 2) nil T)))))
+          ((equal operador :Derecha) (if (= casillaDelEspacioEnBlanco 2) nil T))
+          (T "Error"))))
+          ;(T (if (= casillaDelEspacioEnBlanco 2) nil T)))))
 
 ;[Operador] Aplicamos los diferentes Operadores
 (defun aplicarOperador (operador estado)
@@ -147,7 +149,7 @@
 
 ;[Busqueda] Permite saber cuantos estan desacomodados
 (defun numeroDeElementosDesacomodados (estado meta)
-  (auxNumeroDeElementosDesacomodados (aplanaLista estado) (aplanaLista meta) 0))
+  (1- (auxNumeroDeElementosDesacomodados (aplanaLista estado) (aplanaLista meta) 0)))
 
 ;[Aux] Permite aplanar la lista
 (defun aplanaLista (l)
@@ -158,6 +160,7 @@
 ;[Aux] Permite saber el numero de desordenados segun el estado meta
 (defun auxNumeroDeElementosDesacomodados (estado meta contador)
   (cond ((null estado) contador)
+        ((= (car estado) 0) ( + (auxNumeroDeElementosDesacomodados (cdr estado ) (cdr meta) contador)))
         ((= (car estado) (car meta)) ( + (auxNumeroDeElementosDesacomodados (cdr estado ) (cdr meta) contador)))
         (T (+ (auxNumeroDeElementosDesacomodados(cdr estado) (cdr meta) (1+ contador))))))
 
@@ -223,42 +226,55 @@
         (sucesores '())
         (operador nil)
         (metaEncontrada nil)
+        (testing 0)
         (listaDeDesacomodados nil ))
     (setq *estadoMeta* meta)
     (insertarAFronteraDeBusqueda inicio nil metodo)
                                         ; (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
-    (loop for i from 1 to 9 do
+    (loop until (or metaEncontrada (null *fronteraDeBusqueda*) (= testing 10)) do
          (setq nodo (obtenerDeFronteraDeBusqueda)
                estado (second nodo))
+         (print "ESTO ES MI ESTADO")
          (print estado)
+         (setq testing (1+ testing))
+         (setq listaDeDesacomodados nil)
          (insertarEnMemoria nodo)
          (cond ((equal meta estado)
                 (format t "Exito. Meta encontrada en ~A  intentos~%" (first  nodo))
                 (setq metaEncontrada T))
                (T (setq *ancestro* (first nodo))
+                  (print estado)
                   (setq sucesores (expandir estado))
                   (setq sucesores (filtraMemoria sucesores))
                   (loop for elemento in sucesores do
                        (setq listaDeDesacomodados
                              (cons
-                              (list (numeroDeElementosDesacomodados (first elemento) *estadoMeta*)
-                                    (first elemento)
-                                    (second elemento)
-                                    metodo)
+                              (list
+                               (first elemento)
+                               (numeroDeElementosDesacomodados (first elemento) *estadoMeta*)
+                               (second elemento)
+                               metodo)
                                     listaDeDesacomodados))
                        (print "/*/*/*/*/*/*/*/*/*")
                        (print listaDeDesacomodados)
                        (print "/*/*/*/*/*/*/*/*/*")
-                       (insertarAFronteraDeBusqueda (first elemento) (second elemento) metodo)
-                     finally (sort listaDeDesacomodados  #'< :key #'car))
+                    ;(insertarAFronteraDeBusqueda (first elemento) (second elemento) metodo)
+                                        finally (setq listaDeDesacomodados (sort listaDeDesacomodados  #'< :key #'cadr)))
+                  (loop for elemento in listaDeDesacomodados do
+                       (insertarAFronteraDeBusqueda (first elemento) (second elemento) (fourth elemento)))
                   (print listaDeDesacomodados ))))))
 
+(trace insertarAFronteraDeBusqueda)
+(bestFirstSearch  '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch)
+
 (sort
- '((6 ((1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) :BESTFIRSTSEARCH)
-   (1 ((1 2 3) (4 5 6) (7 0 8)) (:IZQUIERDA NIL) :BESTFIRSTSEARCH))   #'< :key #'car )
+ '((((1 2 3) (4 5 0) (7 8 6)) 6 (:ARRIBA NIL) :BESTFIRSTSEARCH)
+   (((1 2 3) (4 5 6) (7 0 8)) 4 (:IZQUIERDA NIL) :BESTFIRSTSEARCH))   #'< :key #'cadr )
 (caar '(( 6 ((1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) 6)
         (((1 2 3) (4 5 6) (7 0 8)) (:IZQUIERDA NIL) 6)))
-(bestFirstSearch  '((1 2 3)(4 5 6)(7 8 0)) '((1 2 3)(5 4 3 )(2 1 0)) :bestFirstSearch)
+
+
+(third (first '((6 ((1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) :BESTFIRSTSEARCH))))
 
 (sort tester #'> :key #'car)
 
