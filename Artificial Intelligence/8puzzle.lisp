@@ -134,7 +134,6 @@
           ((equal operador :Abajo) (if (= filaDelEspacioEnBlanco 2) nil T))
           ((equal operador :Izquierda) (if (= casillaDelEspacioEnBlanco 0) nil T))
           (T (if (= casillaDelEspacioEnBlanco 2) nil T)))))
-(trace operadorValido?)
 
 ;[Operador] Aplicamos los diferentes Operadores
 (defun aplicarOperador (operador estado)
@@ -148,7 +147,7 @@
 
 ;[Busqueda] Permite saber cuantos estan desacomodados
 (defun numeroDeElementosDesacomodados (estado meta)
-  (auxNumeroDeElementosDesacomodados (aplanaLista (first estado)) (aplanaLista meta) 0))
+  (auxNumeroDeElementosDesacomodados (aplanaLista estado) (aplanaLista meta) 0))
 
 ;[Aux] Permite aplanar la lista
 (defun aplanaLista (l)
@@ -197,14 +196,22 @@
 
 ;[Predicado] Permite saber si ya esta en la memoria
 (defun recuerdasElEstado? (estado memoria)
+  (print "MEMORIA (((((((((((((((((((((((((())))))))))))))))))))))))))")
+  (print memoria)
   (cond ((null memoria) nil)
-        ((equal estado (second (first memoria))) T)
+        ((equal estado (second (first memoria)))
+         (print "SIMON")
+         T)
         (T (recuerdasElEstado? estado (rest memoria)))))
 
 ;[Filtro] Permite saber si ya estaba en la memoria
 (defun filtraMemoria (listaDeEstados)
   (cond ((null listaDeEstados) nil)
         ((recuerdasElEstado? (first (first listaDeEstados)) *memoria*)
+         (print "--------------------------------------------------------------")
+         (print (first (first listaDeEstados)))
+         (print (first listaDeEstados))
+         (print "--------------------------------------------------------------")
          (filtraMemoria (rest listaDeEstados)))
         (T (cons (first listaDeEstados) (filtraMemoria (rest listaDeEstados))))))
 
@@ -215,11 +222,12 @@
         (estado nil)
         (sucesores '())
         (operador nil)
-        (metaEncontrada nil))
+        (metaEncontrada nil)
+        (listaDeDesacomodados nil ))
     (setq *estadoMeta* meta)
     (insertarAFronteraDeBusqueda inicio nil metodo)
                                         ; (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
-    (loop for i from 1 to 10 do
+    (loop for i from 1 to 9 do
          (setq nodo (obtenerDeFronteraDeBusqueda)
                estado (second nodo))
          (print estado)
@@ -231,11 +239,27 @@
                   (setq sucesores (expandir estado))
                   (setq sucesores (filtraMemoria sucesores))
                   (loop for elemento in sucesores do
+                       (setq listaDeDesacomodados
+                             (cons
+                              (list (first elemento)
+                                    (second elemento)
+                                    (numeroDeElementosDesacomodados (first elemento) *estadoMeta*))
+                                    listaDeDesacomodados))
+                       (print "/*/*/*/*/*/*/*/*/*")
+                       (print listaDeDesacomodados)
+                       (print "/*/*/*/*/*/*/*/*/*")
                        (insertarAFronteraDeBusqueda (first elemento) (second elemento) metodo)
                                           ))))))
 
-
+(sort
+'((( 3 (1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) 6)
+  (( 2 (1 2 3) (4 5 6) (7 0 8)) (:IZQUIERDA NIL) 5))  #'< :key #'caar )
+(caar '(( 6 ((1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) 6)
+        (((1 2 3) (4 5 6) (7 0 8)) (:IZQUIERDA NIL) 6)))
 (bestFirstSearch  '((1 2 3)(4 5 6)(7 8 0)) '((1 2 3)(5 4 3 )(2 1 0)) :bestFirstSearch)
+
+(sort tester #'> :key #'car)
+
 ;(trace expandir)
 ;(trace bestFirstSearch)
 ;(trace numeroDeElementosDesacomodados)
