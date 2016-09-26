@@ -4,8 +4,8 @@
 
 ;Definicion de Operadores, los definimos como nil por que cada operador es
 ; diferente dependiendo de la casilla en blanco
-(defparameter *operadores* '((:Arriba nil)
-                             (:Abajo nil)
+(defparameter *operadores* '((:Abajo nil)
+                             (:Arriba nil)
                              (:Izquierda nil)
                              (:Derecha nil)))
 
@@ -169,7 +169,6 @@
   (let ((descendientes nil)
         (nuevoEstado nil))
     (dolist (operador *operadores* descendientes)
-      (print operador)
       (if (operadorValido? operador estado)
           (progn
             (setq nuevoEstado (aplicarOperador operador estado))
@@ -192,15 +191,11 @@
     (cond ((eql metodoBusqueda :bestFirstSearch)
            (setq nodo (crearNodo estado operador (numeroDeElementosDesacomodados estado *estadoMeta*)))
            (push nodo *fronteraDeBusqueda*)
-           (reordenarFronteraDeBusqueda *fronteraDeBusqueda*)
-           (print "FRONTERA DE BUSQUEDA  ++++++++++++++++++++++++++++++++++++++++++++++++++++")
-           (print *fronteraDeBusqueda*)
-           (print "FRONTERA DE BUSQUEDA  ++++++++++++++++++++++++++++++++++++++++++++++++++++")))))
+           (reordenarFronteraDeBusqueda *fronteraDeBusqueda*)))))
 
 ;[Funcion] Permite reordenar la frontera de Busqueda
 (defun reordenarFronteraDeBusqueda (fronteraDeBusqueda)
   (setq *fronteraDeBusqueda* (sort *fronteraDeBusqueda* #'< :key #'(lambda (x) (fifth x)))))
-(bestFirstSearch  '((1 2 3)(4 5 6)(7 8 0)) '((1 2 3)(7 8 0)(4 5 6)) :bestFirstSearch )
 
 ;[Funcion] Permite meter a memoria de Busqueda
 (defun insertarEnMemoria(nodo)
@@ -208,8 +203,6 @@
 
 ;[Predicado] Permite saber si ya esta en la memoria
 (defun recuerdasElEstado? (estado memoria)
-  (print "MEMORIA (((((((((((((((((((((((((())))))))))))))))))))))))))")
-  (print memoria)
   (cond ((null memoria) nil)
         ((equal estado (second (first memoria))) T)
         (T (recuerdasElEstado? estado (rest memoria)))))
@@ -234,18 +227,16 @@
     (setq *estadoMeta* meta)
     (insertarAFronteraDeBusqueda inicio nil metodo)
                                         ; (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
-    (loop until (or metaEncontrada (null *fronteraDeBusqueda*) (= testing 15)) do
+    (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
          (setq nodo (obtenerDeFronteraDeBusqueda)
                estado (second nodo))
          (setq testing (1+ testing))
          (setq listaDeDesacomodados nil)
          (insertarEnMemoria nodo)
-         ;(setq *fronteraDeBusqueda* (pop *fronteraDeBusqueda*))
          (cond ((equal meta estado)
                 (format t "Exito. Meta encontrada en ~A  intentos~%" (first  nodo))
                 (setq metaEncontrada T))
                (T (setq *ancestro* (first nodo))
-                  (print estado)
                   (setq sucesores (expandir estado))
                   (setq sucesores (filtraMemoria sucesores))
                   (loop for elemento in sucesores do
@@ -260,11 +251,10 @@
                     ;(insertarAFronteraDeBusqueda (first elemento) (second elemento) metodo)
                                         finally (setq listaDeDesacomodados (sort listaDeDesacomodados  #'> :key #'cadr)))
                   (loop for elemento in listaDeDesacomodados do
-                       (insertarAFronteraDeBusqueda (first elemento) (second elemento) (fourth elemento)))
-                  (print listaDeDesacomodados ))))))
+                       (insertarAFronteraDeBusqueda (first elemento) (second elemento) (fourth elemento))))))))
 
-(trace insertarAFronteraDeBusqueda)
-(bestFirstSearch  '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
+
+(bestFirstSearch  '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 4 7)(6 0 5)) :bestFirstSearch )
 
 (sort '((5 ((1 2 3) (4 5 6) (0 7 8)) 1 5 5) (4 ((1 2 3) (4 0 5) (7 8 6)) 2 4 9)
         (3 ((1 2 0) (4 5 3) (7 8 6)) 2 5 5) (7 ((1 0 3) (4 2 6) (7 5 8)) 6 5 1)) #'< :key #'(lambda (x) (fifth x)))
