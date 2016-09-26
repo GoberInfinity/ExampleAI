@@ -241,19 +241,21 @@
                   (loop for elemento in sucesores do
                        (setq listaDeDesacomodados
                              (cons
-                              (list (first elemento)
+                              (list (numeroDeElementosDesacomodados (first elemento) *estadoMeta*)
+                                    (first elemento)
                                     (second elemento)
-                                    (numeroDeElementosDesacomodados (first elemento) *estadoMeta*))
+                                    metodo)
                                     listaDeDesacomodados))
                        (print "/*/*/*/*/*/*/*/*/*")
                        (print listaDeDesacomodados)
                        (print "/*/*/*/*/*/*/*/*/*")
                        (insertarAFronteraDeBusqueda (first elemento) (second elemento) metodo)
-                                          ))))))
+                     finally (sort listaDeDesacomodados  #'< :key #'car))
+                  (print listaDeDesacomodados ))))))
 
 (sort
-'((( 3 (1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) 6)
-  (( 2 (1 2 3) (4 5 6) (7 0 8)) (:IZQUIERDA NIL) 5))  #'< :key #'caar )
+ '((6 ((1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) :BESTFIRSTSEARCH)
+   (1 ((1 2 3) (4 5 6) (7 0 8)) (:IZQUIERDA NIL) :BESTFIRSTSEARCH))   #'< :key #'car )
 (caar '(( 6 ((1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) 6)
         (((1 2 3) (4 5 6) (7 0 8)) (:IZQUIERDA NIL) 6)))
 (bestFirstSearch  '((1 2 3)(4 5 6)(7 8 0)) '((1 2 3)(5 4 3 )(2 1 0)) :bestFirstSearch)
