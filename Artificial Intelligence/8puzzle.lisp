@@ -149,7 +149,7 @@
 
 ;[Busqueda] Permite saber cuantos estan desacomodados
 (defun numeroDeElementosDesacomodados (estado meta)
-  (1- (auxNumeroDeElementosDesacomodados (aplanaLista estado) (aplanaLista meta) 0)))
+   (auxNumeroDeElementosDesacomodados (aplanaLista estado) (aplanaLista meta) 0))
 
 ;[Aux] Permite aplanar la lista
 (defun aplanaLista (l)
@@ -177,7 +177,7 @@
 
 ;[Funcion] Permite obtener el ultimo elemento de la frontera de busqueda
 (defun obtenerDeFronteraDeBusqueda ()
-  (pop *fronteraDeBusqueda*))
+   (pop *fronteraDeBusqueda*))
 
 ;[Funcion] Permite crear el nodo con la esctructura id - estado - ancestro - operador - desacomodados
 (defun crearNodo (estado operador desacomodados)
@@ -191,7 +191,16 @@
   (let ((nodo nil))
     (cond ((eql metodoBusqueda :bestFirstSearch)
            (setq nodo (crearNodo estado operador (numeroDeElementosDesacomodados estado *estadoMeta*)))
-           (push nodo *fronteraDeBusqueda*)))))
+           (push nodo *fronteraDeBusqueda*)
+           (reordenarFronteraDeBusqueda *fronteraDeBusqueda*)
+           (print "FRONTERA DE BUSQUEDA  ++++++++++++++++++++++++++++++++++++++++++++++++++++")
+           (print *fronteraDeBusqueda*)
+           (print "FRONTERA DE BUSQUEDA  ++++++++++++++++++++++++++++++++++++++++++++++++++++")))))
+
+;[Funcion] Permite reordenar la frontera de Busqueda
+(defun reordenarFronteraDeBusqueda (fronteraDeBusqueda)
+  (setq *fronteraDeBusqueda* (sort *fronteraDeBusqueda* #'< :key #'(lambda (x) (fifth x)))))
+(bestFirstSearch  '((1 2 3)(4 5 6)(7 8 0)) '((1 2 3)(7 8 0)(4 5 6)) :bestFirstSearch )
 
 ;[Funcion] Permite meter a memoria de Busqueda
 (defun insertarEnMemoria(nodo)
@@ -202,19 +211,13 @@
   (print "MEMORIA (((((((((((((((((((((((((())))))))))))))))))))))))))")
   (print memoria)
   (cond ((null memoria) nil)
-        ((equal estado (second (first memoria)))
-         (print "SIMON")
-         T)
+        ((equal estado (second (first memoria))) T)
         (T (recuerdasElEstado? estado (rest memoria)))))
 
 ;[Filtro] Permite saber si ya estaba en la memoria
 (defun filtraMemoria (listaDeEstados)
   (cond ((null listaDeEstados) nil)
         ((recuerdasElEstado? (first (first listaDeEstados)) *memoria*)
-         (print "--------------------------------------------------------------")
-         (print (first (first listaDeEstados)))
-         (print (first listaDeEstados))
-         (print "--------------------------------------------------------------")
          (filtraMemoria (rest listaDeEstados)))
         (T (cons (first listaDeEstados) (filtraMemoria (rest listaDeEstados))))))
 
@@ -231,14 +234,13 @@
     (setq *estadoMeta* meta)
     (insertarAFronteraDeBusqueda inicio nil metodo)
                                         ; (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
-    (loop until (or metaEncontrada (null *fronteraDeBusqueda*) (= testing 10)) do
+    (loop until (or metaEncontrada (null *fronteraDeBusqueda*) (= testing 15)) do
          (setq nodo (obtenerDeFronteraDeBusqueda)
                estado (second nodo))
-         (print "ESTO ES MI ESTADO")
-         (print estado)
          (setq testing (1+ testing))
          (setq listaDeDesacomodados nil)
          (insertarEnMemoria nodo)
+         ;(setq *fronteraDeBusqueda* (pop *fronteraDeBusqueda*))
          (cond ((equal meta estado)
                 (format t "Exito. Meta encontrada en ~A  intentos~%" (first  nodo))
                 (setq metaEncontrada T))
@@ -255,17 +257,21 @@
                                (second elemento)
                                metodo)
                                     listaDeDesacomodados))
-                       (print "/*/*/*/*/*/*/*/*/*")
-                       (print listaDeDesacomodados)
-                       (print "/*/*/*/*/*/*/*/*/*")
                     ;(insertarAFronteraDeBusqueda (first elemento) (second elemento) metodo)
-                                        finally (setq listaDeDesacomodados (sort listaDeDesacomodados  #'< :key #'cadr)))
+                                        finally (setq listaDeDesacomodados (sort listaDeDesacomodados  #'> :key #'cadr)))
                   (loop for elemento in listaDeDesacomodados do
                        (insertarAFronteraDeBusqueda (first elemento) (second elemento) (fourth elemento)))
                   (print listaDeDesacomodados ))))))
 
 (trace insertarAFronteraDeBusqueda)
-(bestFirstSearch  '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch)
+(bestFirstSearch  '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
+
+(sort '((5 ((1 2 3) (4 5 6) (0 7 8)) 1 5 5) (4 ((1 2 3) (4 0 5) (7 8 6)) 2 4 9)
+        (3 ((1 2 0) (4 5 3) (7 8 6)) 2 5 5) (7 ((1 0 3) (4 2 6) (7 5 8)) 6 5 1)) #'< :key #'(lambda (x) (fifth x)))
+
+(fifth (first '((5 ((1 2 3) (4 5 6) (0 7 8)) 1 5 5) (4 ((1 2 3) (4 0 5) (7 8 6)) 2 4 4)
+        (3 ((1 2 0) (4 5 3) (7 8 6)) 2 5 5) (7 ((1 0 3) (4 2 6) (7 5 8)) 6 5 5))))
+
 
 (sort
  '((((1 2 3) (4 5 0) (7 8 6)) 6 (:ARRIBA NIL) :BESTFIRSTSEARCH)
@@ -276,7 +282,7 @@
 
 (third (first '((6 ((1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) :BESTFIRSTSEARCH))))
 
-(sort tester #'> :key #'car)
+
 
 ;(trace expandir)
 ;(trace bestFirstSearch)
