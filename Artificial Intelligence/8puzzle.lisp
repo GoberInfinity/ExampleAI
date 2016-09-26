@@ -23,6 +23,15 @@
 (defparameter *tiempoFinal* 0)
 (defparameter *tiempoFinal* 0)
 
+;[Funcion] Permite limpiar todas las variables
+(defun limpiarVariables ()
+  (setq  *fronteraDeBusqueda*  nil)
+  (setq  *memoria*  nil)
+  (setq  *id*  0)
+  (setq *estadoMeta* 0)
+  (setq *ancestro*  nil)
+  (setq *solucion*  nil))
+
 ;[Validacion] Nos permite saber en donde esta el 0
 (defun dondeEstaEspacioEnBlanco (estado)
   (let*((filaDelEspacioEnBlanco 0)
@@ -137,24 +146,21 @@
       (:Derecha (operadorDerecha estado))
       (T "Error"))))
 
-;[Funcion] Permite saber el numero de casillas desordenadas
-(defun insertarAFronteraDeBusqueda (estado operador metodoDeBusqueda))
-
 ;[Busqueda] Permite saber cuantos estan desacomodados
 (defun numeroDeElementosDesacomodados (estado meta)
-  (auxNumeroDeElementosDesacomodados (aplanaLista estado) (aplanaLista meta) 0))
+  (auxNumeroDeElementosDesacomodados (aplanaLista (first estado)) (aplanaLista meta) 0))
 
 ;[Aux] Permite aplanar la lista
 (defun aplanaLista (l)
   (cond ((null l) nil)
-        ((atom (car l)) (cons (car l) (Aplana (cdr l))))
-        (t (append (Aplana (car l)) (Aplana (cdr l))))))
+        ((atom (car l)) (cons (car l) (aplanaLista (cdr l))))
+        (t (append (aplanaLista (car l)) (aplanaLista (cdr l))))))
 
 ;[Aux] Permite saber el numero de desordenados segun el estado meta
 (defun auxNumeroDeElementosDesacomodados (estado meta contador)
   (cond ((null estado) contador)
-        ((= (car estado) (car meta)) ( + (cuantosElementosDesordenados (cdr estado ) (cdr meta) contador)))
-        (T (+ (cuantosElementosDesordenados(cdr estado) (cdr meta) (1+ contador))))))
+        ((= (car estado) (car meta)) ( + (auxNumeroDeElementosDesacomodados (cdr estado ) (cdr meta) contador)))
+        (T (+ (auxNumeroDeElementosDesacomodados(cdr estado) (cdr meta) (1+ contador))))))
 
 ;[Funcion] Permite expandir el estado
 (defun expandir (estado)
@@ -167,28 +173,85 @@
             (setq nuevoEstado (aplicarOperador operador estado))
             (setq descendientes (cons (list nuevoEstado operador) descendientes)))))))
 
+;[Funcion] Permite obtener el ultimo elemento de la frontera de busqueda
+(defun obtenerDeFronteraDeBusqueda ()
+  (pop *fronteraDeBusqueda*))
+
 ;[Funcion] Permite crear el nodo con la esctructura id - estado - ancestro - operador - desacomodados
 (defun crearNodo (estado operador desacomodados)
   (incf *id*)
   (incf *contadorNodos*)
-  (list (1- *id*) estado *ancestro* operador (numeroDeElementosDesacomodados desacomodados *estadoMeta*)))
+  (list (1- *id*) estado *ancestro* operador desacomodados))
 
 ;[Funcion] Permite insertar a frontera de Busqueda
 (defun insertarAFronteraDeBusqueda (estado operador metodoBusqueda)
-  (let ((nodo (crearNodo estado operador)))))
+;(let ((nodo (crearNodo estado operador)))
+  (let ((nodo nil))
+    (cond ((eql metodoBusqueda :bestFirstSearch)
+           (setq nodo (crearNodo estado operador (numeroDeElementosDesacomodados estado *estadoMeta*)))
+           (push nodo *fronteraDeBusqueda*)))))
 
-(numeroDeElementosDesacomodados '((1 2 3)(4 5 6 )(7 8 0)) '((2 1 3)(4 5 6 )(7 8 0)))
-(operadorIzquierda 0 '((1 2 2)(2 0 3)(7 10 8)))
-(substitute 'xx 2 '(0 2 3))
-(operadorValido? :Izquierda '((1 2 3)(4 0 5)(6 7 8)))
-(aplicarOperador '((:Izquierda nil)) '((1 2 3)(4 0 5)(6 7 8)))
-(aplicarOperador '((:Derecha nil)) '((1 2 3)(4 0 5)(6 7 8)))
-(aplicarOperador '((:Arriba nil)) '((1 2 3)(4 0 5)(6 7 8)))
-(aplicarOperador '((:Abajo nil)) '((1 2 3)(4 0 5)(6 7 8)))
-(trace expandir)
-(expandir '((1 2 3)(4 0 5)(6 7 8)))
-(expandir '((1 0 3)(4 2 5)(6 7 8)))
-(dondeEstaEspacioEnBlanco '((1 0 3)(4 2 5)(6 7 8)))
+;[Funcion] Permite meter a memoria de Busqueda
+(defun insertarEnMemoria(nodo)
+  (push nodo *memoria*))
+
+;[Predicado] Permite saber si ya esta en la memoria
+(defun recuerdasElEstado? (estado memoria)
+  (cond ((null memoria) nil)
+        ((equal estado (second (first memoria))) T)
+        (T (recuerdasElEstado? estado (rest memoria)))))
+
+;[Filtro] Permite saber si ya estaba en la memoria
+(defun filtraMemoria (listaDeEstados)
+  (cond ((null listaDeEstados) nil)
+        ((recuerdasElEstado? (first (first listaDeEstados)) *memoria*)
+         (filtraMemoria (rest listaDeEstados)))
+        (T (cons (first listaDeEstados) (filtraMemoria (rest listaDeEstados))))))
+
+;[Main] Permite comenzar a resolver nuestro algoritmo de 8puzzle
+(defun bestFirstSearch (inicio meta metodo)
+  (limpiarVariables)
+  (let ((nodo nil)
+        (estado nil)
+        (sucesores '())
+        (operador nil)
+        (metaEncontrada nil))
+    (setq *estadoMeta* meta)
+    (insertarAFronteraDeBusqueda inicio nil metodo)
+                                        ; (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
+    (loop for i from 1 to 10 do
+         (setq nodo (obtenerDeFronteraDeBusqueda)
+               estado (second nodo))
+         (print estado)
+         (insertarEnMemoria nodo)
+         (cond ((equal meta estado)
+                (format t "Exito. Meta encontrada en ~A  intentos~%" (first  nodo))
+                (setq metaEncontrada T))
+               (T (setq *ancestro* (first nodo))
+                  (setq sucesores (expandir estado))
+                  (setq sucesores (filtraMemoria sucesores))
+                  (loop for elemento in sucesores do
+                       (insertarAFronteraDeBusqueda (first elemento) (second elemento) metodo)
+                                          ))))))
+
+
+(bestFirstSearch  '((1 2 3)(4 5 6)(7 8 0)) '((1 2 3)(5 4 3 )(2 1 0)) :bestFirstSearch)
+;(trace expandir)
+;(trace bestFirstSearch)
+;(trace numeroDeElementosDesacomodados)
+
+;(numeroDeElementosDesacomodados '((1 2 3)(4 5 6 )(7 8 0)) '((2 1 3)(4 5 6 )(7 8 0)))
+;(operadorIzquierda 0 '((1 2 2)(2 0 3)(7 10 8)))
+;(substitute 'xx 2 '(0 2 3))
+;(operadorValido? :Izquierda '((1 2 3)(4 0 5)(6 7 8)))
+;(aplicarOperador '((:Izquierda nil)) '((1 2 3)(4 0 5)(6 7 8)))
+;(aplicarOperador '((:Derecha nil)) '((1 2 3)(4 0 5)(6 7 8)))
+;(aplicarOperador '((:Arriba nil)) '((1 2 3)(4 0 5)(6 7 8)))
+;(aplicarOperador '((:Abajo nil)) '((1 2 3)(4 0 5)(6 7 8)))
+;(trace expandir)
+;(expandir '((1 2 3)(4 0 5)(6 7 8)))
+;(expandir '((1 0 3)(4 2 5)(6 7 8)))
+;(dondeEstaEspacioEnBlanco '((1 0 3)(4 2 5)(6 7 8)))
 
 
 
