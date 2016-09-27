@@ -4,10 +4,10 @@
 
 ;Definicion de Operadores, los definimos como nil por que cada operador es
 ; diferente dependiendo de la casilla en blanco
-(defparameter *operadores* '((:Abajo nil)
-                             (:Arriba nil)
-                             (:Izquierda nil)
-                             (:Derecha nil)))
+(defparameter *operadores* '((:Abajo "v")
+                             (:Arriba "^")
+                             (:Izquierda "<")
+                             (:Derecha ">")))
 
 ;Definicion de parametros para el problema
 (defparameter *id* 0)
@@ -202,17 +202,56 @@
   (push nodo *memoria*))
 
 ;[Predicado] Permite saber si ya esta en la memoria
-(defun recuerdasElEstado? (estado memoria)
+(defun recuerdasElEstadoEnMemoria? (estado memoria)
   (cond ((null memoria) nil)
         ((equal estado (second (first memoria))) T)
-        (T (recuerdasElEstado? estado (rest memoria)))))
+        (T (recuerdasElEstadoEnMemoria? estado (rest memoria)))))
+
+;[Predicado] Permite saber si ya esta en la frontera
+(defun recuerdasElEsdadoEnFrontera? (estado frontera)
+    (cond ((null frontera) nil)
+          ((equal estado (second (first frontera)))
+           (print "A HUEVO")
+           T)
+          (T (recuerdasElEsdadoEnFrontera? estado (rest frontera)))))
+
+;[Filtro]Permite saber si esta en frontera
+(defun filtraFrontera (listaDeEstados)
+  (cond ((null listaDeEstados) nil)
+        ((recuerdasElEsdadoEnFrontera? (first (first listaDeEstados)) *fronteraDeBusqueda*)
+         (filtraFrontera (rest listaDeEstados)))
+        (T (cons (first listaDeEstados) (filtraFrontera (rest listaDeEstados))))))
 
 ;[Filtro] Permite saber si ya estaba en la memoria
 (defun filtraMemoria (listaDeEstados)
   (cond ((null listaDeEstados) nil)
-        ((recuerdasElEstado? (first (first listaDeEstados)) *memoria*)
+        ((recuerdasElEstadoEnMemoria? (first (first listaDeEstados)) *memoria*)
          (filtraMemoria (rest listaDeEstados)))
         (T (cons (first listaDeEstados) (filtraMemoria (rest listaDeEstados))))))
+
+;[Funcion] Permite extraer la solucion
+(defun extraerSolucion (nodo)
+  (labels ((localizarNodo (id lista)
+             (cond ((null lista) Nil)
+                   ((equal id (first (first lista))) (first lista))
+                   (T (localizarNodo id (rest lista))))))
+    (let ((actual (localizarNodo (first nodo) *memoria*)))
+      (loop while (not (null actual)) do
+           (push actual *solucion*)
+           (setq actual (localizarNodo (third actual) *memoria*))))
+    *solucion*))
+
+
+
+;[Funcion] Permite mostrar la solucion bonita
+(defun mostrarSolucion (listaNodos)
+   (format  t "Longitud de solucion ~A ~%" (1- (length  listaNodos)))
+   (let ((nodo nil))
+     (dotimes (i (length listaNodos))
+       (setq nodo (nth i listaNodos))
+       (if (= i 0)
+           (format t "Inicio en: ~A~%" (second  nodo))
+           (format t "\(~A\) aplicando ~A  se  llega  a  ~A~%"  i (fourth  nodo)  (second  nodo))))))
 
 ;[Main] Permite comenzar a resolver nuestro algoritmo de 8puzzle
 (defun bestFirstSearch (inicio meta metodo)
@@ -235,9 +274,11 @@
          (insertarEnMemoria nodo)
          (cond ((equal meta estado)
                 (format t "Exito. Meta encontrada en ~A  intentos~%" (first  nodo))
+                (mostrarSolucion (extraerSolucion nodo))
                 (setq metaEncontrada T))
                (T (setq *ancestro* (first nodo))
                   (setq sucesores (expandir estado))
+                  (setq sucesores (filtraFrontera sucesores))
                   (setq sucesores (filtraMemoria sucesores))
                   (loop for elemento in sucesores do
                        (setq listaDeDesacomodados
@@ -248,13 +289,12 @@
                                (second elemento)
                                metodo)
                                     listaDeDesacomodados))
-                    ;(insertarAFronteraDeBusqueda (first elemento) (second elemento) metodo)
                                         finally (setq listaDeDesacomodados (sort listaDeDesacomodados  #'> :key #'cadr)))
                   (loop for elemento in listaDeDesacomodados do
-                       (insertarAFronteraDeBusqueda (first elemento) (second elemento) (fourth elemento))))))))
+                       (insertarAFronteraDeBusqueda (first elemento) (third elemento) (fourth elemento))))))))
 
 
-(bestFirstSearch  '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 4 7)(6 0 5)) :bestFirstSearch )
+(bestFirstSearch  '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
 
 (sort '((5 ((1 2 3) (4 5 6) (0 7 8)) 1 5 5) (4 ((1 2 3) (4 0 5) (7 8 6)) 2 4 9)
         (3 ((1 2 0) (4 5 3) (7 8 6)) 2 5 5) (7 ((1 0 3) (4 2 6) (7 5 8)) 6 5 1)) #'< :key #'(lambda (x) (fifth x)))
@@ -269,7 +309,7 @@
 (caar '(( 6 ((1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) 6)
         (((1 2 3) (4 5 6) (7 0 8)) (:IZQUIERDA NIL) 6)))
 
-
+ 
 (third (first '((6 ((1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) :BESTFIRSTSEARCH))))
 
 
