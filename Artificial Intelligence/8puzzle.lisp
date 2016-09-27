@@ -260,6 +260,88 @@
            (format t "Inicio en: ~A~%" (second  nodo))
            (format t "\(~A\) aplicando ~A  se  llega  a  ~A~%"  i (fourth  nodo)  (second  nodo))))))
 
+
+
+
+
+
+
+;[Funcion] Permite saber la distancia Manhatan de cada elementos
+(defun distanciaManhattan (estado meta)
+  (let* ((contadorDeCadaElemento 0)
+         (contadorDeEstado 0)
+         (filaDelEstado 0)
+         (contadorAuxiliar 0)
+         (listaDeElementos (aplanaLista estado)))
+
+    (loop for elemento in listaDeElementos do
+                                        ; (obtenerMovimientosManhattan elemento estado meta 0))
+         (if (or (= contadorDeEstado 3) (= contadorDeEstado 6))
+             (progn
+               (setq contadorAuxiliar 0)
+               (setq filaDelEstado (1+ filaDelEstado))))
+         (setq contadorDeCadaElemento (+ contadorDeCadaElemento (obtenerMovimientosManhattan elemento estado meta 0 filaDelEstado contadorAuxiliar)))
+         (setq contadorAuxiliar (1+ contadorAuxiliar))
+         (setq contadorDeEstado (1+ contadorDeEstado))
+    )(print contadorDeCadaElemento)))
+
+;[Funcion] Permite hacer toda la logita de la distancia Manhatan
+(defun obtenerMovimientosManhattan (elemento estado meta contador filaDelEstado contadorAuxiliar)
+  (cond (( = filaDelEstado 0)
+        (cond (( member elemento (first meta))
+               ( + 0 (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (first meta) elemento 0 contadorAuxiliar)))
+              (( member elemento (second meta))
+               ( + 1 (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (second meta) elemento 0 contadorAuxiliar)))
+              ( T (1+ (1+ (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (third meta) elemento 0 contadorAuxiliar))))))
+        (( = filaDelEstado 1 )
+         (cond (( member elemento (first meta))
+                (format t "~& SEGUNDA PRIMERA ~%")
+                ( 1+ (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (first meta) elemento 0 contadorAuxiliar)))
+               (( member elemento (second meta))
+                (format t "~& SEGUNDA SEGUNDA ~%")
+                ( + 0 (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (second meta) elemento 0 contadorAuxiliar)))
+               ( T (format t "~& SEGUNDA ULTIMA ~%")
+                   (1+ (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (third meta) elemento 0 contadorAuxiliar)))))
+        ( T
+         (cond (( member elemento (first meta))
+                ( 1+ (1+  (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (first meta) elemento 0 contadorAuxiliar))))
+               (( member elemento (second meta))
+                ( + 1 (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (second meta) elemento 0 contadorAuxiliar)))
+               ( T (+ 0 (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (third meta) elemento 0 contadorAuxiliar)))))))
+
+
+;[Aux] Permite saber la casilla del numero para Manthatthan&body
+(defun auxObtenerMovimientosManhattan (estado meta elemento contador contadorAuxiliar)
+  (print elemento)
+  (print meta)
+  (cond ((= contadorAuxiliar 2)
+         (cond (( = elemento (third meta)) contador)
+               (( = elemento (second meta)) (1+ contador))
+               (T (1+ (1+ contador)))))
+        ((= contadorAuxiliar 1)
+         (cond (( = elemento (second meta))
+                (format t "~& DENTRO PRIEMRA  ~%")
+                contador)
+               (T (1+ contador))))
+        ( T
+         (cond (( = elemento (first meta)) contador)
+               (( = elemento (second meta)) (1+ contador))
+               (T (1+ (1+ contador)))))))
+
+;[Aux]
+
+(trace auxObtenerMovimientosManhattan)
+(trace obtenerMovimientosManhattan)
+(distanciaManhattan '((4 5 7)(6 0 2)(1 3 8)) '((1 2 3) (8 0 4) (7 6 5)))
+(member 4 '(8 0 4))
+(1- (length (member 4 (reverse '(8 0 4)))))
+(1- (length (member 4 (reverse '(8 4 5)))))
+(1- (length (member 4 (reverse '(4 0 5)))))
+
+(not (set-exclusive-or  '(1 2 3) '(3 2 1)))
+
+(+ 5 6 7 8)
+
 ;[Main] Permite comenzar a resolver nuestro algoritmo de 8puzzle
 (defun bestFirstSearch (inicio meta metodo)
   (limpiarVariables)
@@ -275,6 +357,7 @@
     (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
          (setq nodo (obtenerDeFronteraDeBusqueda)
                estado (second nodo))
+         (print *estadoMeta*)
          (setq listaDeDesacomodados nil)
          (insertarEnMemoria nodo)
          (cond ((equal meta estado)
@@ -292,7 +375,7 @@
                               listaDeDesacomodados))
                      finally (insertarAFronteraDeBusqueda listaDeDesacomodados metodo 1)))))))
 
-
+(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
 (bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 4 0)(7 6 5)) :bestFirstSearch )
 (bestFirstSearch '((2 8 3)(1 4 5)(7 6 0)) '((1 2 3)(8 4 0)(7 6 5)) :bestFirstSearch )
 
