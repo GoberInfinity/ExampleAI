@@ -1,4 +1,6 @@
 ; Reyes Fragoso Roberto
+
+;Permite saber para cada problema la frontera de busqueda y la memoria
 (defparameter *fronteraDeBusqueda* '())
 (defparameter *memoria* '())
 
@@ -14,9 +16,6 @@
 (defparameter *ancestro* nil)
 (defparameter *solucion* nil)
 (defparameter *estadoMeta* nil)
-
-;Auxiliar para hacer mas legible el codigo
-(defparameter *listaDesacomodadosAux* '())
 
 ;Contadores para poder saber como fue nuestra solucion
 (defparameter *contadorNodos* 0)
@@ -137,7 +136,6 @@
           ((equal operador :Izquierda) (if (= casillaDelEspacioEnBlanco 0) nil T))
           ((equal operador :Derecha) (if (= casillaDelEspacioEnBlanco 2) nil T))
           (T "Error"))))
-          ;(T (if (= casillaDelEspacioEnBlanco 2) nil T)))))
 
 ;[Operador] Aplicamos los diferentes Operadores
 (defun aplicarOperador (operador estado)
@@ -188,9 +186,7 @@
 
 ;[Funcion] Permite reordenar la frontera de Busqueda
 (defun reordenarFronteraDeBusqueda (fronteraDeBusqueda))
-
-;(setq *fronteraDeBusqueda* (sort *fronteraDeBusqueda*  #'> :key #'cadr)))
-  (setq *fronteraDeBusqueda* (sort *fronteraDeBusqueda* #'< :key #'(lambda (x) (fifth x))))
+(setq *fronteraDeBusqueda* (sort *fronteraDeBusqueda* #'< :key #'(lambda (x) (fifth x))))
 
 ;[Funcion] Permite meter a memoria de Busqueda
 (defun insertarEnMemoria(nodo)
@@ -215,9 +211,6 @@
 ;[Aux] Permite reordenar lo que tenemos en nuestra lista
 (defun reordenarDeMenorAMayor (listaDeEstados)
   (sort listaDeEstados  #'> :key #'second))
-                                        ;(sort listaDeEstados  #'> :key #'cadr))
-
-
 
 ;[Predicado] Permite saber si ya esta en la memoria
 (defun recuerdasElEstadoEnMemoria? (estado memoria)
@@ -267,8 +260,6 @@
            (format t "Inicio en: ~A~%" (second  nodo))
            (format t "\(~A\) aplicando ~A  se  llega  a  ~A~%"  i (fourth  nodo)  (second  nodo))))))
 
-;[Funcion] Permite hacer tratamiento de datos dependiendo de que necesitamos
-
 ;[Main] Permite comenzar a resolver nuestro algoritmo de 8puzzle
 (defun bestFirstSearch (inicio meta metodo)
   (limpiarVariables)
@@ -281,11 +272,9 @@
         (listaDeDesacomodados nil ))
     (setq *estadoMeta* meta)
     (insertarAFronteraDeBusqueda inicio metodo 0)
-                                        ; (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
-    (loop until (or metaEncontrada (null *fronteraDeBusqueda*) (= testing 25)) do
+    (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
          (setq nodo (obtenerDeFronteraDeBusqueda)
                estado (second nodo))
-         (setq testing (1+ testing))
          (setq listaDeDesacomodados nil)
          (insertarEnMemoria nodo)
          (cond ((equal meta estado)
@@ -304,9 +293,8 @@
                      finally (insertarAFronteraDeBusqueda listaDeDesacomodados metodo 1)))))))
 
 
-(bestFirstSearch  '((2 8 3)(1 4 5)(7 6 0)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
-
-
+(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 4 0)(7 6 5)) :bestFirstSearch )
+(bestFirstSearch '((2 8 3)(1 4 5)(7 6 0)) '((1 2 3)(8 4 0)(7 6 5)) :bestFirstSearch )
 
 
 ;(trace expandir)
