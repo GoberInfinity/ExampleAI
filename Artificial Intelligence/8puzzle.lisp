@@ -185,8 +185,8 @@
   (list (1- *id*) estado *ancestro* operador desacomodados))
 
 ;[Funcion] Permite reordenar la frontera de Busqueda
-(defun reordenarFronteraDeBusqueda (fronteraDeBusqueda))
-(setq *fronteraDeBusqueda* (sort *fronteraDeBusqueda* #'< :key #'(lambda (x) (fifth x))))
+(defun reordenarFronteraDeBusqueda (fronteraDeBusqueda)
+(setq *fronteraDeBusqueda* (sort *fronteraDeBusqueda* #'< :key #'(lambda (x) (fifth x)))))
 
 ;[Funcion] Permite meter a memoria de Busqueda
 (defun insertarEnMemoria(nodo)
@@ -205,8 +205,25 @@
                    (setq listaOrdenada (reordenarDeMenorAMayor listaDeEstados))
                    (loop for elemento in listaDeEstados do
                         (setq nodo (crearNodo (first elemento) (third elemento) (numeroDeElementosDesacomodados (first elemento) *estadoMeta*)))
-                        (push nodo *fronteraDeBusqueda*))
-                   (reordenarFronteraDeBusqueda *fronteraDeBusqueda*)))))))
+                        (push nodo *fronteraDeBusqueda*)
+                        (reordenarFronteraDeBusqueda *fronteraDeBusqueda*))
+                   (print *fronteraDeBusqueda*)
+                   (reordenarFronteraDeBusqueda *fronteraDeBusqueda*))))
+          ((eql metodoBusqueda :Manhattan)
+           (if (= indicadorInicio 0)
+               (progn
+                 (setq nodo (crearNodo listaDeEstados nil (distanciaManhattan listaDeEstados *estadoMeta*)))
+                 (push nodo *fronteraDeBusqueda*))
+               (progn
+                 (setq listaOrdenada (reordenarDeMenorAMayor listaDeEstados))
+                 (loop for elemento in listaDeEstados do
+                      (setq nodo (crearNodo (first elemento) (third elemento) (distanciaManhattan (first elemento) *estadoMeta*)))
+                      (push nodo *fronteraDeBusqueda*))
+                 (reordenarFronteraDeBusqueda *fronteraDeBusqueda*)))))
+    ))
+
+;(bestFirstSearch '((4 5 7)(6 3 2)(1 0 8)) '((1 2 3)(8 0 4)(7 6 5)) :Manhattan )
+
 
 ;[Aux] Permite reordenar lo que tenemos en nuestra lista
 (defun reordenarDeMenorAMayor (listaDeEstados)
@@ -261,11 +278,6 @@
            (format t "\(~A\) aplicando ~A  se  llega  a  ~A~%"  i (fourth  nodo)  (second  nodo))))))
 
 
-
-
-
-
-
 ;[Funcion] Permite saber la distancia Manhatan de cada elementos
 (defun distanciaManhattan (estado meta)
   (let* ((contadorDeCadaElemento 0)
@@ -283,7 +295,8 @@
          (setq contadorDeCadaElemento (+ contadorDeCadaElemento (obtenerMovimientosManhattan elemento estado meta 0 filaDelEstado contadorAuxiliar)))
          (setq contadorAuxiliar (1+ contadorAuxiliar))
          (setq contadorDeEstado (1+ contadorDeEstado))
-    )(print contadorDeCadaElemento)))
+    )contadorDeCadaElemento))
+
 
 ;[Funcion] Permite hacer toda la logita de la distancia Manhatan
 (defun obtenerMovimientosManhattan (elemento estado meta contador filaDelEstado contadorAuxiliar)
@@ -295,13 +308,10 @@
               ( T (1+ (1+ (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (third meta) elemento 0 contadorAuxiliar))))))
         (( = filaDelEstado 1 )
          (cond (( member elemento (first meta))
-                (format t "~& SEGUNDA PRIMERA ~%")
                 ( 1+ (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (first meta) elemento 0 contadorAuxiliar)))
                (( member elemento (second meta))
-                (format t "~& SEGUNDA SEGUNDA ~%")
                 ( + 0 (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (second meta) elemento 0 contadorAuxiliar)))
-               ( T (format t "~& SEGUNDA ULTIMA ~%")
-                   (1+ (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (third meta) elemento 0 contadorAuxiliar)))))
+               ( T (1+ (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (third meta) elemento 0 contadorAuxiliar)))))
         ( T
          (cond (( member elemento (first meta))
                 ( 1+ (1+  (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (first meta) elemento 0 contadorAuxiliar))))
@@ -312,15 +322,12 @@
 
 ;[Aux] Permite saber la casilla del numero para Manthatthan&body
 (defun auxObtenerMovimientosManhattan (estado meta elemento contador contadorAuxiliar)
-  (print elemento)
-  (print meta)
   (cond ((= contadorAuxiliar 2)
          (cond (( = elemento (third meta)) contador)
                (( = elemento (second meta)) (1+ contador))
                (T (1+ (1+ contador)))))
         ((= contadorAuxiliar 1)
          (cond (( = elemento (second meta))
-                (format t "~& DENTRO PRIEMRA  ~%")
                 contador)
                (T (1+ contador))))
         ( T
@@ -328,19 +335,8 @@
                (( = elemento (second meta)) (1+ contador))
                (T (1+ (1+ contador)))))))
 
-;[Aux]
 
-(trace auxObtenerMovimientosManhattan)
-(trace obtenerMovimientosManhattan)
-(distanciaManhattan '((4 5 7)(6 0 2)(1 3 8)) '((1 2 3) (8 0 4) (7 6 5)))
-(member 4 '(8 0 4))
-(1- (length (member 4 (reverse '(8 0 4)))))
-(1- (length (member 4 (reverse '(8 4 5)))))
-(1- (length (member 4 (reverse '(4 0 5)))))
 
-(not (set-exclusive-or  '(1 2 3) '(3 2 1)))
-
-(+ 5 6 7 8)
 
 ;[Main] Permite comenzar a resolver nuestro algoritmo de 8puzzle
 (defun bestFirstSearch (inicio meta metodo)
@@ -354,11 +350,11 @@
         (listaDeDesacomodados nil ))
     (setq *estadoMeta* meta)
     (insertarAFronteraDeBusqueda inicio metodo 0)
-    (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
+    (loop until (or metaEncontrada (null *fronteraDeBusqueda*)(= testing 10)) do
          (setq nodo (obtenerDeFronteraDeBusqueda)
                estado (second nodo))
-         (print *estadoMeta*)
          (setq listaDeDesacomodados nil)
+         (setq testing (1+ testing))
          (insertarEnMemoria nodo)
          (cond ((equal meta estado)
                 (format t "Exito. Meta encontrada en ~A  intentos~%" (first  nodo))
@@ -375,9 +371,14 @@
                               listaDeDesacomodados))
                      finally (insertarAFronteraDeBusqueda listaDeDesacomodados metodo 1)))))))
 
+(trace distanciaManhattan)
+(bestFirstSearch '((4 5 7)(6 0 2)(1 3 8)) '((1 2 3)(8 0 4)(7 6 5)) :Manhattan )
+(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :Manhattan )
+
+;(distanciaManhattan '((4 5 7)(6 0 2)(1 3 8)) '((1 2 3) (8 0 4) (7 6 5)))
+
 (bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
-(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 4 0)(7 6 5)) :bestFirstSearch )
-(bestFirstSearch '((2 8 3)(1 4 5)(7 6 0)) '((1 2 3)(8 4 0)(7 6 5)) :bestFirstSearch )
+;(bestFirstSearch '((2 8 3)(1 4 5)(7 6 0)) '((1 2 3)(8 4 0)(7 6 5)) :bestFirstSearch )
 
 
 ;(trace expandir)
