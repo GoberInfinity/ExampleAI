@@ -15,6 +15,8 @@
 (defparameter *solucion* nil)
 (defparameter *estadoMeta* nil)
 
+;Auxiliar para hacer mas legible el codigo
+(defparameter *listaDesacomodadosAux* '())
 
 ;Contadores para poder saber como fue nuestra solucion
 (defparameter *contadorNodos* 0)
@@ -149,7 +151,7 @@
 
 ;[Busqueda] Permite saber cuantos estan desacomodados
 (defun numeroDeElementosDesacomodados (estado meta)
-   (auxNumeroDeElementosDesacomodados (aplanaLista estado) (aplanaLista meta) 0))
+   (1- (auxNumeroDeElementosDesacomodados (aplanaLista estado) (aplanaLista meta) 0)))
 
 ;[Aux] Permite aplanar la lista
 (defun aplanaLista (l)
@@ -184,22 +186,38 @@
   (incf *contadorNodos*)
   (list (1- *id*) estado *ancestro* operador desacomodados))
 
-;[Funcion] Permite insertar a frontera de Busqueda
-(defun insertarAFronteraDeBusqueda (estado operador metodoBusqueda)
-;(let ((nodo (crearNodo estado operador)))
-  (let ((nodo nil))
-    (cond ((eql metodoBusqueda :bestFirstSearch)
-           (setq nodo (crearNodo estado operador (numeroDeElementosDesacomodados estado *estadoMeta*)))
-           (push nodo *fronteraDeBusqueda*)
-           (reordenarFronteraDeBusqueda *fronteraDeBusqueda*)))))
-
 ;[Funcion] Permite reordenar la frontera de Busqueda
-(defun reordenarFronteraDeBusqueda (fronteraDeBusqueda)
-  (setq *fronteraDeBusqueda* (sort *fronteraDeBusqueda* #'< :key #'(lambda (x) (fifth x)))))
+(defun reordenarFronteraDeBusqueda (fronteraDeBusqueda))
+
+;(setq *fronteraDeBusqueda* (sort *fronteraDeBusqueda*  #'> :key #'cadr)))
+  (setq *fronteraDeBusqueda* (sort *fronteraDeBusqueda* #'< :key #'(lambda (x) (fifth x))))
 
 ;[Funcion] Permite meter a memoria de Busqueda
 (defun insertarEnMemoria(nodo)
   (push nodo *memoria*))
+
+;[Funcion] Permite insertar a frontera de Busqueda
+(defun insertarAFronteraDeBusqueda (listaDeEstados metodoBusqueda indicadorInicio)
+  (let* ((nodo '())
+         (listaOrdenada '()))
+    (cond ((eql metodoBusqueda :bestFirstSearch)
+           (if (= indicadorInicio 0)
+               (progn
+                 (setq nodo (crearNodo listaDeEstados nil (numeroDeElementosDesacomodados (list listaDeEstados) *estadoMeta*)))
+                 (push nodo *fronteraDeBusqueda*))
+               (progn
+                   (setq listaOrdenada (reordenarDeMenorAMayor listaDeEstados))
+                   (loop for elemento in listaDeEstados do
+                        (setq nodo (crearNodo (first elemento) (third elemento) (numeroDeElementosDesacomodados (first elemento) *estadoMeta*)))
+                        (push nodo *fronteraDeBusqueda*))
+                   (reordenarFronteraDeBusqueda *fronteraDeBusqueda*)))))))
+
+;[Aux] Permite reordenar lo que tenemos en nuestra lista
+(defun reordenarDeMenorAMayor (listaDeEstados)
+  (sort listaDeEstados  #'> :key #'second))
+                                        ;(sort listaDeEstados  #'> :key #'cadr))
+
+
 
 ;[Predicado] Permite saber si ya esta en la memoria
 (defun recuerdasElEstadoEnMemoria? (estado memoria)
@@ -210,9 +228,7 @@
 ;[Predicado] Permite saber si ya esta en la frontera
 (defun recuerdasElEsdadoEnFrontera? (estado frontera)
     (cond ((null frontera) nil)
-          ((equal estado (second (first frontera)))
-           (print "A HUEVO")
-           T)
+          ((equal estado (second (first frontera)))T)
           (T (recuerdasElEsdadoEnFrontera? estado (rest frontera)))))
 
 ;[Filtro]Permite saber si esta en frontera
@@ -241,8 +257,6 @@
            (setq actual (localizarNodo (third actual) *memoria*))))
     *solucion*))
 
-
-
 ;[Funcion] Permite mostrar la solucion bonita
 (defun mostrarSolucion (listaNodos)
    (format  t "Longitud de solucion ~A ~%" (1- (length  listaNodos)))
@@ -252,6 +266,8 @@
        (if (= i 0)
            (format t "Inicio en: ~A~%" (second  nodo))
            (format t "\(~A\) aplicando ~A  se  llega  a  ~A~%"  i (fourth  nodo)  (second  nodo))))))
+
+;[Funcion] Permite hacer tratamiento de datos dependiendo de que necesitamos
 
 ;[Main] Permite comenzar a resolver nuestro algoritmo de 8puzzle
 (defun bestFirstSearch (inicio meta metodo)
@@ -264,9 +280,9 @@
         (testing 0)
         (listaDeDesacomodados nil ))
     (setq *estadoMeta* meta)
-    (insertarAFronteraDeBusqueda inicio nil metodo)
+    (insertarAFronteraDeBusqueda inicio metodo 0)
                                         ; (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
-    (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
+    (loop until (or metaEncontrada (null *fronteraDeBusqueda*) (= testing 25)) do
          (setq nodo (obtenerDeFronteraDeBusqueda)
                estado (second nodo))
          (setq testing (1+ testing))
@@ -283,34 +299,13 @@
                   (loop for elemento in sucesores do
                        (setq listaDeDesacomodados
                              (cons
-                              (list
-                               (first elemento)
-                               (numeroDeElementosDesacomodados (first elemento) *estadoMeta*)
-                               (second elemento)
-                               metodo)
-                                    listaDeDesacomodados))
-                                        finally (setq listaDeDesacomodados (sort listaDeDesacomodados  #'> :key #'cadr)))
-                  (loop for elemento in listaDeDesacomodados do
-                       (insertarAFronteraDeBusqueda (first elemento) (third elemento) (fourth elemento))))))))
+                              (list (first elemento)(numeroDeElementosDesacomodados (first elemento) *estadoMeta*)(second elemento) metodo)
+                              listaDeDesacomodados))
+                     finally (insertarAFronteraDeBusqueda listaDeDesacomodados metodo 1)))))))
 
 
-(bestFirstSearch  '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
+(bestFirstSearch  '((2 8 3)(1 4 5)(7 6 0)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
 
-(sort '((5 ((1 2 3) (4 5 6) (0 7 8)) 1 5 5) (4 ((1 2 3) (4 0 5) (7 8 6)) 2 4 9)
-        (3 ((1 2 0) (4 5 3) (7 8 6)) 2 5 5) (7 ((1 0 3) (4 2 6) (7 5 8)) 6 5 1)) #'< :key #'(lambda (x) (fifth x)))
-
-(fifth (first '((5 ((1 2 3) (4 5 6) (0 7 8)) 1 5 5) (4 ((1 2 3) (4 0 5) (7 8 6)) 2 4 4)
-        (3 ((1 2 0) (4 5 3) (7 8 6)) 2 5 5) (7 ((1 0 3) (4 2 6) (7 5 8)) 6 5 5))))
-
-
-(sort
- '((((1 2 3) (4 5 0) (7 8 6)) 6 (:ARRIBA NIL) :BESTFIRSTSEARCH)
-   (((1 2 3) (4 5 6) (7 0 8)) 4 (:IZQUIERDA NIL) :BESTFIRSTSEARCH))   #'< :key #'cadr )
-(caar '(( 6 ((1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) 6)
-        (((1 2 3) (4 5 6) (7 0 8)) (:IZQUIERDA NIL) 6)))
-
- 
-(third (first '((6 ((1 2 3) (4 5 0) (7 8 6)) (:ARRIBA NIL) :BESTFIRSTSEARCH))))
 
 
 
