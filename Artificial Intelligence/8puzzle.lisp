@@ -149,7 +149,7 @@
 
 ;[Busqueda] Permite saber cuantos estan desacomodados
 (defun numeroDeElementosDesacomodados (estado meta)
-   (1- (auxNumeroDeElementosDesacomodados (aplanaLista estado) (aplanaLista meta) 0)))
+   (auxNumeroDeElementosDesacomodados (aplanaLista estado) (aplanaLista meta) 0))
 
 ;[Aux] Permite aplanar la lista
 (defun aplanaLista (l)
@@ -185,52 +185,34 @@
   (list (1- *id*) estado *ancestro* operador desacomodados))
 
 ;[Funcion] Permite reordenar la frontera de Busqueda
-(defun reordenarFronteraDeBusqueda (fronteraDeBusqueda)
-(setq *fronteraDeBusqueda* (sort *fronteraDeBusqueda* #'< :key #'(lambda (x) (fifth x)))))
+(defun reordenarFronteraDeBusqueda ()
+  (setq *fronteraDeBusqueda* (stable-sort *fronteraDeBusqueda* #'< :key #'(lambda (x) (fifth x)))))
 
 ;[Funcion] Permite meter a memoria de Busqueda
 (defun insertarEnMemoria(nodo)
   (push nodo *memoria*))
 
 ;[Funcion] Permite insertar a frontera de Busqueda
-(defun insertarAFronteraDeBusqueda (listaDeEstados metodoBusqueda indicadorInicio)
+(defun insertarAFronteraDeBusqueda (estado operador metodoBusqueda)
   (let* ((nodo '())
          (listaOrdenada '()))
     (cond ((eql metodoBusqueda :bestFirstSearch)
-           (if (= indicadorInicio 0)
-               (progn
-                 (setq nodo (crearNodo listaDeEstados nil (numeroDeElementosDesacomodados (list listaDeEstados) *estadoMeta*)))
-                 (push nodo *fronteraDeBusqueda*))
-               (progn
-                   (setq listaOrdenada (reordenarDeMenorAMayor listaDeEstados))
-                   (loop for elemento in listaDeEstados do
-                        (setq nodo (crearNodo (first elemento) (third elemento) (numeroDeElementosDesacomodados (first elemento) *estadoMeta*)))
-                        (push nodo *fronteraDeBusqueda*)
-                        (reordenarFronteraDeBusqueda *fronteraDeBusqueda*))
-                   (reordenarFronteraDeBusqueda *fronteraDeBusqueda*))))
+           (setq nodo (crearNodo estado operador (numeroDeElementosDesacomodados estado *estadoMeta*)))
+           (push nodo *fronteraDeBusqueda*)
+           (reordenarFronteraDeBusqueda))
           ((eql metodoBusqueda :Manhattan)
-           (if (= indicadorInicio 0)
-               (progn
-                 (setq nodo (crearNodo listaDeEstados nil (distanciaManhattan listaDeEstados *estadoMeta*)))
-                 (push nodo *fronteraDeBusqueda*))
-               (progn
-                 (setq listaOrdenada (reordenarDeMenorAMayor listaDeEstados))
-                 (loop for elemento in listaDeEstados do
-                      (setq nodo (crearNodo (first elemento) (third elemento) (distanciaManhattan (first elemento) *estadoMeta*)))
-                      (push nodo *fronteraDeBusqueda*))
-                 (reordenarFronteraDeBusqueda *fronteraDeBusqueda*))))
+           (setq nodo (crearNodo estado operador (distanciaManhattan estado *estadoMeta*)))
+           (push nodo *fronteraDeBusqueda*)
+           (reordenarFronteraDeBusqueda))
           ((eql metodoBusqueda :random-value)
-           (if (= indicadorInicio 0)
-               (progn
-                 (setq nodo (crearNodo listaDeEstados nil (random 13)))
-                 (push nodo *fronteraDeBusqueda*))
-               (progn
-                 (loop for elemento in listaDeEstados do
-                      (setq nodo (crearNodo (first elemento) (third elemento) (random 13)))
-                      (push nodo *fronteraDeBusqueda*))
-                 (reordenarFronteraDeBusqueda *fronteraDeBusqueda*))))
-          )
-    ))
+           (setq nodo (crearNodo estado operador (random 10)))
+           (push nodo *fronteraDeBusqueda*)
+           (reordenarFronteraDeBusqueda))
+          ((eql metodoBusqueda :custom-value)
+           (setq nodo (crearNodo estado operador (random 2)))
+           (push nodo *fronteraDeBusqueda*)
+           (reordenarFronteraDeBusqueda))
+          )))
 
 ;[Aux] Permite reordenar lo que tenemos en nuestra lista
 (defun reordenarDeMenorAMayor (listaDeEstados)
@@ -353,7 +335,7 @@
         (testing 0)
         (listaDeDesacomodados nil ))
     (setq *estadoMeta* meta)
-    (insertarAFronteraDeBusqueda inicio metodo 0)
+    (insertarAFronteraDeBusqueda inicio nil metodo)
     (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
          (setq nodo (obtenerDeFronteraDeBusqueda)
                estado (second nodo))
@@ -369,14 +351,17 @@
                   (setq sucesores (filtraFrontera sucesores))
                   (setq sucesores (filtraMemoria sucesores))
                   (loop for elemento in sucesores do
-                       (setq listaDeDesacomodados
-                             (cons
-                              (list (first elemento)(numeroDeElementosDesacomodados (first elemento) *estadoMeta*)(second elemento) metodo)
-                              listaDeDesacomodados))
-                     finally (insertarAFronteraDeBusqueda listaDeDesacomodados metodo 1)))))))
+                    ;   (print (first elemento))
+                    ;   (print (second elemento))
+                       (insertarAFronteraDeBusqueda (first elemento) (second elemento) metodo)))))))
+
+
+(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
+;(distanciaManhattan '((4 5 7)(6 0 2)(1 3 8)) '((1 2 3)(8 0 4)(7 6 5)))
+;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(5 6 7)) :bestFirstSearch )
 
 (bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :Manhattan )
-;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :random-value )
-;(distanciaManhattan '((4 5 7)(6 0 2)(1 3 8)) '((1 2 3) (8 0 4) (7 6 5)))
-(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
+(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :random-value )
+(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :custom-value )
+
 
