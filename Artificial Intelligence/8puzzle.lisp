@@ -209,10 +209,10 @@
            (push nodo *fronteraDeBusqueda*)
            (reordenarFronteraDeBusqueda))
           ((eql metodoBusqueda :custom-value)
-           (setq nodo (crearNodo estado operador (random 2)))
+           (setq nodo (crearNodo estado operador (+ (distanciaManhattan estado *estadoMeta* )
+                                                    (distanciaManhattan estado *estadoMeta*))))
            (push nodo *fronteraDeBusqueda*)
-           (reordenarFronteraDeBusqueda))
-          )))
+           (reordenarFronteraDeBusqueda)))))
 
 ;[Aux] Permite reordenar lo que tenemos en nuestra lista
 (defun reordenarDeMenorAMayor (listaDeEstados)
@@ -357,11 +357,10 @@
 
 
 (bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
-;(distanciaManhattan '((4 5 7)(6 0 2)(1 3 8)) '((1 2 3)(8 0 4)(7 6 5)))
-;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(5 6 7)) :bestFirstSearch )
 
 (bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :Manhattan )
-(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :random-value )
+;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :random-value )
 (bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :custom-value )
+
 
 
