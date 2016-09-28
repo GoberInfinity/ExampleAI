@@ -194,8 +194,7 @@
 
 ;[Funcion] Permite insertar a frontera de Busqueda
 (defun insertarAFronteraDeBusqueda (estado operador metodoBusqueda)
-  (let* ((nodo '())
-         (listaOrdenada '()))
+  (let* ((nodo '()))
     (cond ((eql metodoBusqueda :bestFirstSearch)
            (setq nodo (crearNodo estado operador (numeroDeElementosDesacomodados estado *estadoMeta*)))
            (push nodo *fronteraDeBusqueda*)
@@ -280,36 +279,36 @@
              (progn
                (setq contadorAuxiliar 0)
                (setq filaDelEstado (1+ filaDelEstado))))
-         (setq contadorDeCadaElemento (+ contadorDeCadaElemento (obtenerMovimientosManhattan elemento estado meta 0 filaDelEstado contadorAuxiliar)))
+         (setq contadorDeCadaElemento (+ contadorDeCadaElemento (obtenerMovimientosManhattan elemento  meta  filaDelEstado contadorAuxiliar)))
          (setq contadorAuxiliar (1+ contadorAuxiliar))
          (setq contadorDeEstado (1+ contadorDeEstado))
     )contadorDeCadaElemento))
 
 
 ;[Funcion] Permite hacer toda la logita de la distancia Manhatan
-(defun obtenerMovimientosManhattan (elemento estado meta contador filaDelEstado contadorAuxiliar)
+(defun obtenerMovimientosManhattan (elemento  meta  filaDelEstado contadorAuxiliar)
   (cond (( = filaDelEstado 0)
         (cond (( member elemento (first meta))
-               ( + 0 (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (first meta) elemento 0 contadorAuxiliar)))
+               ( + 0 (auxObtenerMovimientosManhattan (first meta) elemento 0 contadorAuxiliar)))
               (( member elemento (second meta))
-               ( + 1 (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (second meta) elemento 0 contadorAuxiliar)))
-              ( T (1+ (1+ (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (third meta) elemento 0 contadorAuxiliar))))))
+               ( + 1 (auxObtenerMovimientosManhattan (second meta) elemento 0 contadorAuxiliar)))
+              ( T (1+ (1+ (auxObtenerMovimientosManhattan (third meta) elemento 0 contadorAuxiliar))))))
         (( = filaDelEstado 1 )
          (cond (( member elemento (first meta))
-                ( 1+ (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (first meta) elemento 0 contadorAuxiliar)))
+                ( 1+ (auxObtenerMovimientosManhattan (first meta) elemento 0 contadorAuxiliar)))
                (( member elemento (second meta))
-                ( + 0 (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (second meta) elemento 0 contadorAuxiliar)))
-               ( T (1+ (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (third meta) elemento 0 contadorAuxiliar)))))
+                ( + 0 (auxObtenerMovimientosManhattan (second meta) elemento 0 contadorAuxiliar)))
+               ( T (1+ (auxObtenerMovimientosManhattan (third meta) elemento 0 contadorAuxiliar)))))
         ( T
          (cond (( member elemento (first meta))
-                ( 1+ (1+  (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (first meta) elemento 0 contadorAuxiliar))))
+                ( 1+ (1+  (auxObtenerMovimientosManhattan (first meta) elemento 0 contadorAuxiliar))))
                (( member elemento (second meta))
-                ( + 1 (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (second meta) elemento 0 contadorAuxiliar)))
-               ( T (+ 0 (auxObtenerMovimientosManhattan (nth filaDelEstado estado) (third meta) elemento 0 contadorAuxiliar)))))))
+                ( + 1 (auxObtenerMovimientosManhattan (second meta) elemento 0 contadorAuxiliar)))
+               ( T (+ 0 (auxObtenerMovimientosManhattan (third meta) elemento 0 contadorAuxiliar)))))))
 
 
 ;[Aux] Permite saber la casilla del numero para Manthatthan&body
-(defun auxObtenerMovimientosManhattan (estado meta elemento contador contadorAuxiliar)
+(defun auxObtenerMovimientosManhattan ( meta elemento contador contadorAuxiliar)
   (cond ((= contadorAuxiliar 2)
          (cond (( = elemento (third meta)) contador)
                (( = elemento (second meta)) (1+ contador))
@@ -335,7 +334,7 @@
         (testing 0)
         (listaDeDesacomodados nil ))
     (setq *estadoMeta* meta)
-    (insertarAFronteraDeBusqueda inicio nil metodo)
+    (insertarAFronteraDeBusqueda inicio operador metodo)
     (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
          (setq nodo (obtenerDeFronteraDeBusqueda)
                estado (second nodo))
@@ -351,16 +350,13 @@
                   (setq sucesores (filtraFrontera sucesores))
                   (setq sucesores (filtraMemoria sucesores))
                   (loop for elemento in sucesores do
-                    ;   (print (first elemento))
-                    ;   (print (second elemento))
                        (insertarAFronteraDeBusqueda (first elemento) (second elemento) metodo)))))))
 
 
 (bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
-
 (bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :Manhattan )
 ;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :random-value )
-(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :custom-value )
+;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :custom-value )
 
 
 
