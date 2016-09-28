@@ -207,7 +207,6 @@
                         (setq nodo (crearNodo (first elemento) (third elemento) (numeroDeElementosDesacomodados (first elemento) *estadoMeta*)))
                         (push nodo *fronteraDeBusqueda*)
                         (reordenarFronteraDeBusqueda *fronteraDeBusqueda*))
-                   (print *fronteraDeBusqueda*)
                    (reordenarFronteraDeBusqueda *fronteraDeBusqueda*))))
           ((eql metodoBusqueda :Manhattan)
            (if (= indicadorInicio 0)
@@ -219,11 +218,19 @@
                  (loop for elemento in listaDeEstados do
                       (setq nodo (crearNodo (first elemento) (third elemento) (distanciaManhattan (first elemento) *estadoMeta*)))
                       (push nodo *fronteraDeBusqueda*))
-                 (reordenarFronteraDeBusqueda *fronteraDeBusqueda*)))))
+                 (reordenarFronteraDeBusqueda *fronteraDeBusqueda*))))
+          ((eql metodoBusqueda :random-value)
+           (if (= indicadorInicio 0)
+               (progn
+                 (setq nodo (crearNodo listaDeEstados nil (random 13)))
+                 (push nodo *fronteraDeBusqueda*))
+               (progn
+                 (loop for elemento in listaDeEstados do
+                      (setq nodo (crearNodo (first elemento) (third elemento) (random 13)))
+                      (push nodo *fronteraDeBusqueda*))
+                 (reordenarFronteraDeBusqueda *fronteraDeBusqueda*))))
+          )
     ))
-
-;(bestFirstSearch '((4 5 7)(6 3 2)(1 0 8)) '((1 2 3)(8 0 4)(7 6 5)) :Manhattan )
-
 
 ;[Aux] Permite reordenar lo que tenemos en nuestra lista
 (defun reordenarDeMenorAMayor (listaDeEstados)
@@ -287,7 +294,6 @@
          (listaDeElementos (aplanaLista estado)))
 
     (loop for elemento in listaDeElementos do
-                                        ; (obtenerMovimientosManhattan elemento estado meta 0))
          (if (or (= contadorDeEstado 3) (= contadorDeEstado 6))
              (progn
                (setq contadorAuxiliar 0)
@@ -336,8 +342,6 @@
                (T (1+ (1+ contador)))))))
 
 
-
-
 ;[Main] Permite comenzar a resolver nuestro algoritmo de 8puzzle
 (defun bestFirstSearch (inicio meta metodo)
   (limpiarVariables)
@@ -350,7 +354,7 @@
         (listaDeDesacomodados nil ))
     (setq *estadoMeta* meta)
     (insertarAFronteraDeBusqueda inicio metodo 0)
-    (loop until (or metaEncontrada (null *fronteraDeBusqueda*)(= testing 10)) do
+    (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
          (setq nodo (obtenerDeFronteraDeBusqueda)
                estado (second nodo))
          (setq listaDeDesacomodados nil)
@@ -371,12 +375,9 @@
                               listaDeDesacomodados))
                      finally (insertarAFronteraDeBusqueda listaDeDesacomodados metodo 1)))))))
 
-(trace distanciaManhattan)
-(bestFirstSearch '((4 5 7)(6 0 2)(1 3 8)) '((1 2 3)(8 0 4)(7 6 5)) :Manhattan )
 (bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :Manhattan )
-
+(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :random-value )
 ;(distanciaManhattan '((4 5 7)(6 0 2)(1 3 8)) '((1 2 3) (8 0 4) (7 6 5)))
-
 (bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
 ;(bestFirstSearch '((2 8 3)(1 4 5)(7 6 0)) '((1 2 3)(8 4 0)(7 6 5)) :bestFirstSearch )
 
@@ -398,7 +399,7 @@
 ;(expandir '((1 0 3)(4 2 5)(6 7 8)))
 ;(dondeEstaEspacioEnBlanco '((1 0 3)(4 2 5)(6 7 8)))
 
-
+(random 5)
 
 
 
