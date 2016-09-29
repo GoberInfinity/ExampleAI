@@ -1,22 +1,24 @@
-
-#
-
 #ExampleAI <a href="https://github.com/syl20bnr/spacemacs"><img src="https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg" /></a>
 
 Examples and exercises with Lisp and an application to AI.
 
-#Introduction
+## Introduction
 
-For the project i'm going to work with (SBCL) a high performance Common Lisp compiler and Spacemacs editor (you will want a development environment which is more human friendly than the basic SBCL).
+The repository its subdivided into two parts, the first part its an introduction to Lisp here you can find a bunch of exercises to understand the sintaxis of Common Lisp. (There have been many versions of Lisp, I used Common Lisp which is the most widely accepted standard). 
 
+The second part its an Artificial Intelligence problems, each problem is clearly documented; contains a short description of the problem ,the algorithm to solve it, input and output of each function and the secuences of the functions. 
 
-#Prerequisities
+For the project I worked with SBCL compiler, SLIME to run and compile easily the code and Spacemacs as my editor.
+
+Finally if you're still asking you why common lisp for Ai, [here is](http://norvig.com/paip-preface.html#whylisp) and explanation for that. 
+
+## Prerequisities
 
 * Install ["SBCL"](http://www.sbcl.org/platform-table.html) <br />
 * Install ["SLIME"](https://github.com/slime/slime) <br />
 * Install ["Spacemacs"](https://github.com/syl20bnr/spacemacs)
 
-#Usage 
+## Usage for Lisp Examples
 1. Open your Spacemacs. <br>
 2. Press ```ctrl x ``` and type ```slime```.  <br>
 3. Open a lisp file.  <br>
@@ -24,5 +26,12 @@ For the project i'm going to work with (SBCL) a high performance Common Lisp com
 5. Press again ```ctrl-c-p``` after the usage of function: ```(Hello)```.
 6. See the result. ```(HELLOW_WORLD)```.
 
-#Authors
+## Usage for Artificial Intelligence
+1. Open your Spacemacs. <br>
+2. Press ```ctrl x ``` and type ```slime```.  <br>
+3. Open a lisp file.  <br>
+4. Press  ```ctrl-c-k``` at the end of the file.
+5. See the result. 
+
+## Authors
 * **Reyes Fragoso Roberto** - [Portfolio](http://robertoreyes.me)
