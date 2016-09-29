@@ -204,11 +204,11 @@
 (defun insertarAFronteraDeBusqueda (estado operador metodoBusqueda)
   (incf *contadorFronteraBusqueda*)
   (let* ((nodo '()))
-    (cond ((eql metodoBusqueda :bestFirstSearch)
+    (cond ((eql metodoBusqueda :wrong-pieces )
            (setq nodo (crearNodo estado operador (numeroDeElementosDesacomodados estado *estadoMeta*)))
            (push nodo *fronteraDeBusqueda*)
            (reordenarFronteraDeBusqueda))
-          ((eql metodoBusqueda :Manhattan)
+          ((eql metodoBusqueda :moves-left )
            (setq nodo (crearNodo estado operador (distanciaManhattan estado *estadoMeta*)))
            (push nodo *fronteraDeBusqueda*)
            (reordenarFronteraDeBusqueda))
@@ -368,8 +368,8 @@
                   (loop for elemento in sucesores do
                        (insertarAFronteraDeBusqueda (first elemento) (second elemento) metodo)))))))
 
-(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
-;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :Manhattan )
+;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :wrong-pieces )
+;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :moves-left )
 ;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :random-value )
 ;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :custom-value )
 
