@@ -6,11 +6,12 @@ Examples and exercises with Lisp and an application to AI.
 
 The repository its subdivided into two parts, the first part its an introduction to Lisp here you can find a bunch of exercises to understand the sintaxis of Common Lisp. (There have been many versions of Lisp, I used Common Lisp which is the most widely accepted standard). 
 
-The second part its an Artificial Intelligence problems, each problem is clearly documented; contains a short description of the problem ,the algorithm to solve it, input and output of each function and the secuences of the functions. 
+The second part is a list of IA exercises clearly documented; contains a short description of the problem ,the algorithm to solve it, input and output of each function. 
 
 For the project I worked with SBCL compiler, SLIME to run and compile easily the code and Spacemacs as my editor.
 
-Finally if you're still asking you why common lisp for Ai, [here is](http://norvig.com/paip-preface.html#whylisp) and explanation for that. 
+FInally, [here is](http://norvig.com/paip-preface.html#whylisp) an explanation why I´d used Lisp for AI.
+
 
 ## Prerequisities
 
