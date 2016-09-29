@@ -21,17 +21,24 @@
 (defparameter *contadorNodos* 0)
 (defparameter *contadorExpandir* 0)
 (defparameter *contadorFronteraBusqueda* 0)
-(defparameter *tiempoFinal* 0)
+(defparameter *maximaFronteraDeBusqueda* 0)
+(defparameter *tiempoInicial* 0)
 (defparameter *tiempoFinal* 0)
 
 ;[Funcion] Permite limpiar todas las variables
 (defun limpiarVariables ()
-  (setq  *fronteraDeBusqueda*  nil)
-  (setq  *memoria*  nil)
-  (setq  *id*  0)
+  (setq *fronteraDeBusqueda*  nil)
+  (setq *memoria*  nil)
+  (setq *id*  0)
   (setq *estadoMeta* 0)
   (setq *ancestro*  nil)
-  (setq *solucion*  nil))
+  (setq *solucion*  nil)
+  (setq *tiempoInicial* 0)
+  (setq *tiempoFinal* 0)
+  (setq *contadorFronteraBusqueda* 0)
+  (setq *maximaFronteraDeBusqueda* 0)
+  (setq *contadorNodos* 0)
+  (setq *contadorExpandir* 0))
 
 ;[Validacion] Nos permite saber en donde esta el 0
 (defun dondeEstaEspacioEnBlanco (estado)
@@ -166,6 +173,7 @@
 
 ;[Funcion] Permite expandir el estado
 (defun expandir (estado)
+  (incf *contadorExpandir*)
   (let ((descendientes nil)
         (nuevoEstado nil))
     (dolist (operador *operadores* descendientes)
@@ -194,6 +202,7 @@
 
 ;[Funcion] Permite insertar a frontera de Busqueda
 (defun insertarAFronteraDeBusqueda (estado operador metodoBusqueda)
+  (incf *contadorFronteraBusqueda*)
   (let* ((nodo '()))
     (cond ((eql metodoBusqueda :bestFirstSearch)
            (setq nodo (crearNodo estado operador (numeroDeElementosDesacomodados estado *estadoMeta*)))
@@ -257,7 +266,12 @@
 
 ;[Funcion] Permite mostrar la solucion bonita
 (defun mostrarSolucion (listaNodos)
-   (format  t "Longitud de solucion ~A ~%" (1- (length  listaNodos)))
+    (setq *tiempoFinal* (get-internal-real-time))
+    (format  t "Nodos creados ~A ~%" *contadorNodos*)
+    (format  t "Nodos expandidos ~A ~%" *contadorExpandir*)
+    (format  t "Longitud maxima de frontera de busqueda ~A ~%" *maximaFronteraDeBusqueda*)
+    (format  t "Tiempo para encontrar la solucion: ~A~%" (/ (- *tiempoFinal* *tiempoInicial*) internal-time-units-per-second))
+    (format  t "Longitud de solucion ~A ~%" (1- (length  listaNodos)))
    (let ((nodo nil))
      (dotimes (i (length listaNodos))
        (setq nodo (nth i listaNodos))
@@ -284,6 +298,9 @@
          (setq contadorDeEstado (1+ contadorDeEstado))
     )contadorDeCadaElemento))
 
+(defun obtenerMaximoEnFronteraDeBusqueda ()
+  (if (> (length *fronteraDeBusqueda*) *maximaFronteraDeBusqueda*)
+      (setq *maximaFronteraDeBusqueda* (length *fronteraDeBusqueda*))))
 
 ;[Funcion] Permite hacer toda la logita de la distancia Manhatan
 (defun obtenerMovimientosManhattan (elemento  meta  filaDelEstado contadorAuxiliar)
@@ -326,6 +343,7 @@
 ;[Main] Permite comenzar a resolver nuestro algoritmo de 8puzzle
 (defun bestFirstSearch (inicio meta metodo)
   (limpiarVariables)
+  (setq *tiempoInicial* (get-internal-real-time))
   (let ((nodo nil)
         (estado nil)
         (sucesores '())
@@ -338,11 +356,9 @@
     (loop until (or metaEncontrada (null *fronteraDeBusqueda*)) do
          (setq nodo (obtenerDeFronteraDeBusqueda)
                estado (second nodo))
-         (setq listaDeDesacomodados nil)
-         (setq testing (1+ testing))
+         (obtenerMaximoEnFronteraDeBusqueda)
          (insertarEnMemoria nodo)
          (cond ((equal meta estado)
-                (format t "Exito. Meta encontrada en ~A  intentos~%" (first  nodo))
                 (mostrarSolucion (extraerSolucion nodo))
                 (setq metaEncontrada T))
                (T (setq *ancestro* (first nodo))
@@ -352,9 +368,8 @@
                   (loop for elemento in sucesores do
                        (insertarAFronteraDeBusqueda (first elemento) (second elemento) metodo)))))))
 
-
 (bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :bestFirstSearch )
-(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :Manhattan )
+;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :Manhattan )
 ;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :random-value )
 ;(bestFirstSearch '((2 8 3)(1 4 5)(7 0 6)) '((1 2 3)(8 0 4)(7 6 5)) :custom-value )
 
