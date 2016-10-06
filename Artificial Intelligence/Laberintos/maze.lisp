@@ -125,6 +125,27 @@
                                   (= (boole boole-and val 8) 0)))))
           (T nil))))
 
+;[Funcion] Permite aplicar el operador al estado
+(defun apply-operator (operador estado)
+  (if (operadorValido? operador estado)
+      (let* ((fila (aref estado 0))
+             (columna (aref estado 1))
+             (operador (first op))
+             (estadoFinal nil))
+    (case operador
+      (:Arriba (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) columna))))
+      (:ArribaDerecha (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1+ columna)))))
+      (:Derecha (setq estadoFinal (make-array 2 :initial-contents (list fila (1+ columna)))))
+      (:AbajoDerecha (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1+ columna)))))
+      (:Abajo (setq estadoFinals (make-array 2 :initial-contents (list (1+ fila) columna))))
+      (:AbajoIzquierda (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1- columna)))))
+      (:Izquierda (setq estadoFinal (make-array 2 :initial-contents (list fila (1- columna)))))
+      (:ArribaIzquierda (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1- columna)))))
+      (T "error"))
+    estadoFinal)))
+
+
+
 ;;(get-base-data)
 
 
