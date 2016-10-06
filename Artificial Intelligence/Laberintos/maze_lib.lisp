@@ -1,6 +1,6 @@
-;Biblioteca maze-lib.lisp - Versión para descargar.
+;Biblioteca maze-lib.lisp - Version para descargar.
 
-;Variables propias de esta biblioteca. Favor de no usarse o modificarse dentro de su código.
+;Variables propias de esta biblioteca. Favor de no usarse o modificarse dentro de su codigo.
 (defvar *algorithms-list* nil)
 (defvar *goal*)
 (defvar *start*)
@@ -34,7 +34,7 @@
 (setq *goal* (slot-value *maze* 'goal_position))
 
 (defmacro add-algorithm (algoritmo)
-  ;Añade un algoritmo a ejecutar.
+  ;Anade un algoritmo a ejecutar.
   `(setq *algorithms-list* (append *algorithms-list* (list ,algoritmo))))
 
 (defun get-maze-data ()
@@ -79,7 +79,8 @@
   (second (slot-value *maze* 'dimensions)))
 
 (defun start-maze ()
-  ;Función para procesar la línea de comandos.
+  ;Funcion para procesar la linea de comandos.
   (loop for k from 1 below (length *posix-argv*) do
-        (eval (read-from-string (nth k *posix-argv*)))))
+       (eval (read-from-string (nth k *posix-argv*)))))
+
 

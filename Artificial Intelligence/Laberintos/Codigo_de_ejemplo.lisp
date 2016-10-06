@@ -56,7 +56,7 @@
   ;Abajo-izquierda (SW): 5
   ;Izquierda (W): 6
   ;Arriba-izquierda (NW): 7
-
+(breadth-first)
 
 ;Función de muestra. Regresa el resultado de un algoritmo de búsqueda a lo
 ;profundo. Esta función no debe llevar argumentos.
