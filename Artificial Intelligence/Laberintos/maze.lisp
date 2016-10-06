@@ -126,7 +126,7 @@
           (T nil))))
 
 ;[Funcion] Permite aplicar el operador al estado
-(defun apply-operator (operador estado)
+(defun aplicarOperador (operador estado)
   (if (operadorValido? operador estado)
       (let* ((fila (aref estado 0))
              (columna (aref estado 1))
@@ -143,6 +143,27 @@
       (:ArribaIzquierda (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1- columna)))))
       (T "error"))
     estadoFinal)))
+
+;[Funcion] Permite expandir el estado
+(defun expandir (estado)
+  (let ((descendientes nil) (nuevoEstado nil))
+    (dolist (operador *operadores* descendientes)
+      (setq nuevoEstado (aplicarOperador operador estado))
+      (if (not (null nuevoEstado))
+          (setq descendientes (cons (list nuevoEstado op) descendientes))))))
+
+(defun filtrarMemoria (listaDeEstados lista)
+  (cond ((null listaDeEstados) nil)
+        ((recuerdasElEstadoEnFrontera? (first (first listaDeEstados)) lista)
+         (filter-memories (rest listaDeEstados) lista))
+        (T (cons (first listaDeEstados) (filter-memories (rest listaDeEstados) lista)))))
+
+(defun recuerdasElEstado? (estado memoria)
+  (cond ((null memoria) nil)
+        ((and (equal (aref estado 0) (aref (third (first lista-memoria)) 0))
+              (equal (aref estado 1) (aref (third (first lista-memoria)) 1)))
+         T)
+        (T (recuerdasElEstadoEnFrontera? estado (rest memoria)))))
 
 
 
