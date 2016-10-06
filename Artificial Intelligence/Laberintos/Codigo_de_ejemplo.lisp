@@ -37,7 +37,15 @@
   ;Si sienten la necesidad de ver dibujadas las paredes de una celda, pueden
   ;usar la función draw-cell-walls.
   (format t "Dibujo de las paredes de la celda #(0 3):~%")
-  (draw-cell-walls 0 3)
+  (draw-cell-walls 4 0)
+  (format t "Dibujo de las paredes de la celda #(0 3):~%")
+  (draw-cell-walls 4 1)
+  (format t "Dibujo de las paredes de la celda #(0 3):~%")
+  (draw-cell-walls 4 2)
+  (format t "Dibujo de las paredes de la celda #(0 3):~%")
+  (draw-cell-walls 4 3)
+  (format t "Dibujo de las paredes de la celda #(0 3):~%")
+  (draw-cell-walls 4 4)
   ;Si desean obtener la información de todas las paredes del laberinto pueden
   ;usar la función get-maze-data
   (format t "Datos del laberinto: ~%~S~%" (get-maze-data))
@@ -60,13 +68,13 @@
 
 ;Función de muestra. Regresa el resultado de un algoritmo de búsqueda a lo
 ;profundo. Esta función no debe llevar argumentos.
-(defun depth-first ()
- (setq *solution* '(3 4 4 5 0 0 7 7 5 3 3 6 5 0)))
+;(defun depth-first ()
+; (setq *solution* '(3 4 4 5 0 0 7 7 5 3 3 6 5 0)))
 
 ;Función defectuosa. Esta función genera un error al trater de obtener las
 ;paredes de una celda fuera de las fronteras del laberinto. Esto es para que
 ;puedan ver como se despliegan los errores de ejecución dentro de la página.
-(defun error-example () (get-cell-walls 1000 1000))
+;(defun error-example () (get-cell-walls 1000 1000))
 
 ;La última línea ejecutable del código debe ser la siguiente. Es la que se
 ;encarga de enviar la solución a la página de internet para que pueda ser
