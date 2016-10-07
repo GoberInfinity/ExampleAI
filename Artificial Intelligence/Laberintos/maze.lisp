@@ -20,8 +20,6 @@
 (defparameter *numeroDeFilas* nil)
 (defparameter *numeroDeColumnas* nil)
 (defparameter *sol* nil)
-;(defparameter *numeroDeFilas* (get-maze-rows))
-;(defparameter *numeroDeColumnas* (get-maze-cols))
 
 ;Definicion de operadores
 (defparameter *operadores* '((:Mover-Arriba 0)
@@ -31,7 +29,7 @@
                        (:Mover-Abajo 4)
                        (:Mover-Abajo-Izquierda 5)
                        (:Mover-Izquierda 6)
-                       (:Mover-Arriba-Izquierda 7))) 
+                       (:Mover-Arriba-Izquierda 7)))
 
 ;[Funcion] Permite resetear todo
 (defun limpiarVariables ()
@@ -42,16 +40,18 @@
   (setq *ancestro*  nil)
   (setq *solution*  nil))
 
-;Permite crear los nodos necesarios
+;[CHECADA]Permite crear los nodos necesarios
 (defun crearNodo (estado operador importancia)
   (incf *id*)
   (list (1- *id*) importancia estado *ancestro* (second operador)))
-  
-(defun Manhattan (edo)
-  (max (- (max (aref edo 0) (aref *goal* 0))
-          (min (aref edo 0) (aref *goal* 0)))
-       (- (max (aref edo 1) (aref *goal* 1))
-          (min (aref edo 1) (aref *goal* 1)))))
+
+;[CHECADA] Permite saber la distancia manhattan, esta basada en la idea de la ecuacion de la distancia entre
+; dos puntos, pero con una ligera modificacion, solo obtenemos el maximo de: (x2-x1),(y2-y1)
+(defun Manhattan (estado)
+  (max (- (max (aref estado 0) (aref *goal* 0))
+          (min (aref estado 0) (aref *goal* 0)))
+       (- (max (aref estado 1) (aref *goal* 1))
+          (min (aref estado 1) (aref *goal* 1)))))
 
 ;[Funcion] Permite insertar a frontera de Busqueda
 (defun insertarAFronteraDeBusqueda (estado operador metodoBusqueda)
@@ -69,25 +69,25 @@
 		  ((eql metodoBusqueda :Astar)
            (setq nodo (crearNodo estado operador (Manhattan estado)))
            (setf (second nodo) (+ (second nodo) (Backtracking nodo 0)))
-           (if (recuerdasElEstado? (third nodo) *fronteraDeBusqueda*)
+           (if (recuerdasElEstadoEnMemoria? (third nodo) *fronteraDeBusqueda*)
                (check-state nodo *fronteraDeBusqueda*)
                (push nodo *fronteraDeBusqueda*))
-           (setq *fronteraDeBusqueda* (stable-sort *fronteraDeBusqueda* '< :key #'(lambda (x) (second x)))))		   
+           (setq *fronteraDeBusqueda* (stable-sort *fronteraDeBusqueda* '< :key #'(lambda (x) (second x)))))
 		   )))
 
 (defun Backtracking (nodo num)
   (labels ((locate-node (id lista)
-             (cond ((null lista) nil); En caso de ser nula la lista regresamos nil
-                   ((eql id (first (first lista))) (first lista)); Si encontramos el id que buscamos regresamos ese elemento
-                   (T (locate-node id (rest lista)))))); En caso contrario seguimod buscando el nodo
+             (cond ((null lista) nil)
+                   ((eql id (first (first lista))) (first lista))
+                   (T (locate-node id (rest lista))))))
     (let ((current (locate-node (fourth nodo) *memoria*)))
-      (loop while (not (null current)) do 
+      (loop while (not (null current)) do
         (setq num (incf num))
         (setq current (locate-node (fourth current) *memoria*))))
-   num))		   
-		   
-		   
-;[Funcion] Permite obtener el ultimo elemento de la frontera de busqueda
+   num))
+
+
+;[CHECADA] Permite obtener el ultimo elemento de la frontera de busqueda
 (defun obtenerDeFronteraDeBusqueda ()
   (pop *fronteraDeBusqueda*))
 
@@ -106,7 +106,7 @@
     (if (not (= columna 0)) (setq casillaIzquierda (get-cell-walls fila (1- columna))))
 	(if (not (= columna (1- *numeroDeColumnas*))) (setq casillaDerecha (get-cell-walls fila (1+ columna))))
     (if (not (= fila (1- *numeroDeFilas*))) (setq casillaAbajo (get-cell-walls (1+ fila) columna)))
-   
+
 
     (cond ((= operador 0)
            (and (not (= fila 0))
@@ -189,8 +189,8 @@
            (if (< (second nodo) (second nodoAux))
                (progn (delete nodoAux lista-memoria)
                       (push nodo *fronteraDeBusqueda*))))
-          (T (check-state nodo (rest lista-memoria))))))	
-	
+          (T (check-state nodo (rest lista-memoria))))))
+
 ;[Funcion] Permite expandir el estado
 (defun expandir (estado)
   (let ((descendientes nil) (nuevoEstado nil))
@@ -201,16 +201,16 @@
 
 (defun filtrarMemoria (listaDeEstados lista)
   (cond ((null listaDeEstados) nil)
-        ((recuerdasElEstado? (first (first listaDeEstados)) lista)
+        ((recuerdasElEstadoEnMemoria? (first (first listaDeEstados)) lista)
          (filtrarMemoria (rest listaDeEstados) lista))
         (T (cons (first listaDeEstados) (filtrarMemoria (rest listaDeEstados) lista)))))
 
-(defun recuerdasElEstado? (estado memoria)
+;[CHECADA]
+(defun recuerdasElEstadoEnMemoria? (estado memoria)
   (cond ((null memoria) nil)
         ((and (equal (aref estado 0) (aref (third (first memoria)) 0))
-              (equal (aref estado 1) (aref (third (first memoria)) 1)))
-         T)
-        (T (recuerdasElEstado? estado (rest memoria)))))
+              (equal (aref estado 1) (aref (third (first memoria)) 1))) T)
+        (T (recuerdasElEstadoEnMemoria? estado (rest memoria)))))
 
 (defun extract-solution (nodo)
   "Función para obtener la solución analizando los id's de cada nodo recorrido hasta el nodo meta que es el que se proporciona como atributo de la función"
@@ -253,7 +253,7 @@
                        (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
 
 (defun breath-first ()
-  (limpiarVariables) 
+  (limpiarVariables)
       (let ((nodo nil); Creamos variables locales para facilitar la legibilidad del código
             (estado nil)
             (sucesores '())
@@ -277,9 +277,9 @@
                                          sucesores (filtrarMemoria (expandir estado) *memoria*)); En caso contrario exandimos el nodo con los operadores, filtramos ese resultado con la memoria de intentos previos y se van insertando a la frontera de búsqueda
                                    (loop for elem in sucesores do
                                      (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
-									 
+
 (defun best-first ()
-  (limpiarVariables) 
+  (limpiarVariables)
       (let ((nodo nil); Creamos variables locales para facilitar la legibilidad del código
             (estado nil)
             (sucesores '())
@@ -302,8 +302,8 @@
                                 (T (setq *ancestro* (first nodo)
                                          sucesores (filtrarMemoria (filtrarMemoria (expandir estado) *memoria*) *fronteraDeBusqueda*)); En caso contrario exandimos el nodo con los operadores, filtramos ese resultado con la memoria de intentos previos y se van insertando a la frontera de búsqueda
                                    (loop for elem in sucesores do
-                                     (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))	
-									 
+                                     (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
+
 (defun A* ()
 (limpiarVariables) 
       (let ((nodo nil)
@@ -328,7 +328,7 @@
                                 (T (setq *ancestro* (first nodo)
                                          sucesores (filtrarMemoria (expandir estado) *memoria*)); En caso contrario exandimos el nodo con los operadores, filtramos ese resultado con la memoria de intentos previos y se van insertando a la frontera de búsqueda
                                    (loop for elem in sucesores do
-                                     (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))								 
+                                     (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
 (start-maze)
 
 
