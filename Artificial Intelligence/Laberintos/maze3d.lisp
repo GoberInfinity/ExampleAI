@@ -39,6 +39,7 @@
   (setq *memoria*  nil)
   (setq *id*  0)
   (setq *sol* nil)
+  (setq *puente* 0)
   (setq *ancestro*  nil)
   (setq *solution*  nil))
 
@@ -112,27 +113,44 @@
     (if (not (= columna 0)) (setq casillaIzquierda (get-cell-walls fila (1- columna))))
 	(if (not (= columna (1- *numeroDeColumnas*))) (setq casillaDerecha (get-cell-walls fila (1+ columna))))
     (if (not (= fila (1- *numeroDeFilas*))) (setq casillaAbajo (get-cell-walls (1+ fila) columna)))
-	
-	
-	
-	
 
-
-
+	
+	(print "ANCESTRO")
+	(print *ancestro*)
+	
     (cond ((= operador 0)
+	
+	(if  (= casillaArriba 16)
+	(progn 
+	(print "SE PUEDE APLICAR EN ARRIBA")
+	(print *puente*)))
+	
+	
+	(if (and (not (= fila 0)) (= casillaArriba 16))
+		(setq *puente* 1))
+	(if (and (not (= fila 0)) (= casillaArriba 17))
+		(setq *puente* 1))	
+
+	(if (or (= casillaActual 16 ) (= casillaActual 17))
+	(progn 
+	(print "SE PUEDE APLICAR EN ARRIBA")
+	(print *puente*)))
+	
            (and (not (= fila 0))
                 (= (boole boole-and casillaActual 1) 0)
 				(if (or (= casillaActual 16 ) (= casillaActual 17))
-					(if (= *puente* 2) T nil) T)))
+					(if (= *puente* 1) T nil) T)))
 
           ((= operador 1)
-		   (setq casillaDiagonalArribaDerecha (get-cell-walls (1+ fila) (1+ columna)))
+		   (if (and (not (= fila 0))
+                (not (= columna (1- *numeroDeColumnas*)))) 
+				(setq casillaDiagonalArribaDerecha (get-cell-walls (1- fila) (1+ columna))))
            (and (not (= fila 0))
                 (not (= columna (1- *numeroDeColumnas*)))
 				(not (= casillaDiagonalArribaDerecha 16))
 				(not (= casillaDiagonalArribaDerecha 17))
-				(and (not (or (= casillaArriba 16 ) (= casillaAbajo 16 ) (= casillaIzquierda 16 ) (= casillaDerecha 16 ))))
-				(and (not (or (= casillaArriba 17 ) (= casillaAbajo 17 ) (= casillaIzquierda 17 ) (= casillaDerecha 17 ))))
+				(and (not (or (= casillaArriba 16 ) (= casillaAbajo 16 ) (= casillaIzquierda 16 ) (= casillaDerecha 16 ) (= casillaActual 16 ))))
+				(and (not (or (= casillaArriba 17 ) (= casillaAbajo 17 ) (= casillaIzquierda 17 ) (= casillaDerecha 17 ) (= casillaActual 17 ))))
                 (and (or (= (boole boole-and casillaActual 1) 0)
                          (= (boole boole-and casillaDerecha 1) 0))
                      (or (= (boole boole-and casillaArriba 2) 0)
@@ -141,19 +159,32 @@
                          (= (boole boole-and casillaActual 2) 0))
                      (or (= (boole boole-and casillaActual 1) 0)
                          (= (boole boole-and casillaActual 2) 0)))))
-          ((= operador 2) (and 
+          ((= operador 2) 
+		  (if (and (not (= columna (1- *numeroDeColumnas*))) (= casillaDerecha 16))
+			(setq *puente* 2))
+		  (if (and (not (= columna (1- *numeroDeColumnas*))) (= casillaDerecha 17))
+			(setq *puente* 2))	
+			
+		  (if (or (= casillaActual 16 ) (= casillaActual 17))
+			(progn 
+			(print "SE PUEDE APLICAR EN DERECHA")
+			(print *puente*)))
+		  (and 
 						 (not (= columna (1- *numeroDeColumnas*)))
                          (= (boole boole-and casillaActual 2) 0)
 						 (if (or (= casillaActual 16 ) (= casillaActual 17))
-						 (if (= *puente* 1) T nil) T)))
+						 (if (= *puente* 2) T nil) T)))
+						 
           ((= operador 3) 
-		  (setq casillaDiagonalAbajoDerecha (get-cell-walls (1- fila) (1+ columna)))
+		  (if (and (not (= fila (1- *numeroDeFilas*)))
+                   (not (= columna (1- *numeroDeColumnas*)))) 
+				   (setq casillaDiagonalAbajoDerecha (get-cell-walls (1+ fila) (1+ columna))))
 		  (and (not (= fila (1- *numeroDeFilas*)))
                          (not (= columna (1- *numeroDeColumnas*)))
 						 (not (= casillaDiagonalAbajoDerecha 16))
 						 (not (= casillaDiagonalAbajoDerecha 17))
-						 (and (not (or (= casillaArriba 16 ) (= casillaAbajo 16 ) (= casillaIzquierda 16 ) (= casillaDerecha 16 ))))
-						 (and (not (or (= casillaArriba 17 ) (= casillaAbajo 17 ) (= casillaIzquierda 17 ) (= casillaDerecha 17 ))))
+						 (and (not (or (= casillaArriba 16 ) (= casillaAbajo 16 ) (= casillaIzquierda 16 ) (= casillaDerecha 16 ) (= casillaActual 16 ))))
+						 (and (not (or (= casillaArriba 17 ) (= casillaAbajo 17 ) (= casillaIzquierda 17 ) (= casillaDerecha 17 ) (= casillaActual 17 ))))
                          (and (or (= (boole boole-and casillaActual 4) 0)
                                   (= (boole boole-and casillaDerecha 4) 0))
                               (or (= (boole boole-and casillaAbajo 2) 0)
@@ -162,19 +193,32 @@
                                   (= (boole boole-and casillaActual 2) 0))
                               (or (= (boole boole-and casillaActual 4) 0)
                                   (= (boole boole-and casillaActual 2) 0)))))
-          ((= operador 4) (and (not (= fila (1- *numeroDeFilas*)))
+								  
+          ((= operador 4) 
+		  (if (and (not (= fila (1- *numeroDeFilas*))) (= casillaAbajo 16))
+			(setq *puente* 1))
+		  (if (and (not (= fila (1- *numeroDeFilas*))) (= casillaAbajo 17))
+			(setq *puente* 1))	
+		
+		  (if (or (= casillaActual 16 ) (= casillaActual 17))
+			(progn 
+			(print "SE PUEDE APLICAR EN ABAJO")
+			(print *puente*)))
+		  (and (not (= fila (1- *numeroDeFilas*)))
 							   (= (boole boole-and casillaActual 4) 0)
 							   (if (or (= casillaActual 16 ) (= casillaActual 17))
-									(if (= *puente* 2) T nil) T)))
+									(if (= *puente* 1) T nil) T)))
 
           ((= operador 5) 
-		  (setq casillaDiagonalArribaIzquierda (get-cell-walls (1- fila) (1+ columna)))
+		  (if (and (not (= fila (1- *numeroDeFilas*)))
+					(not (= columna 0))) 
+					(setq casillaDiagonalAbajoIzquierda (get-cell-walls (1+ fila) (1- columna))))
 		  (and (not (= fila (1- *numeroDeFilas*)))
                          (not (= columna 0))
 						 (not (= casillaDiagonalAbajoIzquierda 16))
 						 (not (= casillaDiagonalAbajoIzquierda 17))
-						 (and (not (or (= casillaArriba 16 ) (= casillaAbajo 16 ) (= casillaIzquierda 16 ) (= casillaDerecha 16 ))))
-						 (and (not (or (= casillaArriba 17 ) (= casillaAbajo 17 ) (= casillaIzquierda 17 ) (= casillaDerecha 17 ))))
+						 (and (not (or (= casillaArriba 16 ) (= casillaAbajo 16 ) (= casillaIzquierda 16 ) (= casillaDerecha 16 ) (= casillaActual 16 ))))
+						 (and (not (or (= casillaArriba 17 ) (= casillaAbajo 17 ) (= casillaIzquierda 17 ) (= casillaDerecha 17 ) (= casillaActual 17 ))))
                          (and (or (= (boole boole-and casillaActual 4) 0)
                                   (= (boole boole-and casillaIzquierda 4) 0))
                               (or (= (boole boole-and casillaAbajo 8) 0)
@@ -183,18 +227,31 @@
                                   (= (boole boole-and casillaActual 8) 0))
                               (or (= (boole boole-and casillaActual 4) 0)
                                   (= (boole boole-and casillaActual 8) 0)))))
-          ((= operador 6) (and (not (= columna 0))
+								  
+          ((= operador 6) 
+		  
+		  (if (and (not (= columna 0)) (= casillaIzquierda 16))
+			(setq *puente* 2))
+		  (if (and (not (= columna 0)) (= casillaIzquierda 17))
+			(setq *puente* 2))	
+		  (if (or (= casillaActual 16 ) (= casillaActual 17))
+			(progn 
+			(print "SE PUEDE APLICAR EN IZQUIERDA")
+			(print *puente*)))
+		  (and (not (= columna 0))
                          (= (boole boole-and casillaActual 8) 0)
 						 (if (or (= casillaActual 16 ) (= casillaActual 17))
-						 (if (= *puente* 1) T nil) T)))
+						 (if (= *puente* 2) T nil) T)))
           ((= operador 7) 
-		  (setq casillaDiagonalAbajoIzquierda (get-cell-walls (1- fila) (1- columna)))
+		  (if (and (not (= fila 0))
+              (not (= columna 0))) 
+			  (setq casillaDiagonalArribaIzquierda (get-cell-walls (1- fila) (1- columna))))
 		  (and (not (= fila 0))
                          (not (= columna 0))
 						 (not (= casillaDiagonalArribaIzquierda 16))
 						 (not (= casillaDiagonalArribaIzquierda 17))
-						 (and (not (or (= casillaArriba 16 ) (= casillaAbajo 16 ) (= casillaIzquierda 16 ) (= casillaDerecha 16 ))))
-						 (and (not (or (= casillaArriba 17 ) (= casillaAbajo 17 ) (= casillaIzquierda 17 ) (= casillaDerecha 17 ))))
+						 (and (not (or (= casillaArriba 16 ) (= casillaAbajo 16 ) (= casillaIzquierda 16 ) (= casillaDerecha 16 ) (= casillaActual 16 ))))
+						 (and (not (or (= casillaArriba 17 ) (= casillaAbajo 17 ) (= casillaIzquierda 17 ) (= casillaDerecha 17 ) (= casillaActual 17 ))))
                          (and (or (= (boole boole-and casillaActual 1) 0)
                                   (= (boole boole-and casillaIzquierda 1) 0))
                               (or (= (boole boole-and casillaArriba 8) 0)
@@ -214,23 +271,19 @@
              (estadoFinal nil))
     (case operador
       (:Mover-Arriba (progn (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) columna)))
-							(setq *puente* 2)
-							(print *puente*)))
+							))
       (:Mover-Arriba-Derecha (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1+ columna)))))
 
       (:Mover-Derecha (progn (setq estadoFinal (make-array 2 :initial-contents (list fila (1+ columna))))
-							(setq *puente* 1)
-							(print *puente*)))
+							))
       (:Mover-Abajo-Derecha (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1+ columna)))))
 
       (:Mover-Abajo (progn (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) columna)))
-							(setq *puente* 2)
-							(print *puente*)))
+							))
       (:Mover-Abajo-Izquierda (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1- columna)))))
 
       (:Mover-Izquierda (progn (setq estadoFinal (make-array 2 :initial-contents (list fila (1- columna))))
-							(setq *puente* 1)
-							(print *puente*)))
+							))
       (:Mover-Arriba-Izquierda (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1- columna)))))
 
       (T "error"))
