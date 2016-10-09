@@ -94,26 +94,34 @@
 (defun obtenerDeFronteraDeBusqueda ()
   (pop *fronteraDeBusqueda*))
 
-(defun NDobtenerDeFronteraDeBusqueda ()
-  (first *fronteraDeBusqueda*))
+(defun NDobtenerDeMemoria ()
+  (first *memoria*))
 
-(defun puedeOperarArriba? (casillaArriba casillaActual)
+(defun puedeOperarArriba? (casillaArriba casillaActual operadorPasado)
   (cond ((null casillaArriba) nil)
+        ((or (= casillaActual 16)(= casillaActual 17))
+         (if (= operadorPasado 4) T nil))
         ((= (boole boole-and casillaActual 1) 0) T)
         (T nil)))
 
-(defun puedeOperarDerecha? (casillaDerecha casillaActual)
+(defun puedeOperarDerecha? (casillaDerecha casillaActual operadorPasado)
   (cond ((null casillaDerecha) nil)
+        ((or (= casillaActual 16)(= casillaActual 17))
+         (if (= operadorPasado 2) T nil))
         ((= (boole boole-and casillaActual 2) 0) T)
         (T nil)))
 
-(defun puedeOperarAbajo? (casillaAbajo casillaActual)
+(defun puedeOperarAbajo? (casillaAbajo casillaActual operadorPasado)
   (cond ((null casillaAbajo) nil)
+        ((or (= casillaActual 16)(= casillaActual 17))
+         (if (= operadorPasado 0) T nil))
         ((= (boole boole-and casillaActual 4) 0) T)
         (T nil)))
 
-(defun puedeOperarIzquierda? (casillaIzquierda casillaActual)
+(defun puedeOperarIzquierda? (casillaIzquierda casillaActual operadorPasado)
   (cond ((null casillaIzquierda) nil)
+        ((or (= casillaActual 16)(= casillaActual 17))
+         (if (= operadorPasado 6) T nil))
         ((= (boole boole-and casillaActual 8) 0) T)
         (T nil)))
 
@@ -187,6 +195,7 @@
          (casillaDiagonalAbajoIzquierda -1)
          (casillaIzquierda nil)
          (casillaDerecha nil)
+         (operadorPasado -1)
          (diagonalALosLados nil))
 
     (if (not (= fila 0))
@@ -210,51 +219,49 @@
           (if (and (not (or (= casillaArriba 16 ) (= casillaAbajo 16 ) (= casillaIzquierda 16 ) (= casillaDerecha 16 ) (= casillaActual 16 )))
                    (not (or (= casillaArriba 17 ) (= casillaAbajo 17 ) (= casillaIzquierda 17 ) (= casillaDerecha 17 ) (= casillaActual 17 ))))
               (setq diagonalALosLados T))))
+    (if (not ( null (fifth (NDobtenerDeMemoria))))
+        (setq operadorPasado (fifth(NDobtenerDeMemoria))))
+
+    (print "-------------------MEMORIA----------------------")
+    (print operadorPasado)
 
     (cond ((= operador 0)
-           (puedeOperarArriba? casillaArriba casillaActual))
+           (puedeOperarArriba? casillaArriba casillaActual operadorPasado))
           ((= operador 1)
            (puedeOperarArribaDerecha? casillaActual casillaArriba casillaDerecha casillaDiagonalArribaDerecha diagonalALosLados))
           ((= operador 2)
-           (puedeOperarDerecha? casillaDerecha casillaActual))
+           (puedeOperarDerecha? casillaDerecha casillaActual operadorPasado))
           ((= operador 3)
            (puedeOperarAbajoDerecha? casillaActual casillaAbajo casillaDerecha casillaDiagonalAbajoDerecha diagonalALosLados))
           ((= operador 4)
-           (puedeOperarAbajo? casillaAbajo casillaActual))
+           (puedeOperarAbajo? casillaAbajo casillaActual operadorPasado))
           ((= operador 5)
            (puedeOperarAbajoIzquierda? casillaActual casillaAbajo casillaIzquierda casillaDiagonalAbajoIzquierda diagonalALosLados))
           ((= operador 6)
-           (puedeOperarIzquierda? casillaIzquierda casillaActual))
+           (puedeOperarIzquierda? casillaIzquierda casillaActual operadorPasado))
           ((= operador 7)
            (puedeOperarArribaIzquierda? casillaActual casillaArriba casillaIzquierda casillaDiagonalArribaIzquierda diagonalALosLados))
           (T nil))))
 
 ;[Funcion] Permite aplicar el operador al estado
 (defun aplicarOperador (operador estado)
-  (if (operadorValido? operador estado)
-      (let* ((fila (aref estado 0))
-             (columna (aref estado 1))
-             (operador (first operador))
-             (estadoFinal nil))
+  (let* ((fila (aref estado 0))
+         (columna (aref estado 1))
+         (operador (first operador))
+         (estadoFinal nil))
+
     (case operador
-      (:Mover-Arriba (progn (setq *puente* 1) (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) columna)))
-							))
+      (:Mover-Arriba (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) columna))))
       (:Mover-Arriba-Derecha (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1+ columna)))))
-
-      (:Mover-Derecha (progn (setq *puente* 2)(setq estadoFinal (make-array 2 :initial-contents (list fila (1+ columna))))
-							))
+      (:Mover-Derecha (setq estadoFinal (make-array 2 :initial-contents (list fila (1+ columna)))))
       (:Mover-Abajo-Derecha (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1+ columna)))))
-
-      (:Mover-Abajo (progn (setq *puente* 1)(setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) columna)))
-							))
+      (:Mover-Abajo (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) columna))))
       (:Mover-Abajo-Izquierda (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1- columna)))))
-
-      (:Mover-Izquierda (progn (setq *puente* 2)(setq estadoFinal (make-array 2 :initial-contents (list fila (1- columna))))
-							))
+      (:Mover-Izquierda (setq estadoFinal (make-array 2 :initial-contents (list fila (1- columna)))))
       (:Mover-Arriba-Izquierda (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1- columna)))))
-
       (T "error"))
-    estadoFinal)))
+    estadoFinal))
+
 
 ;[Funcion]
 (defun check-state (nodo lista-memoria)
@@ -272,9 +279,11 @@
 (defun expandir (estado)
   (let ((descendientes nil) (nuevoEstado nil))
     (dolist (operador *operadores* descendientes)
-      (setq nuevoEstado (aplicarOperador operador estado))
-      (if (not (null nuevoEstado))
-          (setq descendientes (cons (list nuevoEstado operador) descendientes))))))
+      (if (operadorValido? operador estado)
+          (progn
+            (setq nuevoEstado (aplicarOperador operador estado))
+            (setq descendientes (cons (list nuevoEstado operador) descendientes)))))))
+
 
 (defun filtrarMemoria (listaDeEstados lista)
   (cond ((null listaDeEstados) nil)
