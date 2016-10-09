@@ -91,6 +91,75 @@
 (defun obtenerDeFronteraDeBusqueda ()
   (pop *fronteraDeBusqueda*))
 
+;[FUNCIONES DE VALIDACIONES]
+(defun puedeOperarArriba? (casillaArriba casillaActual)
+  (cond ((null casillaArriba) nil)
+        ((= (boole boole-and casillaActual 1) 0) T)
+        (T nil)))
+
+(defun puedeOperarDerecha? (casillaDerecha casillaActual)
+  (cond ((null casillaDerecha) nil)
+        ((= (boole boole-and casillaActual 2) 0) T)
+        (T nil)))
+
+(defun puedeOperarAbajo? (casillaAbajo casillaActual)
+  (cond ((null casillaAbajo) nil)
+        ((= (boole boole-and casillaActual 4) 0) T)
+        (T nil)))
+
+(defun puedeOperarIzquierda? (casillaIzquierda casillaActual)
+  (cond ((null casillaIzquierda) nil)
+        ((= (boole boole-and casillaActual 8) 0) T)
+        (T nil)))
+
+(defun puedeOperarArribaDerecha? (casillaActual casillaArriba casillaDerecha)
+  (cond ((or (null casillaArriba) (null casillaDerecha)) nil)
+        ((and (or (= (boole boole-and casillaActual 1) 0)
+                  (= (boole boole-and casillaDerecha 1) 0))
+              (or (= (boole boole-and casillaArriba 2) 0)
+                  (= (boole boole-and casillaDerecha 1) 0))
+              (or (= (boole boole-and casillaArriba 2) 0)
+                  (= (boole boole-and casillaActual 2) 0))
+              (or (= (boole boole-and casillaActual 1) 0)
+                  (= (boole boole-and casillaActual 2) 0))) T)
+        (T nil)))
+
+(defun puedeOperarAbajoDerecha? (casillaActual casillaAbajo casillaDerecha)
+  (cond ((or (null casillaDerecha) (null casillaAbajo)) nil)
+        ((and (or (= (boole boole-and casillaActual 4) 0)
+                  (= (boole boole-and casillaDerecha 4) 0))
+              (or (= (boole boole-and casillaAbajo 2) 0)
+                  (= (boole boole-and casillaDerecha 4) 0))
+              (or (= (boole boole-and casillaAbajo 2) 0)
+                  (= (boole boole-and casillaActual 2) 0))
+              (or (= (boole boole-and casillaActual 4) 0)
+                  (= (boole boole-and casillaActual 2) 0))) T)
+        (T nil)))
+
+(defun puedeOperarAbajoIzquierda? (casillaActual casillaAbajo casillaIzquierda)
+  (cond ((or (null casillaAbajo) (null casillaIzquierda)) nil)
+        ((and (or (= (boole boole-and casillaActual 4) 0)
+                 (= (boole boole-and casillaIzquierda 4) 0))
+             (or (= (boole boole-and casillaAbajo 8) 0)
+                 (= (boole boole-and casillaIzquierda 4) 0))
+             (or (= (boole boole-and casillaAbajo 8) 0)
+                 (= (boole boole-and casillaActual 8) 0))
+             (or (= (boole boole-and casillaActual 4) 0)
+                 (= (boole boole-and casillaActual 8) 0))) T)
+        (T nil)))
+
+(defun puedeOperarArribaIzquierda? (casillaActual casillaArriba casillaIzquierda)
+  (cond ((or (null casillaArriba) (null casillaIzquierda)) nil)
+        ((and (or (= (boole boole-and casillaActual 1) 0)
+                 (= (boole boole-and casillaIzquierda 1) 0))
+             (or (= (boole boole-and casillaArriba 8) 0)
+                 (= (boole boole-and casillaIzquierda 1) 0))
+             (or (= (boole boole-and casillaArriba 8) 0)
+                 (= (boole boole-and casillaActual 8) 0))
+             (or (= (boole boole-and casillaActual 1) 0)
+                 (= (boole boole-and casillaActual 8) 0))) T)
+        (T nil)))
+
 ;[Funcion] Permite validar nuestro operador
 (defun operadorValido? (op estado)
   (let* ((fila (aref estado 0))
@@ -102,71 +171,36 @@
          (casillaIzquierda 0)
          (casillaDerecha 0))
 
-    (if (not (= fila 0)) (setq casillaArriba (get-cell-walls (1- fila) columna)))
-    (if (not (= columna 0)) (setq casillaIzquierda (get-cell-walls fila (1- columna))))
-	(if (not (= columna (1- *numeroDeColumnas*))) (setq casillaDerecha (get-cell-walls fila (1+ columna))))
-    (if (not (= fila (1- *numeroDeFilas*))) (setq casillaAbajo (get-cell-walls (1+ fila) columna)))
-
+    (if (not (= fila 0)) (setq casillaArriba (get-cell-walls (1- fila) columna))(setq casillaArriba nil))
+    (if (not (= columna 0)) (setq casillaIzquierda (get-cell-walls fila (1- columna))) (setq casillaIzquierda nil))
+	  (if (not (= columna (1- *numeroDeColumnas*))) (setq casillaDerecha (get-cell-walls fila (1+ columna)))(setq casillaDerecha nil))
+    (if (not (= fila (1- *numeroDeFilas*))) (setq casillaAbajo (get-cell-walls (1+ fila) columna))(setq casillaAbajo nil))
 
     (cond ((= operador 0)
-           (and (not (= fila 0))
-                (= (boole boole-and casillaActual 1) 0)))
+           (puedeOperarArriba? casillaArriba casillaActual))
           ((= operador 1)
-           (and (not (= fila 0))
-                (not (= columna (1- *numeroDeColumnas*)))
-                (and (or (= (boole boole-and casillaActual 1) 0)
-                         (= (boole boole-and casillaDerecha 1) 0))
-                     (or (= (boole boole-and casillaArriba 2) 0)
-                         (= (boole boole-and casillaDerecha 1) 0))
-                     (or (= (boole boole-and casillaArriba 2) 0)
-                         (= (boole boole-and casillaActual 2) 0))
-                     (or (= (boole boole-and casillaActual 1) 0)
-                         (= (boole boole-and casillaActual 2) 0)))))
-          ((= operador 2) (and (not (= columna (1- *numeroDeColumnas*)))
-                         (= (boole boole-and casillaActual 2) 0)))
-          ((= operador 3) (and (not (= fila (1- *numeroDeFilas*)))
-                         (not (= columna (1- *numeroDeColumnas*)))
-                         (and (or (= (boole boole-and casillaActual 4) 0)
-                                  (= (boole boole-and casillaDerecha 4) 0))
-                              (or (= (boole boole-and casillaAbajo 2) 0)
-                                  (= (boole boole-and casillaDerecha 4) 0))
-                              (or (= (boole boole-and casillaAbajo 2) 0)
-                                  (= (boole boole-and casillaActual 2) 0))
-                              (or (= (boole boole-and casillaActual 4) 0)
-                                  (= (boole boole-and casillaActual 2) 0)))))
-          ((= operador 4) (and (not (= fila (1- *numeroDeFilas*)))
-                         (= (boole boole-and casillaActual 4) 0)))
-          ((= operador 5) (and (not (= fila (1- *numeroDeFilas*)))
-                         (not (= columna 0))
-                         (and (or (= (boole boole-and casillaActual 4) 0)
-                                  (= (boole boole-and casillaIzquierda 4) 0))
-                              (or (= (boole boole-and casillaAbajo 8) 0)
-                                  (= (boole boole-and casillaIzquierda 4) 0))
-                              (or (= (boole boole-and casillaAbajo 8) 0)
-                                  (= (boole boole-and casillaActual 8) 0))
-                              (or (= (boole boole-and casillaActual 4) 0)
-                                  (= (boole boole-and casillaActual 8) 0)))))
-          ((= operador 6) (and (not (= columna 0))
-                         (= (boole boole-and casillaActual 8) 0)))
-          ((= operador 7) (and (not (= fila 0))
-                         (not (= columna 0))
-                         (and (or (= (boole boole-and casillaActual 1) 0)
-                                  (= (boole boole-and casillaIzquierda 1) 0))
-                              (or (= (boole boole-and casillaArriba 8) 0)
-                                  (= (boole boole-and casillaIzquierda 1) 0))
-                              (or (= (boole boole-and casillaArriba 8) 0)
-                                  (= (boole boole-and casillaActual 8) 0))
-                              (or (= (boole boole-and casillaActual 1) 0)
-                                  (= (boole boole-and casillaActual 8) 0)))))
+           (puedeOperarArribaDerecha? casillaActual casillaArriba casillaDerecha))
+          ((= operador 2)
+           (puedeOperarDerecha? casillaDerecha casillaActual))
+          ((= operador 3)
+           (puedeOperarAbajoDerecha? casillaActual casillaAbajo casillaDerecha))
+          ((= operador 4)
+           (puedeOperarAbajo? casillaAbajo casillaActual))
+          ((= operador 5)
+           (puedeOperarAbajoIzquierda? casillaActual casillaAbajo casillaIzquierda))
+          ((= operador 6)
+           (puedeOperarIzquierda? casillaIzquierda casillaActual))
+          ((= operador 7)
+           (puedeOperarArribaIzquierda? casillaActual casillaArriba casillaIzquierda))
           (T nil))))
 
 ;[Funcion] Permite aplicar el operador al estado
 (defun aplicarOperador (operador estado)
-  (if (operadorValido? operador estado)
-      (let* ((fila (aref estado 0))
-             (columna (aref estado 1))
-             (operador (first operador))
-             (estadoFinal nil))
+  (let* ((fila (aref estado 0))
+         (columna (aref estado 1))
+         (operador (first operador))
+         (estadoFinal nil))
+
     (case operador
       (:Mover-Arriba (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) columna))))
       (:Mover-Arriba-Derecha (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1+ columna)))))
@@ -177,7 +211,7 @@
       (:Mover-Izquierda (setq estadoFinal (make-array 2 :initial-contents (list fila (1- columna)))))
       (:Mover-Arriba-Izquierda (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1- columna)))))
       (T "error"))
-    estadoFinal)))
+    estadoFinal))
 
 ;[Funcion]
 (defun check-state (nodo lista-memoria)
@@ -191,13 +225,14 @@
                       (push nodo *fronteraDeBusqueda*))))
           (T (check-state nodo (rest lista-memoria))))))
 
-;[Funcion] Permite expandir el estado
+;[CHECADA] Permite expandir el estado
 (defun expandir (estado)
   (let ((descendientes nil) (nuevoEstado nil))
     (dolist (operador *operadores* descendientes)
-      (setq nuevoEstado (aplicarOperador operador estado))
-      (if (not (null nuevoEstado))
-          (setq descendientes (cons (list nuevoEstado operador) descendientes))))))
+      (if (operadorValido? operador estado)
+          (progn
+            (setq nuevoEstado (aplicarOperador operador estado))
+            (setq descendientes (cons (list nuevoEstado operador) descendientes)))))))
 
 (defun filtrarMemoria (listaDeEstados lista)
   (cond ((null listaDeEstados) nil)
@@ -213,17 +248,16 @@
         (T (recuerdasElEstadoEnMemoria? estado (rest memoria)))))
 
 (defun extract-solution (nodo)
-  "Función para obtener la solución analizando los id's de cada nodo recorrido hasta el nodo meta que es el que se proporciona como atributo de la función"
-  (labels ((locate-node (id lista); Hacemos una función local para localizar el nodo que le precede al nodo actual
-             (cond ((null lista) nil); En caso de ser nula la lista regresamos nil
-                   ((eql id (first (first lista))) (first lista)); Si encontramos el id que buscamos regresamos ese elemento
-                   (T (locate-node id (rest lista)))))); En caso contrario seguimod buscando el nodo
-    (let ((current (locate-node (first nodo) *memoria*))); Buscamos por primera vez el nodo ancestro y le asignamos el valor a current
-      (loop while (not (null current)) do ; Mientras current no sea nil hacemos el siguiente ciclo
+  (labels ((locate-node (id lista)
+             (cond ((null lista) nil)
+                   ((eql id (first (first lista))) (first lista))
+                   (T (locate-node id (rest lista))))))
+    (let ((current (locate-node (first nodo) *memoria*)))
+      (loop while (not (null current)) do
         (if (not (null (fifth current)))
-        (push (fifth current) *sol*)); Agregamos current que es el nodo ancestro a solución
-        (setq current (locate-node (fourth current) *memoria*)))); Y buscamos el nodo ancestro al previamente encontrado y se le asigna nuevamente a current
-    *sol*)); Por último regresamos la solución
+        (push (fifth current) *sol*))
+        (setq current (locate-node (fourth current) *memoria*))))
+    *sol*))
 
 
 (defun depth-first ()
@@ -254,58 +288,58 @@
 
 (defun breath-first ()
   (limpiarVariables)
-      (let ((nodo nil); Creamos variables locales para facilitar la legibilidad del código
+      (let ((nodo nil)
             (estado nil)
             (sucesores '())
             (meta-encontrada nil)
             (metodo :breath-first))
 		(setq *numeroDeFilas* (get-maze-rows))
 		(setq *numeroDeColumnas* (get-maze-cols))
-        (insertarAFronteraDeBusqueda *start* nil metodo); Insertamos a la frontera de búsqueda el nodo del estado inicial
-        (loop until (or meta-encontrada; Entramos en un ciclo mientras no se encuentre el estado final o este vacía la frontera de búsqueda, que realize lo siguiente
+        (insertarAFronteraDeBusqueda *start* nil metodo)
+        (loop until (or meta-encontrada
                         (null *fronteraDeBusqueda*)) do
-                          (setq nodo (obtenerDeFronteraDeBusqueda); Obtenemos el primer nodo de la frontera de búsqueda
-                                estado (third nodo)); Obtenemos el estado de ese nodo
-                          (push nodo *memoria*); Agregamos el nodo a la memoria de intentos previos
+                          (setq nodo (obtenerDeFronteraDeBusqueda)
+                                estado (third nodo))
+                          (push nodo *memoria*)
                           (cond ((and (equal (aref *goal* 0)
                                              (aref estado 0))
                                       (equal (aref *goal* 1)
-                                             (aref estado 1))); si el estado actual es igual al meta
-                                 (setq *solution* (extract-solution nodo)); Desplegamos la solución
-                                 (setq meta-encontrada T)); Asignamos el valor T a meta-encontrada para terminar el ciclo
+                                             (aref estado 1)))
+                                 (setq *solution* (extract-solution nodo))
+                                 (setq meta-encontrada T))
                                 (T (setq *ancestro* (first nodo)
-                                         sucesores (filtrarMemoria (expandir estado) *memoria*)); En caso contrario exandimos el nodo con los operadores, filtramos ese resultado con la memoria de intentos previos y se van insertando a la frontera de búsqueda
+                                         sucesores (filtrarMemoria (expandir estado) *memoria*))
                                    (loop for elem in sucesores do
                                      (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
 
 (defun best-first ()
   (limpiarVariables)
-      (let ((nodo nil); Creamos variables locales para facilitar la legibilidad del código
+      (let ((nodo nil)
             (estado nil)
             (sucesores '())
             (meta-encontrada nil)
             (metodo :best-first))
 		(setq *numeroDeFilas* (get-maze-rows))
 		(setq *numeroDeColumnas* (get-maze-cols))
-        (insertarAFronteraDeBusqueda *start* nil metodo); Insertamos a la frontera de búsqueda el nodo del estado inicial
-        (loop until (or meta-encontrada; Entramos en un ciclo mientras no se encuentre el estado final o este vacía la frontera de búsqueda, que realize lo siguiente
+        (insertarAFronteraDeBusqueda *start* nil metodo)
+        (loop until (or meta-encontrada
                         (null *fronteraDeBusqueda*)) do
-                          (setq nodo (obtenerDeFronteraDeBusqueda); Obtenemos el primer nodo de la frontera de búsqueda
-                                estado (third nodo)); Obtenemos el estado de ese nodo
-                          (push nodo *memoria*); Agregamos el nodo a la memoria de intentos previos
+                          (setq nodo (obtenerDeFronteraDeBusqueda)
+                                estado (third nodo))
+                          (push nodo *memoria*)
                           (cond ((and (equal (aref *goal* 0)
                                              (aref estado 0))
                                       (equal (aref *goal* 1)
-                                             (aref estado 1))); si el estado actual es igual al meta
-                                 (setq *solution* (extract-solution nodo)); Desplegamos la solución
-                                 (setq meta-encontrada T)); Asignamos el valor T a meta-encontrada para terminar el ciclo
+                                             (aref estado 1)))
+                                 (setq *solution* (extract-solution nodo))
+                                 (setq meta-encontrada T))
                                 (T (setq *ancestro* (first nodo)
-                                         sucesores (filtrarMemoria (filtrarMemoria (expandir estado) *memoria*) *fronteraDeBusqueda*)); En caso contrario exandimos el nodo con los operadores, filtramos ese resultado con la memoria de intentos previos y se van insertando a la frontera de búsqueda
+                                         sucesores (filtrarMemoria (filtrarMemoria (expandir estado) *fronteraDeBusqueda*) *memoria*))
                                    (loop for elem in sucesores do
                                      (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
 
 (defun A* ()
-(limpiarVariables) 
+(limpiarVariables)
       (let ((nodo nil)
             (estado nil)
             (sucesores '())
@@ -314,19 +348,19 @@
 			(setq *numeroDeFilas* (get-maze-rows))
 		(setq *numeroDeColumnas* (get-maze-cols))
         (insertarAFronteraDeBusqueda *start* nil metodo)
-        (loop until (or meta-encontrada 
+        (loop until (or meta-encontrada
                         (null *fronteraDeBusqueda*)) do
-                          (setq nodo (obtenerDeFronteraDeBusqueda); Obtenemos el primer nodo de la frontera de búsqueda
-                                estado (third nodo)); Obtenemos el estado de ese nodo
-                          (push nodo *memoria*); Agregamos el nodo a la memoria de intentos previos
+                          (setq nodo (obtenerDeFronteraDeBusqueda)
+                                estado (third nodo))
+                          (push nodo *memoria*)
                           (cond ((and (equal (aref *goal* 0)
                                              (aref estado 0))
                                       (equal (aref *goal* 1)
-                                             (aref estado 1))); si el estado actual es igual al meta
-                                 (setq *solution* (extract-solution nodo)); Desplegamos la solución
-                                 (setq meta-encontrada T)); Asignamos el valor T a meta-encontrada para terminar el ciclo
+                                             (aref estado 1)))
+                                 (setq *solution* (extract-solution nodo))
+                                 (setq meta-encontrada T))
                                 (T (setq *ancestro* (first nodo)
-                                         sucesores (filtrarMemoria (expandir estado) *memoria*)); En caso contrario exandimos el nodo con los operadores, filtramos ese resultado con la memoria de intentos previos y se van insertando a la frontera de búsqueda
+                                         sucesores (filtrarMemoria (expandir estado) *memoria*))
                                    (loop for elem in sucesores do
                                      (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
 (start-maze)

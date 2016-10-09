@@ -93,6 +93,9 @@
 ;[CHECADA] Permite obtener el ultimo elemento de la frontera de busqueda
 (defun obtenerDeFronteraDeBusqueda ()
   (pop *fronteraDeBusqueda*))
+  
+(defun NDobtenerDeFronteraDeBusqueda ()
+  (first *fronteraDeBusqueda*))  
 
 ;[Funcion] Permite validar nuestro operador
 (defun operadorValido? (op estado)
@@ -159,6 +162,8 @@
                          (= (boole boole-and casillaActual 2) 0))
                      (or (= (boole boole-and casillaActual 1) 0)
                          (= (boole boole-and casillaActual 2) 0)))))
+						 
+						 
           ((= operador 2) 
 		  (if (and (not (= columna (1- *numeroDeColumnas*))) (= casillaDerecha 16))
 			(setq *puente* 2))
@@ -169,6 +174,7 @@
 			(progn 
 			(print "SE PUEDE APLICAR EN DERECHA")
 			(print *puente*)))
+			
 		  (and 
 						 (not (= columna (1- *numeroDeColumnas*)))
                          (= (boole boole-and casillaActual 2) 0)
@@ -270,19 +276,19 @@
              (operador (first operador))
              (estadoFinal nil))
     (case operador
-      (:Mover-Arriba (progn (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) columna)))
+      (:Mover-Arriba (progn (setq *puente* 1) (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) columna)))
 							))
       (:Mover-Arriba-Derecha (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1+ columna)))))
 
-      (:Mover-Derecha (progn (setq estadoFinal (make-array 2 :initial-contents (list fila (1+ columna))))
+      (:Mover-Derecha (progn (setq *puente* 2)(setq estadoFinal (make-array 2 :initial-contents (list fila (1+ columna))))
 							))
       (:Mover-Abajo-Derecha (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1+ columna)))))
 
-      (:Mover-Abajo (progn (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) columna)))
+      (:Mover-Abajo (progn (setq *puente* 1)(setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) columna)))
 							))
       (:Mover-Abajo-Izquierda (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1- columna)))))
 
-      (:Mover-Izquierda (progn (setq estadoFinal (make-array 2 :initial-contents (list fila (1- columna))))
+      (:Mover-Izquierda (progn (setq *puente* 2)(setq estadoFinal (make-array 2 :initial-contents (list fila (1- columna))))
 							))
       (:Mover-Arriba-Izquierda (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1- columna)))))
 
