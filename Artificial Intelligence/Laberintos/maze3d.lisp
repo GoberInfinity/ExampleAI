@@ -221,7 +221,8 @@
               (setq diagonalALosLados T))))
     (if (not ( null (fifth (NDobtenerDeMemoria))))
         (setq operadorPasado (fifth(NDobtenerDeMemoria))))
-
+    (if (or (= casillaActual 16)(= casillaActual 17))
+        (setq *puente* 1)(setq *puente* 0))
     (print "-------------------MEMORIA----------------------")
     (print operadorPasado)
 
@@ -251,14 +252,14 @@
          (estadoFinal nil))
 
     (case operador
-      (:Mover-Arriba (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) columna))))
-      (:Mover-Arriba-Derecha (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1+ columna)))))
-      (:Mover-Derecha (setq estadoFinal (make-array 2 :initial-contents (list fila (1+ columna)))))
-      (:Mover-Abajo-Derecha (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1+ columna)))))
-      (:Mover-Abajo (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) columna))))
-      (:Mover-Abajo-Izquierda (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1- columna)))))
-      (:Mover-Izquierda (setq estadoFinal (make-array 2 :initial-contents (list fila (1- columna)))))
-      (:Mover-Arriba-Izquierda (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1- columna)))))
+      (:Mover-Arriba (setq estadoFinal (make-array 3 :initial-contents (list (1- fila) columna *puente*))))
+      (:Mover-Arriba-Derecha (setq estadoFinal (make-array 3 :initial-contents (list (1- fila) (1+ columna) *puente*))))
+      (:Mover-Derecha (setq estadoFinal (make-array 3 :initial-contents (list fila (1+ columna) *puente*))))
+      (:Mover-Abajo-Derecha (setq estadoFinal (make-array 3 :initial-contents (list (1+ fila) (1+ columna) *puente* ))))
+      (:Mover-Abajo (setq estadoFinal (make-array 3 :initial-contents (list (1+ fila) columna *puente*))))
+      (:Mover-Abajo-Izquierda (setq estadoFinal (make-array 3 :initial-contents (list (1+ fila) (1- columna) *puente*))))
+      (:Mover-Izquierda (setq estadoFinal (make-array 3 :initial-contents (list fila (1- columna) *puente*))))
+      (:Mover-Arriba-Izquierda (setq estadoFinal (make-array 3 :initial-contents (list (1- fila) (1- columna) *puente*))))
       (T "error"))
     estadoFinal))
 
@@ -295,7 +296,8 @@
 (defun recuerdasElEstadoEnMemoria? (estado memoria)
   (cond ((null memoria) nil)
         ((and (equal (aref estado 0) (aref (third (first memoria)) 0))
-              (equal (aref estado 1) (aref (third (first memoria)) 1))) T)
+              (equal (aref estado 1) (aref (third (first memoria)) 1))
+              (= 0 (aref (third (first memoria)) 2))) T)
         (T (recuerdasElEstadoEnMemoria? estado (rest memoria)))))
 
 (defun extract-solution (nodo)
@@ -316,11 +318,15 @@
   (let ((nodo nil)
         (estado nil)
         (sucesores '())
+        (inicialColumna nil)
+        (inicialFila nil)
         (meta-encontrada nil)
         (metodo :depth-first))
 	(setq *numeroDeFilas* (get-maze-rows))
 	(setq *numeroDeColumnas* (get-maze-cols))
-    (insertarAFronteraDeBusqueda *start* nil metodo)
+  (setq inicialColumna (aref *start* 0))
+  (setq inicialFila (aref *start* 1))
+  (insertarAFronteraDeBusqueda (make-array 3 :initial-contents (list inicialColumna inicialFila 0 )) nil metodo)
     (loop until (or meta-encontrada
                     (null *fronteraDeBusqueda*)) do
          (setq nodo (obtenerDeFronteraDeBusqueda)
@@ -339,79 +345,91 @@
 
 (defun breath-first ()
   (limpiarVariables)
-      (let ((nodo nil); Creamos variables locales para facilitar la legibilidad del código
+      (let ((nodo nil)
             (estado nil)
             (sucesores '())
             (meta-encontrada nil)
+            (inicialColumna nil)
+            (inicialFila nil)
             (metodo :breath-first))
 		(setq *numeroDeFilas* (get-maze-rows))
 		(setq *numeroDeColumnas* (get-maze-cols))
-        (insertarAFronteraDeBusqueda *start* nil metodo); Insertamos a la frontera de búsqueda el nodo del estado inicial
-        (loop until (or meta-encontrada; Entramos en un ciclo mientras no se encuentre el estado final o este vacía la frontera de búsqueda, que realize lo siguiente
+    (setq inicialColumna (aref *start* 0))
+    (setq inicialFila (aref *start* 1))
+    (insertarAFronteraDeBusqueda (make-array 3 :initial-contents (list inicialColumna inicialFila 0 )) nil metodo)
+        (loop until (or meta-encontrada
                         (null *fronteraDeBusqueda*)) do
-                          (setq nodo (obtenerDeFronteraDeBusqueda); Obtenemos el primer nodo de la frontera de búsqueda
-                                estado (third nodo)); Obtenemos el estado de ese nodo
-                          (push nodo *memoria*); Agregamos el nodo a la memoria de intentos previos
+                          (setq nodo (obtenerDeFronteraDeBusqueda)
+                                estado (third nodo))
+                          (push nodo *memoria*)
                           (cond ((and (equal (aref *goal* 0)
                                              (aref estado 0))
                                       (equal (aref *goal* 1)
-                                             (aref estado 1))); si el estado actual es igual al meta
-                                 (setq *solution* (extract-solution nodo)); Desplegamos la solución
-                                 (setq meta-encontrada T)); Asignamos el valor T a meta-encontrada para terminar el ciclo
+                                             (aref estado 1)))
+                                 (setq *solution* (extract-solution nodo))
+                                 (setq meta-encontrada T))
                                 (T (setq *ancestro* (first nodo)
-                                         sucesores (filtrarMemoria (expandir estado) *memoria*)); En caso contrario exandimos el nodo con los operadores, filtramos ese resultado con la memoria de intentos previos y se van insertando a la frontera de búsqueda
+                                         sucesores (filtrarMemoria (expandir estado) *memoria*))
                                    (loop for elem in sucesores do
                                      (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
 
 (defun best-first ()
   (limpiarVariables)
-      (let ((nodo nil); Creamos variables locales para facilitar la legibilidad del código
+      (let ((nodo nil)
             (estado nil)
             (sucesores '())
+            (inicialColumna nil)
+            (inicialFila nil)
             (meta-encontrada nil)
             (metodo :best-first))
-		(setq *numeroDeFilas* (get-maze-rows))
-		(setq *numeroDeColumnas* (get-maze-cols))
-        (insertarAFronteraDeBusqueda *start* nil metodo); Insertamos a la frontera de búsqueda el nodo del estado inicial
-        (loop until (or meta-encontrada; Entramos en un ciclo mientras no se encuentre el estado final o este vacía la frontera de búsqueda, que realize lo siguiente
+        (setq *numeroDeFilas* (get-maze-rows))
+        (setq *numeroDeColumnas* (get-maze-cols))
+        (setq inicialColumna (aref *start* 0))
+        (setq inicialFila (aref *start* 1))
+        (insertarAFronteraDeBusqueda (make-array 3 :initial-contents (list inicialColumna inicialFila 0 )) nil metodo)
+        (loop until (or meta-encontrada
                         (null *fronteraDeBusqueda*)) do
-                          (setq nodo (obtenerDeFronteraDeBusqueda); Obtenemos el primer nodo de la frontera de búsqueda
-                                estado (third nodo)); Obtenemos el estado de ese nodo
-                          (push nodo *memoria*); Agregamos el nodo a la memoria de intentos previos
+                          (setq nodo (obtenerDeFronteraDeBusqueda)
+                                estado (third nodo))
+                          (push nodo *memoria*)
                           (cond ((and (equal (aref *goal* 0)
                                              (aref estado 0))
                                       (equal (aref *goal* 1)
-                                             (aref estado 1))); si el estado actual es igual al meta
-                                 (setq *solution* (extract-solution nodo)); Desplegamos la solución
-                                 (setq meta-encontrada T)); Asignamos el valor T a meta-encontrada para terminar el ciclo
+                                             (aref estado 1)))
+                                 (setq *solution* (extract-solution nodo))
+                                 (setq meta-encontrada T))
                                 (T (setq *ancestro* (first nodo)
-                                         sucesores (filtrarMemoria (filtrarMemoria (expandir estado) *memoria*) *fronteraDeBusqueda*)); En caso contrario exandimos el nodo con los operadores, filtramos ese resultado con la memoria de intentos previos y se van insertando a la frontera de búsqueda
+                                         sucesores (filtrarMemoria (filtrarMemoria (expandir estado) *memoria*) *fronteraDeBusqueda*))
                                    (loop for elem in sucesores do
                                      (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
 
 (defun A* ()
-(limpiarVariables) 
+(limpiarVariables)
       (let ((nodo nil)
             (estado nil)
             (sucesores '())
+            (inicialColumna nil)
+            (inicialFila nil)
             (meta-encontrada nil)
             (metodo :Astar))
-			(setq *numeroDeFilas* (get-maze-rows))
-		(setq *numeroDeColumnas* (get-maze-cols))
-        (insertarAFronteraDeBusqueda *start* nil metodo)
-        (loop until (or meta-encontrada 
+        (setq *numeroDeFilas* (get-maze-rows))
+        (setq *numeroDeColumnas* (get-maze-cols))
+        (setq inicialColumna (aref *start* 0))
+        (setq inicialFila (aref *start* 1))
+        (insertarAFronteraDeBusqueda (make-array 3 :initial-contents (list inicialColumna inicialFila 0 )) nil metodo)
+        (loop until (or meta-encontrada
                         (null *fronteraDeBusqueda*)) do
-                          (setq nodo (obtenerDeFronteraDeBusqueda); Obtenemos el primer nodo de la frontera de búsqueda
-                                estado (third nodo)); Obtenemos el estado de ese nodo
-                          (push nodo *memoria*); Agregamos el nodo a la memoria de intentos previos
+                          (setq nodo (obtenerDeFronteraDeBusqueda)
+                                estado (third nodo))
+                          (push nodo *memoria*)
                           (cond ((and (equal (aref *goal* 0)
                                              (aref estado 0))
                                       (equal (aref *goal* 1)
-                                             (aref estado 1))); si el estado actual es igual al meta
-                                 (setq *solution* (extract-solution nodo)); Desplegamos la solución
-                                 (setq meta-encontrada T)); Asignamos el valor T a meta-encontrada para terminar el ciclo
+                                             (aref estado 1)))
+                                 (setq *solution* (extract-solution nodo))
+                                 (setq meta-encontrada T))
                                 (T (setq *ancestro* (first nodo)
-                                         sucesores (filtrarMemoria (expandir estado) *memoria*)); En caso contrario exandimos el nodo con los operadores, filtramos ese resultado con la memoria de intentos previos y se van insertando a la frontera de búsqueda
+                                         sucesores (filtrarMemoria (expandir estado) *memoria*))
                                    (loop for elem in sucesores do
                                      (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
 (start-maze)
