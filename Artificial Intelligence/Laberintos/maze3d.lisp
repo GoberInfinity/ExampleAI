@@ -299,17 +299,16 @@
         (T (recuerdasElEstadoEnMemoria? estado (rest memoria)))))
 
 (defun extract-solution (nodo)
-  "Función para obtener la solución analizando los id's de cada nodo recorrido hasta el nodo meta que es el que se proporciona como atributo de la función"
-  (labels ((locate-node (id lista); Hacemos una función local para localizar el nodo que le precede al nodo actual
-             (cond ((null lista) nil); En caso de ser nula la lista regresamos nil
-                   ((eql id (first (first lista))) (first lista)); Si encontramos el id que buscamos regresamos ese elemento
-                   (T (locate-node id (rest lista)))))); En caso contrario seguimod buscando el nodo
-    (let ((current (locate-node (first nodo) *memoria*))); Buscamos por primera vez el nodo ancestro y le asignamos el valor a current
-      (loop while (not (null current)) do ; Mientras current no sea nil hacemos el siguiente ciclo
+  (labels ((locate-node (id lista)
+             (cond ((null lista) nil)
+                   ((eql id (first (first lista))) (first lista))
+                   (T (locate-node id (rest lista))))))
+    (let ((current (locate-node (first nodo) *memoria*)))
+      (loop while (not (null current)) do
         (if (not (null (fifth current)))
-        (push (fifth current) *sol*)); Agregamos current que es el nodo ancestro a solución
-        (setq current (locate-node (fourth current) *memoria*)))); Y buscamos el nodo ancestro al previamente encontrado y se le asigna nuevamente a current
-    *sol*)); Por último regresamos la solución
+        (push (fifth current) *sol*))
+        (setq current (locate-node (fourth current) *memoria*))))
+    *sol*))
 
 
 (defun depth-first ()
