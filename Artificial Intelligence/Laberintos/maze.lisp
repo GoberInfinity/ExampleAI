@@ -40,12 +40,12 @@
   (setq *ancestro*  nil)
   (setq *solution*  nil))
 
-;[CHECADA]Permite crear los nodos necesarios
+;[Funcion]Permite crear los nodos necesarios
 (defun crearNodo (estado operador importancia)
   (incf *id*)
   (list (1- *id*) importancia estado *ancestro* (second operador)))
 
-;[CHECADA] Permite saber la distancia manhattan, esta basada en la idea de la ecuacion de la distancia entre
+;[Funcion] Permite saber la distancia manhattan, esta basada en la idea de la ecuacion de la distancia entre
 ; dos puntos, pero con una ligera modificacion, solo obtenemos el maximo de: (x2-x1),(y2-y1)
 (defun Manhattan (estado)
   (max (- (max (aref estado 0) (aref *goal* 0))
@@ -70,11 +70,12 @@
            (setq nodo (crearNodo estado operador (Manhattan estado)))
            (setf (second nodo) (+ (second nodo) (Backtracking nodo 0)))
            (if (recuerdasElEstadoEnMemoria? (third nodo) *fronteraDeBusqueda*)
-               (check-state nodo *fronteraDeBusqueda*)
+               (checarEstado nodo *fronteraDeBusqueda*)
                (push nodo *fronteraDeBusqueda*))
            (setq *fronteraDeBusqueda* (stable-sort *fronteraDeBusqueda* '< :key #'(lambda (x) (second x)))))
 		   )))
 
+;[Funcion] Permite hacer el backtracking para A*
 (defun Backtracking (nodo num)
   (labels ((locate-node (id lista)
              (cond ((null lista) nil)
@@ -87,31 +88,35 @@
    num))
 
 
-;[CHECADA] Permite obtener el ultimo elemento de la frontera de busqueda
+;[Funcion] Permite obtener el ultimo elemento de la frontera de busqueda
 (defun obtenerDeFronteraDeBusqueda ()
   (pop *fronteraDeBusqueda*))
 
-;[FUNCIONES DE VALIDACIONES]
+;[FUNCIONES DE VALIDACIONES] El bloque siguiente de funciones permite ver si es valido el operador, regresa T o nil
 (defun puedeOperarArriba? (casillaArriba casillaActual)
   (cond ((null casillaArriba) nil)
         ((= (boole boole-and casillaActual 1) 0) T)
         (T nil)))
 
+;[Validacion]		
 (defun puedeOperarDerecha? (casillaDerecha casillaActual)
   (cond ((null casillaDerecha) nil)
         ((= (boole boole-and casillaActual 2) 0) T)
         (T nil)))
 
+;[Validacion]
 (defun puedeOperarAbajo? (casillaAbajo casillaActual)
   (cond ((null casillaAbajo) nil)
         ((= (boole boole-and casillaActual 4) 0) T)
         (T nil)))
 
+;[Validacion]
 (defun puedeOperarIzquierda? (casillaIzquierda casillaActual)
   (cond ((null casillaIzquierda) nil)
         ((= (boole boole-and casillaActual 8) 0) T)
         (T nil)))
-
+		
+;[Validacion]
 (defun puedeOperarArribaDerecha? (casillaActual casillaArriba casillaDerecha)
   (cond ((or (null casillaArriba) (null casillaDerecha)) nil)
         ((and (or (= (boole boole-and casillaActual 1) 0)
@@ -123,7 +128,8 @@
               (or (= (boole boole-and casillaActual 1) 0)
                   (= (boole boole-and casillaActual 2) 0))) T)
         (T nil)))
-
+		
+;[Validacion]
 (defun puedeOperarAbajoDerecha? (casillaActual casillaAbajo casillaDerecha)
   (cond ((or (null casillaDerecha) (null casillaAbajo)) nil)
         ((and (or (= (boole boole-and casillaActual 4) 0)
@@ -135,7 +141,8 @@
               (or (= (boole boole-and casillaActual 4) 0)
                   (= (boole boole-and casillaActual 2) 0))) T)
         (T nil)))
-
+		
+;[Validacion]
 (defun puedeOperarAbajoIzquierda? (casillaActual casillaAbajo casillaIzquierda)
   (cond ((or (null casillaAbajo) (null casillaIzquierda)) nil)
         ((and (or (= (boole boole-and casillaActual 4) 0)
@@ -147,7 +154,8 @@
              (or (= (boole boole-and casillaActual 4) 0)
                  (= (boole boole-and casillaActual 8) 0))) T)
         (T nil)))
-
+		
+;[Validacion]
 (defun puedeOperarArribaIzquierda? (casillaActual casillaArriba casillaIzquierda)
   (cond ((or (null casillaArriba) (null casillaIzquierda)) nil)
         ((and (or (= (boole boole-and casillaActual 1) 0)
@@ -213,8 +221,8 @@
       (T "error"))
     estadoFinal))
 
-;[Funcion]
-(defun check-state (nodo lista-memoria)
+;[Funcion] Permite checar nuestro estado en A*
+(defun checarEstado (nodo lista-memoria)
   (let ((nodoAux nil))
     (cond ((null lista-memoria) (push nodo *fronteraDeBusqueda*))
           ((and (equal (aref (third nodo) 0) (aref (third (first lista-memoria)) 0))
@@ -223,9 +231,9 @@
            (if (< (second nodo) (second nodoAux))
                (progn (delete nodoAux lista-memoria)
                       (push nodo *fronteraDeBusqueda*))))
-          (T (check-state nodo (rest lista-memoria))))))
+          (T (checarEstado nodo (rest lista-memoria))))))
 
-;[CHECADA] Permite expandir el estado
+;[Funcion] Permite expandir el estado
 (defun expandir (estado)
   (let ((descendientes nil) (nuevoEstado nil))
     (dolist (operador *operadores* descendientes)
@@ -240,13 +248,14 @@
          (filtrarMemoria (rest listaDeEstados) lista))
         (T (cons (first listaDeEstados) (filtrarMemoria (rest listaDeEstados) lista)))))
 
-;[CHECADA]
+;[Funcion] Es un predicado pemrite saber si el estado esta en la memoria
 (defun recuerdasElEstadoEnMemoria? (estado memoria)
   (cond ((null memoria) nil)
         ((and (equal (aref estado 0) (aref (third (first memoria)) 0))
               (equal (aref estado 1) (aref (third (first memoria)) 1))) T)
         (T (recuerdasElEstadoEnMemoria? estado (rest memoria)))))
 
+;[Funcion] Permite extraer la solucion
 (defun extract-solution (nodo)
   (labels ((locate-node (id lista)
              (cond ((null lista) nil)
@@ -363,6 +372,8 @@
                                          sucesores (filtrarMemoria (expandir estado) *memoria*))
                                    (loop for elem in sucesores do
                                      (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
+
+;[Funcion] Permite iniciar nuestro laberinto
 (start-maze)
 
 
