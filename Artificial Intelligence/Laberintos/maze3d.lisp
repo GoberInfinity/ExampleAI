@@ -58,6 +58,8 @@
 
 ;[Funcion] Permite insertar a frontera de Busqueda
 (defun insertarAFronteraDeBusqueda (estado operador metodoBusqueda)
+  (print "------------------PUENTE----------------------")
+  (print (NDobtenerDeMemoria))
   (let* ((nodo '()))
     (cond ((eql metodoBusqueda :depth-first )
            (setq nodo (crearNodo estado operador nil))
@@ -100,7 +102,7 @@
 (defun puedeOperarArriba? (casillaArriba casillaActual operadorPasado)
   (cond ((null casillaArriba) nil)
         ((or (= casillaActual 16)(= casillaActual 17))
-         (if (= operadorPasado 4) T nil))
+         (if (= operadorPasado 0) T nil))
         ((= (boole boole-and casillaActual 1) 0) T)
         (T nil)))
 
@@ -112,9 +114,9 @@
         (T nil)))
 
 (defun puedeOperarAbajo? (casillaAbajo casillaActual operadorPasado)
-  (cond ((null casillaAbajo) nil)
-        ((or (= casillaActual 16)(= casillaActual 17))
-         (if (= operadorPasado 0) T nil))
+  (cond ((or (= casillaActual 16)(= casillaActual 17))
+         (if (= operadorPasado 4) T nil))
+        ((null casillaAbajo) nil)
         ((= (boole boole-and casillaActual 4) 0) T)
         (T nil)))
 
@@ -223,8 +225,7 @@
         (setq operadorPasado (fifth(NDobtenerDeMemoria))))
     (if (or (= casillaActual 16)(= casillaActual 17))
         (setq *puente* 1)(setq *puente* 0))
-    (print "-------------------MEMORIA----------------------")
-    (print operadorPasado)
+    
 
     (cond ((= operador 0)
            (puedeOperarArriba? casillaArriba casillaActual operadorPasado))
@@ -297,7 +298,8 @@
   (cond ((null memoria) nil)
         ((and (equal (aref estado 0) (aref (third (first memoria)) 0))
               (equal (aref estado 1) (aref (third (first memoria)) 1))
-              (= 0 (aref (third (first memoria)) 2))) T)
+              (and (= 0 (aref (third (first memoria)) 2))
+                   (= 0 (aref estado 2)))) T)
         (T (recuerdasElEstadoEnMemoria? estado (rest memoria)))))
 
 (defun extract-solution (nodo)
