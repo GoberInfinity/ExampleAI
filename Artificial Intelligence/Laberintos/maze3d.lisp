@@ -43,12 +43,12 @@
   (setq *ancestro*  nil)
   (setq *solution*  nil))
 
-;[CHECADA]Permite crear los nodos necesarios
+;[Funcion] Permite crear los nodos necesarios
 (defun crearNodo (estado operador importancia)
   (incf *id*)
   (list (1- *id*) importancia estado *ancestro* (second operador)))
 
-;[CHECADA] Permite saber la distancia manhattan, esta basada en la idea de la ecuacion de la distancia entre
+;[Funcion] Permite saber la distancia manhattan, esta basada en la idea de la ecuacion de la distancia entre
 ; dos puntos, pero con una ligera modificacion, solo obtenemos el maximo de: (x2-x1),(y2-y1)
 (defun Manhattan (estado)
   (max (- (max (aref estado 0) (aref *goal* 0))
@@ -58,8 +58,6 @@
 
 ;[Funcion] Permite insertar a frontera de Busqueda
 (defun insertarAFronteraDeBusqueda (estado operador metodoBusqueda)
-  (print "------------------PUENTE----------------------")
-  (print (NDobtenerDeMemoria))
   (let* ((nodo '()))
     (cond ((eql metodoBusqueda :depth-first )
            (setq nodo (crearNodo estado operador nil))
@@ -75,11 +73,12 @@
            (setq nodo (crearNodo estado operador (Manhattan estado)))
            (setf (second nodo) (+ (second nodo) (Backtracking nodo 0)))
            (if (recuerdasElEstadoEnMemoria? (third nodo) *fronteraDeBusqueda*)
-               (check-state nodo *fronteraDeBusqueda*)
+               (checarEstado nodo *fronteraDeBusqueda*)
                (push nodo *fronteraDeBusqueda*))
            (setq *fronteraDeBusqueda* (stable-sort *fronteraDeBusqueda* '< :key #'(lambda (x) (second x)))))
 		   )))
 
+;[Funcion] Permite hacer backtracking, se usa para el algoritmo A*
 (defun Backtracking (nodo num)
   (labels ((locate-node (id lista)
              (cond ((null lista) nil)
@@ -92,13 +91,15 @@
    num))
 
 
-;[CHECADA] Permite obtener el ultimo elemento de la frontera de busqueda
+;[Funcion] Permite obtener el ultimo elemento de la frontera de busqueda
 (defun obtenerDeFronteraDeBusqueda ()
   (pop *fronteraDeBusqueda*))
 
+;[Funcion] Permite obtener el ultimo elemento de nuestra memoria, es una funcion no destructiva
 (defun NDobtenerDeMemoria ()
   (first *memoria*))
 
+;[Validacion] Permite validar los diferentes operadores
 (defun puedeOperarArriba? (casillaArriba casillaActual operadorPasado)
   (cond ((null casillaArriba) nil)
         ((or (= casillaActual 16)(= casillaActual 17))
@@ -106,6 +107,7 @@
         ((= (boole boole-and casillaActual 1) 0) T)
         (T nil)))
 
+;[Validacion]
 (defun puedeOperarDerecha? (casillaDerecha casillaActual operadorPasado)
   (cond ((null casillaDerecha) nil)
         ((or (= casillaActual 16)(= casillaActual 17))
@@ -113,6 +115,7 @@
         ((= (boole boole-and casillaActual 2) 0) T)
         (T nil)))
 
+;[Validacion]
 (defun puedeOperarAbajo? (casillaAbajo casillaActual operadorPasado)
   (cond ((or (= casillaActual 16)(= casillaActual 17))
          (if (= operadorPasado 4) T nil))
@@ -120,6 +123,7 @@
         ((= (boole boole-and casillaActual 4) 0) T)
         (T nil)))
 
+;[Validacion]
 (defun puedeOperarIzquierda? (casillaIzquierda casillaActual operadorPasado)
   (cond ((null casillaIzquierda) nil)
         ((or (= casillaActual 16)(= casillaActual 17))
@@ -127,6 +131,7 @@
         ((= (boole boole-and casillaActual 8) 0) T)
         (T nil)))
 
+;[Validacion]
 (defun puedeOperarArribaDerecha? (casillaActual casillaArriba casillaDerecha casillaDiagonalArribaDerecha diagonalALosLados)
   (cond ((or (= casillaDiagonalArribaDerecha 16)(= casillaDiagonalArribaDerecha 17)) nil)
         ((null diagonalALosLados) nil)
@@ -141,6 +146,7 @@
                   (= (boole boole-and casillaActual 2) 0))) T)
         (T nil)))
 
+;[Validacion]
 (defun puedeOperarAbajoDerecha? (casillaActual casillaAbajo casillaDerecha casillaDiagonalAbajoDerecha diagonalALosLados)
   (cond ((or (= casillaDiagonalAbajoDerecha 16)(= casillaDiagonalAbajoDerecha 17)) nil)
         ((null diagonalALosLados) nil)
@@ -155,6 +161,7 @@
                   (= (boole boole-and casillaActual 2) 0))) T)
         (T nil)))
 
+;[Validacion]
 (defun puedeOperarAbajoIzquierda? (casillaActual casillaAbajo casillaIzquierda casillaDiagonalAbajoIzquierda diagonalALosLados)
   (cond ((or (= casillaDiagonalAbajoIzquierda 16)(= casillaDiagonalAbajoIzquierda 17)) nil)
         ((null diagonalALosLados) nil)
@@ -169,6 +176,7 @@
                  (= (boole boole-and casillaActual 8) 0))) T)
         (T nil)))
 
+;[Validacion]
 (defun puedeOperarArribaIzquierda? (casillaActual casillaArriba casillaIzquierda casillaDiagonalArribaIzquierda diagonalALosLados)
   (cond ((or (= casillaDiagonalArribaIzquierda 16)(= casillaDiagonalArribaIzquierda 17)) nil)
         ((null diagonalALosLados) nil)
@@ -225,7 +233,7 @@
         (setq operadorPasado (fifth(NDobtenerDeMemoria))))
     (if (or (= casillaActual 16)(= casillaActual 17))
         (setq *puente* 1)(setq *puente* 0))
-    
+
 
     (cond ((= operador 0)
            (puedeOperarArriba? casillaArriba casillaActual operadorPasado))
@@ -265,17 +273,17 @@
     estadoFinal))
 
 
-;[Funcion]
-(defun check-state (nodo lista-memoria)
+;[Funcion] Permite ayudarnos en nuestro algoritmo A*
+(defun checarEstado (nodo listaMemoria)
   (let ((nodoAux nil))
-    (cond ((null lista-memoria) (push nodo *fronteraDeBusqueda*))
-          ((and (equal (aref (third nodo) 0) (aref (third (first lista-memoria)) 0))
-                (equal (aref (third nodo) 1) (aref (third (first lista-memoria)) 1)))
-           (setq nodoAux (first lista-memoria))
+    (cond ((null listaMemoria) (push nodo *fronteraDeBusqueda*))
+          ((and (equal (aref (third nodo) 0) (aref (third (first listaMemoria)) 0))
+                (equal (aref (third nodo) 1) (aref (third (first listaMemoria)) 1)))
+           (setq nodoAux (first listaMemoria))
            (if (< (second nodo) (second nodoAux))
-               (progn (delete nodoAux lista-memoria)
+               (progn (delete nodoAux listaMemoria)
                       (push nodo *fronteraDeBusqueda*))))
-          (T (check-state nodo (rest lista-memoria))))))
+          (T (checarEstado nodo (rest listaMemoria))))))
 
 ;[Funcion] Permite expandir el estado
 (defun expandir (estado)
@@ -286,14 +294,14 @@
             (setq nuevoEstado (aplicarOperador operador estado))
             (setq descendientes (cons (list nuevoEstado operador) descendientes)))))))
 
-
+;[Funcion] Permite filtrar nuestra memoria
 (defun filtrarMemoria (listaDeEstados lista)
   (cond ((null listaDeEstados) nil)
         ((recuerdasElEstadoEnMemoria? (first (first listaDeEstados)) lista)
          (filtrarMemoria (rest listaDeEstados) lista))
         (T (cons (first listaDeEstados) (filtrarMemoria (rest listaDeEstados) lista)))))
 
-;[CHECADA]
+;[Funcion] Es un predicado, devuelve verdadero o falso si recuerda el estado en la memoria
 (defun recuerdasElEstadoEnMemoria? (estado memoria)
   (cond ((null memoria) nil)
         ((and (equal (aref estado 0) (aref (third (first memoria)) 0))
@@ -302,6 +310,7 @@
                    (= 0 (aref estado 2)))) T)
         (T (recuerdasElEstadoEnMemoria? estado (rest memoria)))))
 
+;[Funcion] Permite extraer la solucion
 (defun extract-solution (nodo)
   (labels ((locate-node (id lista)
              (cond ((null lista) nil)
@@ -329,21 +338,18 @@
   (setq inicialColumna (aref *start* 0))
   (setq inicialFila (aref *start* 1))
   (insertarAFronteraDeBusqueda (make-array 3 :initial-contents (list inicialColumna inicialFila 0 )) nil metodo)
-    (loop until (or meta-encontrada
-                    (null *fronteraDeBusqueda*)) do
-         (setq nodo (obtenerDeFronteraDeBusqueda)
-               estado (third nodo))
-         (push nodo *memoria*)
-         (cond ((and (equal (aref *goal* 0)
-                            (aref estado 0))
-                     (equal (aref *goal* 1)
-                            (aref estado 1)))
-                (setq *solution* (extract-solution nodo))
-                (setq meta-encontrada T))
-               (T (setq *ancestro* (first nodo)
-                        sucesores (filtrarMemoria (expandir estado) *memoria*))
-                  (loop for elem in sucesores do
-                       (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
+  (loop until (or meta-encontrada (null *fronteraDeBusqueda*)) do
+       (setq nodo (obtenerDeFronteraDeBusqueda)
+             estado (third nodo))
+       (push nodo *memoria*)
+       (cond ((and (equal (aref *goal* 0) (aref estado 0))
+                   (equal (aref *goal* 1) (aref estado 1)))
+              (setq *solution* (extract-solution nodo))
+              (setq meta-encontrada T))
+             (T (setq *ancestro* (first nodo)
+                      sucesores (filtrarMemoria (expandir estado) *memoria*))
+                (loop for elem in sucesores do
+                     (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
 
 (defun breath-first ()
   (limpiarVariables)
@@ -359,21 +365,18 @@
     (setq inicialColumna (aref *start* 0))
     (setq inicialFila (aref *start* 1))
     (insertarAFronteraDeBusqueda (make-array 3 :initial-contents (list inicialColumna inicialFila 0 )) nil metodo)
-        (loop until (or meta-encontrada
-                        (null *fronteraDeBusqueda*)) do
-                          (setq nodo (obtenerDeFronteraDeBusqueda)
-                                estado (third nodo))
-                          (push nodo *memoria*)
-                          (cond ((and (equal (aref *goal* 0)
-                                             (aref estado 0))
-                                      (equal (aref *goal* 1)
-                                             (aref estado 1)))
-                                 (setq *solution* (extract-solution nodo))
-                                 (setq meta-encontrada T))
-                                (T (setq *ancestro* (first nodo)
-                                         sucesores (filtrarMemoria (expandir estado) *memoria*))
-                                   (loop for elem in sucesores do
-                                     (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
+    (loop until (or meta-encontrada
+                    (null *fronteraDeBusqueda*)) do
+         (setq nodo (obtenerDeFronteraDeBusqueda) estado (third nodo))
+         (push nodo *memoria*)
+         (cond ((and (equal (aref *goal* 0) (aref estado 0))
+                     (equal (aref *goal* 1) (aref estado 1)))
+                (setq *solution* (extract-solution nodo))
+                (setq meta-encontrada T))
+               (T (setq *ancestro* (first nodo)
+                        sucesores (filtrarMemoria (expandir estado) *memoria*))
+                  (loop for elem in sucesores do
+                       (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
 
 (defun best-first ()
   (limpiarVariables)
@@ -389,21 +392,18 @@
         (setq inicialColumna (aref *start* 0))
         (setq inicialFila (aref *start* 1))
         (insertarAFronteraDeBusqueda (make-array 3 :initial-contents (list inicialColumna inicialFila 0 )) nil metodo)
-        (loop until (or meta-encontrada
-                        (null *fronteraDeBusqueda*)) do
-                          (setq nodo (obtenerDeFronteraDeBusqueda)
-                                estado (third nodo))
-                          (push nodo *memoria*)
-                          (cond ((and (equal (aref *goal* 0)
-                                             (aref estado 0))
-                                      (equal (aref *goal* 1)
-                                             (aref estado 1)))
-                                 (setq *solution* (extract-solution nodo))
-                                 (setq meta-encontrada T))
-                                (T (setq *ancestro* (first nodo)
-                                         sucesores (filtrarMemoria (filtrarMemoria (expandir estado) *memoria*) *fronteraDeBusqueda*))
-                                   (loop for elem in sucesores do
-                                     (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
+        (loop until (or meta-encontrada (null *fronteraDeBusqueda*)) do
+             (setq nodo (obtenerDeFronteraDeBusqueda)
+                   estado (third nodo))
+             (push nodo *memoria*)
+             (cond ((and (equal (aref *goal* 0) (aref estado 0))
+                         (equal (aref *goal* 1) (aref estado 1)))
+                    (setq *solution* (extract-solution nodo))
+                    (setq meta-encontrada T))
+                   (T (setq *ancestro* (first nodo)
+                            sucesores (filtrarMemoria (filtrarMemoria (expandir estado) *fronteraDeBusqueda*) *memoria*))
+                      (loop for elem in sucesores do
+                           (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
 
 (defun A* ()
 (limpiarVariables)
@@ -419,21 +419,20 @@
         (setq inicialColumna (aref *start* 0))
         (setq inicialFila (aref *start* 1))
         (insertarAFronteraDeBusqueda (make-array 3 :initial-contents (list inicialColumna inicialFila 0 )) nil metodo)
-        (loop until (or meta-encontrada
-                        (null *fronteraDeBusqueda*)) do
-                          (setq nodo (obtenerDeFronteraDeBusqueda)
-                                estado (third nodo))
-                          (push nodo *memoria*)
-                          (cond ((and (equal (aref *goal* 0)
-                                             (aref estado 0))
-                                      (equal (aref *goal* 1)
-                                             (aref estado 1)))
-                                 (setq *solution* (extract-solution nodo))
-                                 (setq meta-encontrada T))
-                                (T (setq *ancestro* (first nodo)
-                                         sucesores (filtrarMemoria (expandir estado) *memoria*))
-                                   (loop for elem in sucesores do
-                                     (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
+        (loop until (or meta-encontrada (null *fronteraDeBusqueda*)) do
+             (setq nodo (obtenerDeFronteraDeBusqueda)
+                   estado (third nodo))
+             (push nodo *memoria*)
+             (cond ((and (equal (aref *goal* 0) (aref estado 0))
+                         (equal (aref *goal* 1) (aref estado 1)))
+                    (setq *solution* (extract-solution nodo))
+                    (setq meta-encontrada T))
+                   (T (setq *ancestro* (first nodo)
+                            sucesores (filtrarMemoria (expandir estado) *memoria*))
+                      (loop for elem in sucesores do
+                           (insertarAFronteraDeBusqueda (first elem) (second elem) metodo)))))))
+
+;[Inicio] Iniciamos nuestro laberinto
 (start-maze)
 
 
