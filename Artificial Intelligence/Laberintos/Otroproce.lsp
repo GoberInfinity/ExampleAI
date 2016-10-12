@@ -261,9 +261,9 @@
          (estadoFinal nil))
 	(if (or (= casillaActual 16)(= casillaActual 17))
 		(progn 
-			("VALOR DEL PUENTE ES")
+			(print "VALOR DEL PUENTE ES")
 			(setq *puente* 1)
-			("Se encontro en la casilla")
+			(print "Se encontro en la casilla")
 			(print fila)
 			(print columna))
 		(setq *puente* 0))	 
@@ -313,12 +313,14 @@
 
 ;[Funcion] Es un predicado, devuelve verdadero o falso si recuerda el estado en la memoria
 (defun recuerdasElEstadoEnMemoria? (estado memoria)
+(let* ((fila (aref estado 0))
+         (columna (aref estado 1))
+         (casillaActual (get-cell-walls fila columna)))
   (cond ((null memoria) nil)
         ((and (equal (aref estado 0) (aref (third (first memoria)) 0))
               (equal (aref estado 1) (aref (third (first memoria)) 1))
-              (and (= 0 (aref (third (first memoria)) 2))
-                   (= 0 (aref estado 2)))) T)
-        (T (recuerdasElEstadoEnMemoria? estado (rest memoria)))))
+              (not (or (= casillaActual 16) (= casillaActual 17)))) T)
+        (T (recuerdasElEstadoEnMemoria? estado (rest memoria))))))
 
 ;[Funcion] Permite extraer la solucion
 (defun extract-solution (nodo)
