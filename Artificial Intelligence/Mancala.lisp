@@ -1,20 +1,19 @@
 ;Reyes Fragoso Roberto
 
 ;[Parametros] Definicion del tablero del enemigo y el nuestro para el juego
-(defparameter *tableroMaquina* '(()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)))
-(defparameter *tableroHumano* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()))
-
+(defparameter *tablero* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()))
 
 ;[Funcion] Permite imprimir el tablero, mostrando arriba la base del oponente
 ; y abajo la base del jugador
 (defun imprimirTablero()
-  (format  t  " ~A ~%" *tableroMaquina*)
-  (format  t  " ~A ~%" *tableroHumano*))
+  (format  t  "~& ~A ~A ~A ~A ~A ~A ~A~%"
+           (nth 13 *tablero*)(nth 12 *tablero*)(nth 11 *tablero*)(nth 10 *tablero*)(nth 9 *tablero*)(nth 8 *tablero*)(nth 7 *tablero*))
+  (format  t  "~& ~A ~A ~A ~A ~A ~A ~A~%"
+           (nth 0 *tablero*)(nth 1 *tablero*)(nth 2 *tablero*)(nth 3 *tablero*)(nth 4 *tablero*)(nth 5 *tablero*)(nth 6 *tablero*)))
 
 ;[Funcion] Permite resetear el juego
 (defun reiniciarJuego ()
-  (setq *tableroMaquina* '(()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)))
-  (setq *tableroHumano* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)())))
+  *tablero* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()))
 
 ;[Funcion] Permite leer la casilla que el usuario desea mover
 (defun leerUsuario()
@@ -24,18 +23,18 @@
 
 ;[Funcion] Le permite saber el numero de casillas en la posicion que eligio el usuario
 (defun canicasEnCasilla (casilla)
-  (nth casilla *tableroHumano*))
+  (nth casilla *tablero*))
 
 ;[Funcion] Te permite mover la canica a una nueva casilla
 (defun moverCanicaACasilla (casillaEscogida casillaAMover)
-  (let* ((canica (pop (nth casillaEscogida *tableroHumano*))))
+  (let* ((canica (pop (nth casillaEscogida *tablero*))))
     (format t "~& CANICA  ~A ~%" canica)
-    (format t "~& MOVER A   ~A ~%" (nth casillaAMover *tableroHumano*))
-    (push canica (nth casillaAMover *tableroHumano*))
+    (format t "~& MOVER A   ~A ~%" (nth casillaAMover *tablero*))
+    (push canica (nth casillaAMover *tablero*))
 
   (format t "~& CasillaEscogida  ~A ~%" casillaEscogida)
   (format t "~& CasillaAMover  ~A ~%" casillaAMover)
-  (format t "~& FINAL HUMANO  ~A ~%" *tableroHumano*)))
+  (imprimirTablero)))
 
 ;[Predicado]Permite saber si ya se termino el juego
 ;TODO: Hacer recursiva esta
@@ -57,6 +56,9 @@
 (defun casillaValida? (casillaEscogida)
   (if (null (canicasEnCasilla casillaEscogida)) nil T))
 
+;[Predicado] Permite saber si el movimiento es valido
+(defun movimientoValido? (casillaEscogida casillaAMover)
+  (if (> casillaAMover casillaEscogida) T nil))
 
 ;[Funcion] Es el inicio del Juego
 (defun Mancala()
@@ -78,10 +80,7 @@
 ;    (loop until (juegoTerminado?) do
        (loop for canica in canicas do
          (format t "~& ¿Para donde mover la canica?  ~A ~%" canica)
-            (moverCanicaACasilla casillaEscogida (leerCasilla)))))
-
-()
-
+            (moverCanicaACasilla casillaEscogida (leerUsuario)))))
 (Mancala)
 
 
