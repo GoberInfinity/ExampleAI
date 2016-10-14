@@ -1,46 +1,20 @@
 ;Reyes Fragoso Roberto
 
-
-(defparameter *baseEnemiga* '())
-(defparameter *baseHumana* '())
-(defparameter *tableroMaquina* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)))
-(defparameter *tableroHumano* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)))
+;[Parametros] Definicion del tablero del enemigo y el nuestro para el juego
+(defparameter *tableroMaquina* '(()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)))
+(defparameter *tableroHumano* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()))
 
 
 ;[Funcion] Permite imprimir el tablero, mostrando arriba la base del oponente
 ; y abajo la base del jugador
 (defun imprimirTablero()
-  (format  t  " ~A ~%"  *baseEnemiga*)
   (format  t  " ~A ~%" *tableroMaquina*)
-  (format  t  " ~A ~%" *tableroHumano*)
-  (format  t  " ~A ~%"  *baseHumana*))
-
-(imprimirTablero)
-
-;[Funcion] Permite firmatear la entrada del usuario para saber a donde mover la bolita
-(defun convertirEntradaUsuario (entrada)
-
-  )
-
-
-;[Funcion] Permite mover las casillas dependiendo de lo que eliga el usuario en
-; teclado
-(defun moverCanicas (primeraPosicion segundaPosicion terceraPosicion))
-
-
-(defvar answer 0)
-(defvar an2 0)
-
-(defun limpiarEntrada ()
-  (setq answer 0)
-  (setq an2 0))
+  (format  t  " ~A ~%" *tableroHumano*))
 
 ;[Funcion] Permite resetear el juego
 (defun reiniciarJuego ()
-  (setq *baseEnemiga* '())
-  (setq *baseHumana* '())
-  (setq *tableroMaquina* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)))
-  (setq *tableroHumano* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3))))
+  (setq *tableroMaquina* '(()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)))
+  (setq *tableroHumano* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)())))
 
 ;[Funcion] Permite leer la casilla que el usuario desea mover
 (defun leerUsuario()
@@ -63,34 +37,51 @@
   (format t "~& CasillaAMover  ~A ~%" casillaAMover)
   (format t "~& FINAL HUMANO  ~A ~%" *tableroHumano*)))
 
+;[Predicado]Permite saber si ya se termino el juego
+;TODO: Hacer recursiva esta
+;; (defun juegoTerminado? ()
+;;   (boole boole-and (null (nth 0 *tableroHumano*))
+;;          (null (nth 1 *tableroHumano*))
+;;          (null (nth 2 *tableroHumano*))
+;;          (null (nth 3 *tableroHumano*))
+;;          (null (nth 4 *tableroHumano*))
+;;          (null (nth 5 *tableroHumano*))
+;;          (null (nth 0 *tableroMaquina*))
+;;          (null (nth 1 *tableroMaquina*))
+;;          (null (nth 2 *tableroMaquina*))
+;;          (null (nth 3 *tableroMaquina*))
+;;          (null (nth 4 *tableroMaquina*))
+;;          (null (nth 5 *tableroMaquina*))))
+
+;[Predicate] Permite validar si se puede escoger la casilla
+(defun casillaValida? (casillaEscogida)
+  (if (null (canicasEnCasilla casillaEscogida)) nil T))
+
+
 ;[Funcion] Es el inicio del Juego
 (defun Mancala()
   (reiniciarJuego)
   (let* ((casillaEscogida 0)
          (canicas 0)
+         (casillaValida nil)
          (casilla))
+    (imprimirTablero)
 
-    (setq casillaEscogida (leerUsuario))
+    (loop until casillaValida do
+         (setq casillaEscogida (leerUsuario))
+         (if (casillaValida? casillaEscogida)
+             (setq casillaValida T)
+             (print "Casilla Invalida")))
+
+    ;(setq casillaEscogida (leerUsuario))
     (setq canicas (canicasEnCasilla casillaEscogida))
-    (loop for canica in canicas do
+;    (loop until (juegoTerminado?) do
+       (loop for canica in canicas do
          (format t "~& ¿Para donde mover la canica?  ~A ~%" canica)
-         (moverCanicaACasilla casillaEscogida (leerCasilla)))))
+            (moverCanicaACasilla casillaEscogida (leerCasilla)))))
+
+()
 
 (Mancala)
 
 
-(defun imprimirInstrucciones ()
-  (format t "~& Testing printing ~%"))
-
-(defun algo ()
-  (format t "~& INGRES ALOS DATOS POR FAVOR ~%")
-  (setq answer (read))
-  (setq an2 (read)))
-
-(defun dummy ()
-  (limpiarEntrada)
-  (algo)
-  (format t "~& Los datos ingregados fueron  ~A ~%" answer) 
-  (format t "~& Los datos ingregados fueron  ~A ~%" an2))
-
-(dummy) 
