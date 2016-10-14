@@ -35,11 +35,52 @@
   (setq answer 0)
   (setq an2 0))
 
-(defun leerCasilla())
+;[Funcion] Permite resetear el juego
+(defun reiniciarJuego ()
+  (setq *baseEnemiga* '())
+  (setq *baseHumana* '())
+  (setq *tableroMaquina* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)))
+  (setq *tableroHumano* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3))))
+
+;[Funcion] Permite leer la casilla que el usuario desea mover
+(defun leerUsuario()
+  (let*((casillaEscogida 0))
+    (setq casillaEscogida (read))
+    casillaEscogida))
+
+;[Funcion] Le permite saber el numero de casillas en la posicion que eligio el usuario
+(defun canicasEnCasilla (casilla)
+  (nth casilla *tableroHumano*))
+
+;[Funcion] Te permite mover la canica a una nueva casilla
+(defun moverCanicaACasilla (casillaEscogida casillaAMover)
+  (let* ((canica (pop (nth casillaEscogida *tableroHumano*))))
+    (format t "~& CANICA  ~A ~%" canica)
+    (format t "~& MOVER A   ~A ~%" (nth casillaAMover *tableroHumano*))
+    (push canica (nth casillaAMover *tableroHumano*))
+
+  (format t "~& CasillaEscogida  ~A ~%" casillaEscogida)
+  (format t "~& CasillaAMover  ~A ~%" casillaAMover)
+  (format t "~& FINAL HUMANO  ~A ~%" *tableroHumano*)))
+
+;[Funcion] Es el inicio del Juego
+(defun Mancala()
+  (reiniciarJuego)
+  (let* ((casillaEscogida 0)
+         (canicas 0)
+         (casilla))
+
+    (setq casillaEscogida (leerUsuario))
+    (setq canicas (canicasEnCasilla casillaEscogida))
+    (loop for canica in canicas do
+         (format t "~& ¿Para donde mover la canica?  ~A ~%" canica)
+         (moverCanicaACasilla casillaEscogida (leerCasilla)))))
+
+(Mancala)
+
 
 (defun imprimirInstrucciones ()
-  (print "Para mover las casillas primero seleccione la casilla")
-  (leerCasilla()))
+  (format t "~& Testing printing ~%"))
 
 (defun algo ()
   (format t "~& INGRES ALOS DATOS POR FAVOR ~%")
@@ -49,7 +90,7 @@
 (defun dummy ()
   (limpiarEntrada)
   (algo)
-  (format t "~& Los datos ingregados fueron  ~A ~%" answer)
+  (format t "~& Los datos ingregados fueron  ~A ~%" answer) 
   (format t "~& Los datos ingregados fueron  ~A ~%" an2))
 
-(dummy)
+(dummy) 
