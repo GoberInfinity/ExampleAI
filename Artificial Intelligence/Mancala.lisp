@@ -2,6 +2,8 @@
 
 ;[Parametros] Definicion del tablero del enemigo y el nuestro para el juego
 (defparameter *tablero* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()))
+(defparameter *tirarDeNuevo* T)
+(defparameter *casillasTiradas* nil)
 
 ;[Funcion] Permite imprimir el tablero, mostrando arriba la base del oponente
 ; y abajo la base del jugador
@@ -31,6 +33,9 @@
     (format t "~& CANICA  ~A ~%" canica)
     (format t "~& MOVER A   ~A ~%" (nth casillaAMover *tablero*))
     (push canica (nth casillaAMover *tablero*))
+    (if (= casillaAMover 6)
+        (setq *tirarDeNuevo* T)
+        (setq *tirarDeNuevo* nil))
 
   (format t "~& CasillaEscogida  ~A ~%" casillaEscogida)
   (format t "~& CasillaAMover  ~A ~%" casillaAMover)
@@ -53,20 +58,26 @@
 ;;          (null (nth 5 *tableroMaquina*))))
 
 ;[Predicate] Permite validar si se puede escoger la casilla
+;TODO Hacerlo recursivo
 (defun casillaValida? (casillaEscogida)
-  (if (null (canicasEnCasilla casillaEscogida)) nil T))
+  (cond ((member casillaEscogida '(6 7 8 9 10 11 12 13)) nil)
+        ((null (canicasEnCasilla casillaEscogida)) nil)
+        (T T)))
 
-;[Predicado] Permite saber si el movimiento es valido
-(defun movimientoValido? (casillaEscogida casillaAMover)
-  (if (> casillaAMover casillaEscogida) T nil))
+(defun seRepiteMovimiento? (casillaEscogida)
+  (print *casillasTiradas*)
+  (print casillaEscogida)
+  (if (member casillaEscogida *casillasTiradas*) T nil))
 
 ;[Funcion] Es el inicio del Juego
+;TODO limpiar las variables y hacer bottom up 
 (defun Mancala()
   (reiniciarJuego)
   (let* ((casillaEscogida 0)
          (canicas 0)
          (casillaValida nil)
-         (casilla))
+         (casilla)
+         (casillaAMover nil))
     (imprimirTablero)
 
     (loop until casillaValida do
@@ -77,10 +88,17 @@
 
     ;(setq casillaEscogida (leerUsuario))
     (setq canicas (canicasEnCasilla casillaEscogida))
-;    (loop until (juegoTerminado?) do
+                                        ;    (loop until (juegoTerminado?) do
+    (loop until (null *tirarDeNuevo*) do
        (loop for canica in canicas do
-         (format t "~& ¿Para donde mover la canica?  ~A ~%" canica)
-            (moverCanicaACasilla casillaEscogida (leerUsuario)))))
-(Mancala)
+            (format t "~& ¿Para donde mover la canica?  ~A ~%" canica)
+            (setq casillaAMover (leerUsuario))
+            (loop until (null (seRepiteMovimiento? casillaAMover)) do
+                 (format t "~& No se puede mover ~%")
+                 (setq casillaAMover (leerUsuario)))
+            (push casillaAMover *casillasTiradas*)
+            (moverCanicaACasilla casillaEscogida casillaAMover)))))
 
+;TODO NO TIENE SENTIDO HACER LA FUNCION LEER USUARIO CORREGIR
+(Mancala)
 
