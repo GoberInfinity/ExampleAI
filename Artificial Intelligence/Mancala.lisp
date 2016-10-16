@@ -5,6 +5,17 @@
 (defparameter *tirarDeNuevo* T)
 (defparameter *casillasTiradas* nil)
 
+;[Parametros] Definimos los operadores
+(defparameter *id* 0)
+(defparameter *ancestro* nil)
+(defparameter *arbol*)
+(defparameter *operadores* '((:Primero 7)
+                             (:Segundo 8)
+                             (:Tercero 9)
+                             (:Cuarto 10)
+                             (:Quinto 11)
+                             (:Sexto 12)))
+
 ;[Funcion] Permite imprimir el tablero, mostrando arriba la base del oponente
 ; y abajo la base del jugador
 (defun imprimirTablero()
@@ -27,6 +38,9 @@
     (format t "~& CANICA  ~A ~%" canica)
     (format t "~& MOVER A   ~A ~%" (nth casillaAMover *tablero*))
     (push canica (nth casillaAMover *tablero*))
+
+    ;TODO Validar tambien la inteligencia artificial si cae en contrario no tire
+
     (if (= casillaAMover 6)
         (setq *tirarDeNuevo* T)
         (setq *tirarDeNuevo* nil))
@@ -52,7 +66,6 @@
 ;;          (null (nth 5 *tableroMaquina*))))
 
 ;[Predicate] Permite validar si se puede escoger la casilla
-;TODO Hacerlo recursivo
 (defun casillaValida? (casillaEscogida)
   (cond ((member casillaEscogida '(6 7 8 9 10 11 12 13)) nil)
         ((null (canicasEnCasilla casillaEscogida)) nil)
@@ -99,7 +112,56 @@
          (setq casillaValida nil)
          (setq *casillasTiradas* nil))))
 
-;TODO NO TIENE SENTIDO HACER LA FUNCION LEER USUARIO CORREGIR
-;(Mancala)
 
-(turnoHumano)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;[Funcion] Permite saber si el operador es valido
+(defun operadorValido? (operador estado)
+  (let* ((operador (second operador)))
+    (cond ((= operador 7)
+           (if (null (nth 7 estado)) nil T))
+          ((= operador 8)
+           (if(null (nth 8 estado)) nil T))
+          ((= operador 9)
+           (if(null (nth 9 estado)) nil T))
+          ((= operador 10)
+           (if(null (nth 10 estado)) nil T))
+          ((= operador 11)
+           (if(null (nth 11 estado)) nil T))
+          ((= operador 12)
+           (if(null (nth 12 estado)) nil T))
+          (T nil))))
+
+;[Funcion] Permite  expandir el estado
+(defun expandir (estado)
+  (let ((descencientes nil)(nuevoEstado nil))
+    (dolist (operador *operadores* descendientes)
+      (if (operadorValido? operador estado)
+          (progn
+            (setq nuevoEstado (aplicarOperador operador estado))
+            (setq descendientes (cons (list nuevoEstado operador) descendientes)))))))
+
+(defun heuristicaMancaa (estado))
+
+
+;[Main] Programando minimax
+(defun minMax (estado profundidad maximizarJugador)
+  (if ( = profundidad 0)
+      ;Retornar la heuristica del nodo
+      (return-from minMax (heuristicaMancaa estado)))
+  (if maximizarJugador (setq mejorValor most-negative-fixnum) (setq mejorValor most-positive-fixnum))
+  (loop for operador in *operadores* do
+       (if (operadorValido? operador estado)
+           (progn
+             (setq nuevoEstado (aplicaOperador operador estado))
+             (setq valorActual (miniMax nuevoEstado (1- profundidad) nil))
+             (setq mejorValor (max mejorValor valorActual)))
+           ;Falta regresar cual es el mejor
+      
+))
+
+      (turnoHumano)
+
+      (apropos "MOST-NEGATIVE")
