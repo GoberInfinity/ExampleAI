@@ -17,12 +17,6 @@
 (defun reiniciarJuego ()
   *tablero* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()))
 
-;[Funcion] Permite leer la casilla que el usuario desea mover
-(defun leerUsuario()
-  (let*((casillaEscogida 0))
-    (setq casillaEscogida (read))
-    casillaEscogida))
-
 ;[Funcion] Le permite saber el numero de casillas en la posicion que eligio el usuario
 (defun canicasEnCasilla (casilla)
   (nth casilla *tablero*))
@@ -69,36 +63,43 @@
   (print casillaEscogida)
   (if (member casillaEscogida *casillasTiradas*) T nil))
 
-;[Funcion] Es el inicio del Juego
-;TODO limpiar las variables y hacer bottom up 
-(defun Mancala()
-  (reiniciarJuego)
-  (let* ((casillaEscogida 0)
+
+(defun turnoHumano ()
+  (let* ((casillaEscogida nil)
          (canicas 0)
          (casillaValida nil)
-         (casilla)
          (casillaAMover nil))
-    (imprimirTablero)
+    ;quitar al final
+    (reiniciarJuego)
 
-    (loop until casillaValida do
-         (setq casillaEscogida (leerUsuario))
-         (if (casillaValida? casillaEscogida)
-             (setq casillaValida T)
-             (print "Casilla Invalida")))
-
-    ;(setq casillaEscogida (leerUsuario))
-    (setq canicas (canicasEnCasilla casillaEscogida))
-                                        ;    (loop until (juegoTerminado?) do
     (loop until (null *tirarDeNuevo*) do
-       (loop for canica in canicas do
-            (format t "~& ¿Para donde mover la canica?  ~A ~%" canica)
-            (setq casillaAMover (leerUsuario))
-            (loop until (null (seRepiteMovimiento? casillaAMover)) do
-                 (format t "~& No se puede mover ~%")
-                 (setq casillaAMover (leerUsuario)))
-            (push casillaAMover *casillasTiradas*)
-            (moverCanicaACasilla casillaEscogida casillaAMover)))))
+         ;Primero validamos que la casilla que va atirar tenga al menos una canica
+         ; y si es asi, obtenermos el total de ellas en esa casilla
+         (loop until casillaValida do
+              (if (casillaValida? (setq casillaEscogida (read)))
+                  (progn
+                    (setq canicas (canicasEnCasilla casillaEscogida))
+                    (setq casillaValida T))
+                  (print "La casilla que escogiste no tiene canicas")))
+
+    ;Despues para cada canica en esa casilla, le permitimos al usuario mover cada una.
+    ;Asi como tambien validamos que si cae en su base alguna canica vuelve a tirar
+    ;Y finalmente validamos que no se repitan sus movimientos por cada turno
+         (loop for canica in canicas do
+              (format t "~& ¿Para donde mover la canica?  ~A ~%" canica)
+              (loop until (null (seRepiteMovimiento? (setq casillaAMover(read)))) do
+                   (format t "~& No se puede mover ~%"))
+              (push casillaAMover *casillasTiradas*)
+              (moverCanicaACasilla casillaEscogida casillaAMover))
+
+         ;Limpiamos las variables tomando la precaucion de si el usuario puede volver
+         ; a tirar
+         (imprimirTablero)
+         (setq casillaEscogida nil)
+         (setq casillaValida nil)
+         (setq *casillasTiradas* nil))))
 
 ;TODO NO TIENE SENTIDO HACER LA FUNCION LEER USUARIO CORREGIR
-(Mancala)
+;(Mancala)
 
+(turnoHumano)
