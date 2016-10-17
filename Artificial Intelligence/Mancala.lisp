@@ -144,9 +144,6 @@
          (casillaActual (second operador))
          (canicas (canicasEnCasilla casillaActual))
          (estadoFinal nil))
-    (reiniciarJuego)
-    (imprimirTablero)
-    (print "ALGO BONITO")
     (case operadorEtiqueta
       (:Primero (setq estadoFinal (aplicarOperadorAux estado casillaActual canicas)))
     ;  (:Segundo (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1+ columna)))))
@@ -155,7 +152,6 @@
     ;  (:Quinto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) columna))))
     ;  (:Sexto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1- columna)))))
       (T "error"))
-    (imprimirTablero)
     estadoFinal))
 
 ;[Auxiliar] Para evitar que se repita codigo creamos una funcion auxiliar que nos permita mover las casillas
@@ -172,9 +168,22 @@
          (if (> casillaAMeter 13)
              (setq casillaActual 0))
          (push canica (nth casillaAMeter estado))
-         (setq casillaAMeter (1+ casillaAMeter)))
-    estado))
+         (setq casillaAMeter (1+ casillaAMeter))
+       finally (return (list estado seguirTirando)))))
 
+;(reiniciarJuego)
+;(imprimirTablero)
+
+(defun dummy ()
+  (let* ((algo nil)))
+  (reiniciarJuego)
+  (setq algo (aplicarOperador '(:Primero 7) *tablero*))
+  (print algo)
+  (print "WTF")
+  (print (first algo))
+  (print (second algo)))
+
+(dummy)
 
 ;[Main] Programando minimax
 ;(defun minMax (estado profundidad maximizarJugador)
@@ -193,5 +202,5 @@
 ;           ;Falta regresar cual es el mejor
 ;))
 
-(turnoHumano)
+;(turnoHumano)
 
