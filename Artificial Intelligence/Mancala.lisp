@@ -143,8 +143,41 @@
             (setq nuevoEstado (aplicarOperador operador estado))
             (setq descendientes (cons (list nuevoEstado operador) descendientes)))))))
 
+;TODO FALTA HACER NUESTRA HEURISTICA
 (defun heuristicaMancaa (estado))
 
+;[Funcion] Permite hacer el movimiento no destructivo, eso devuelve del loop
+; Falta validar que si cae en su base vuelve a tirar
+(defun aplicarOperador (operador estado)
+  (let* ((operadorEtiqueta (first operador))
+         (casillaActual (second operador))
+         (canicas (canicasEnCasilla casillaActual)))
+
+    (print canicas)
+    (case operadorEtiqueta
+      (:Primero (aplicarOperadorAux estado casillaActual canicas)
+      (:Segundo (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1+ columna)))))
+      (:Tercero (setq estadoFinal (make-array 2 :initial-contents (list fila (1+ columna)))))
+      (:Cuarto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1+ columna)))))
+      (:Quinto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) columna))))
+      (:Sexto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1- columna)))))
+      (T "error"))
+    estadoFinal))
+
+;[Auxiliar] Para evitar que se repita codigo creamos una funcion auxiliar que nos permita mover las casillas
+;TODO Cambiar los valores de la otra funcion a esta
+(defun aplicarOperadorAux (estado casillaActual canicas)
+  (let* ((seguirTirando nil)
+         (canicaAux nil)
+         (casillaAMeter -1))
+    (loop for canica in canicas do
+         (setq canicaAux (pop (nth operador estado)))
+         (setq casillaAMeter (1+ casillaActual))
+         (if (= casillaAMeter 13)
+             (setq seguirTirando T))
+         (if (> casillaAMeter 13)
+             (setq casillaActual 0))
+         (push canica (nth casillaAMeter estado)))))
 
 ;[Main] Programando minimax
 (defun minMax (estado profundidad maximizarJugador)
@@ -157,9 +190,10 @@
            (progn
              (setq nuevoEstado (aplicaOperador operador estado))
              (setq valorActual (miniMax nuevoEstado (1- profundidad) nil))
-             (setq mejorValor (max mejorValor valorActual)))
+             (setq mejorValor (max mejorValor valorActual)))))
+  (list mejorValor nuevoEstado)
+
            ;Falta regresar cual es el mejor
-      
 ))
 
       (turnoHumano)
