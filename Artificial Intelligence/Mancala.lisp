@@ -146,11 +146,11 @@
          (estadoFinal nil))
     (case operadorEtiqueta
       (:Primero (setq estadoFinal (aplicarOperadorAux estado casillaActual canicas)))
-    ;  (:Segundo (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1+ columna)))))
-    ;  (:Tercero (setq estadoFinal (make-array 2 :initial-contents (list fila (1+ columna)))))
-    ;  (:Cuarto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1+ columna)))))
-    ;  (:Quinto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) columna))))
-    ;  (:Sexto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1- columna)))))
+      (:Segundo (setq estadoFinal (aplicarOperadorAux estado casillaActual canicas)))
+      (:Tercero (setq estadoFinal (aplicarOperadorAux estado casillaActual canicas)))
+      (:Cuarto (setq estadoFinal (aplicarOperadorAux estado casillaActual canicas)))
+      (:Quinto (setq estadoFinal (aplicarOperadorAux estado casillaActual canicas)))
+      (:Sexto (setq estadoFinal (aplicarOperadorAux estado casillaActual canicas)))
       (T "error"))
     estadoFinal))
 
@@ -166,7 +166,7 @@
          (if (= casillaAMeter 13)
              (setq seguirTirando T))
          (if (> casillaAMeter 13)
-             (setq casillaActual 0))
+             (setq casillaAMeter 0))
          (push canica (nth casillaAMeter estado))
          (setq casillaAMeter (1+ casillaAMeter))
        finally (return (list estado seguirTirando)))))
@@ -175,15 +175,17 @@
 ;(imprimirTablero)
 
 (defun dummy ()
-  (let* ((algo nil)))
+  (let* ((algo nil))
   (reiniciarJuego)
-  (setq algo (aplicarOperador '(:Primero 7) *tablero*))
+  (setq algo (aplicarOperador '(:Quinto 11) *tablero*))
   (print algo)
   (print "WTF")
   (print (first algo))
-  (print (second algo)))
+  (print (second algo))
+  (imprimirTablero)))
 
 (dummy)
+
 
 ;[Main] Programando minimax
 ;(defun minMax (estado profundidad maximizarJugador)
