@@ -8,7 +8,6 @@
 ;[Parametros] Definimos los operadores
 (defparameter *id* 0)
 (defparameter *ancestro* nil)
-(defparameter *arbol*)
 (defparameter *operadores* '((:Primero 7)
                              (:Segundo 8)
                              (:Tercero 9)
@@ -26,7 +25,7 @@
 
 ;[Funcion] Permite resetear el juego
 (defun reiniciarJuego ()
-  *tablero* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()))
+  (setq *tablero* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)())))
 
 ;[Funcion] Le permite saber el numero de casillas en la posicion que eligio el usuario
 (defun canicasEnCasilla (casilla)
@@ -134,14 +133,6 @@
            (if(null (nth 12 estado)) nil T))
           (T nil))))
 
-;[Funcion] Permite  expandir el estado
-(defun expandir (estado)
-  (let ((descencientes nil)(nuevoEstado nil))
-    (dolist (operador *operadores* descendientes)
-      (if (operadorValido? operador estado)
-          (progn
-            (setq nuevoEstado (aplicarOperador operador estado))
-            (setq descendientes (cons (list nuevoEstado operador) descendientes)))))))
 
 ;TODO FALTA HACER NUESTRA HEURISTICA
 (defun heuristicaMancaa (estado))
@@ -151,17 +142,20 @@
 (defun aplicarOperador (operador estado)
   (let* ((operadorEtiqueta (first operador))
          (casillaActual (second operador))
-         (canicas (canicasEnCasilla casillaActual)))
-
-    (print canicas)
+         (canicas (canicasEnCasilla casillaActual))
+         (estadoFinal nil))
+    (reiniciarJuego)
+    (imprimirTablero)
+    (print "ALGO BONITO")
     (case operadorEtiqueta
-      (:Primero (aplicarOperadorAux estado casillaActual canicas)
-      (:Segundo (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1+ columna)))))
-      (:Tercero (setq estadoFinal (make-array 2 :initial-contents (list fila (1+ columna)))))
-      (:Cuarto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1+ columna)))))
-      (:Quinto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) columna))))
-      (:Sexto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1- columna)))))
+      (:Primero (setq estadoFinal (aplicarOperadorAux estado casillaActual canicas)))
+    ;  (:Segundo (setq estadoFinal (make-array 2 :initial-contents (list (1- fila) (1+ columna)))))
+    ;  (:Tercero (setq estadoFinal (make-array 2 :initial-contents (list fila (1+ columna)))))
+    ;  (:Cuarto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1+ columna)))))
+    ;  (:Quinto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) columna))))
+    ;  (:Sexto (setq estadoFinal (make-array 2 :initial-contents (list (1+ fila) (1- columna)))))
       (T "error"))
+    (imprimirTablero)
     estadoFinal))
 
 ;[Auxiliar] Para evitar que se repita codigo creamos una funcion auxiliar que nos permita mover las casillas
@@ -169,33 +163,35 @@
 (defun aplicarOperadorAux (estado casillaActual canicas)
   (let* ((seguirTirando nil)
          (canicaAux nil)
-         (casillaAMeter -1))
+         (casillaAMeter (1+ casillaActual)))
     (loop for canica in canicas do
-         (setq canicaAux (pop (nth operador estado)))
-         (setq casillaAMeter (1+ casillaActual))
+         (print casillaAMeter)
+         (setq canicaAux (pop (nth casillaActual estado)))
          (if (= casillaAMeter 13)
              (setq seguirTirando T))
          (if (> casillaAMeter 13)
              (setq casillaActual 0))
-         (push canica (nth casillaAMeter estado)))))
+         (push canica (nth casillaAMeter estado))
+         (setq casillaAMeter (1+ casillaAMeter)))
+    estado))
+
 
 ;[Main] Programando minimax
-(defun minMax (estado profundidad maximizarJugador)
-  (if ( = profundidad 0)
-      ;Retornar la heuristica del nodo
-      (return-from minMax (heuristicaMancaa estado)))
-  (if maximizarJugador (setq mejorValor most-negative-fixnum) (setq mejorValor most-positive-fixnum))
-  (loop for operador in *operadores* do
-       (if (operadorValido? operador estado)
-           (progn
-             (setq nuevoEstado (aplicaOperador operador estado))
-             (setq valorActual (miniMax nuevoEstado (1- profundidad) nil))
-             (setq mejorValor (max mejorValor valorActual)))))
-  (list mejorValor nuevoEstado)
+;(defun minMax (estado profundidad maximizarJugador)
+;  (if ( = profundidad 0)
+;      ;Retornar la heuristica del nodo
+;      (return-from minMax (heuristicaMancaa estado)))
+;  (if maximizarJugador (setq mejorValor most-negative-fixnum) (setq mejorValor most-positive-fixnum))
+;  (loop for operador in *operadores* do
+;       (if (operadorValido? operador estado)
+;           (progn
+;             (setq nuevoEstado (aplicaOperador operador estado))
+;             (setq valorActual (miniMax nuevoEstado (1- profundidad) nil))
+;             (setq mejorValor (max mejorValor valorActual)))))
+;  (list mejorValor nuevoEstado)
+;
+;           ;Falta regresar cual es el mejor
+;))
 
-           ;Falta regresar cual es el mejor
-))
+(turnoHumano)
 
-      (turnoHumano)
-
-      (apropos "MOST-NEGATIVE")
