@@ -51,19 +51,20 @@
 
 ;[Predicado]Permite saber si ya se termino el juego
 ;TODO: Hacer recursiva esta
-;; (defun juegoTerminado? ()
-;;   (boole boole-and (null (nth 0 *tableroHumano*))
-;;          (null (nth 1 *tableroHumano*))
-;;          (null (nth 2 *tableroHumano*))
-;;          (null (nth 3 *tableroHumano*))
-;;          (null (nth 4 *tableroHumano*))
-;;          (null (nth 5 *tableroHumano*))
-;;          (null (nth 0 *tableroMaquina*))
-;;          (null (nth 1 *tableroMaquina*))
-;;          (null (nth 2 *tableroMaquina*))
-;;          (null (nth 3 *tableroMaquina*))
-;;          (null (nth 4 *tableroMaquina*))
-;;          (null (nth 5 *tableroMaquina*))))
+(defun juegoTerminado? ()
+  (and
+         (null (nth 0 *tablero*))
+         (null (nth 1 *tablero*))
+         (null (nth 2 *tablero*))
+         (null (nth 3 *tablero*))
+         (null (nth 4 *tablero*))
+         (null (nth 5 *tablero*))
+         (null (nth 7 *tablero*))
+         (null (nth 8 *tablero*))
+         (null (nth 9 *tablero*))
+         (null (nth 10 *tablero*))
+         (null (nth 11 *tablero*))
+         (null (nth 12 *tablero*))))
 
 ;[Predicate] Permite validar si se puede escoger la casilla
 (defun casillaValida? (casillaEscogida)
@@ -82,8 +83,6 @@
          (canicas 0)
          (casillaValida nil)
          (casillaAMover nil))
-    ;quitar al final
-    (reiniciarJuego)
 
     (loop until (null *tirarDeNuevo*) do
          ;Primero validamos que la casilla que va atirar tenga al menos una canica
@@ -190,15 +189,11 @@
 ;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
 ;TODO Recursividad
 (defun heuristicaMancala (estado)
-  (+ (- (apply #'+ (nth 13 estado)) (apply #'+ (nth 6 estado)))
+  (-(+ (- (apply #'+ (nth 13 estado)) (apply #'+ (nth 6 estado)))
      (- (+ (apply #'+ (nth 7 estado))(apply #'+ (nth 8 estado))(apply #'+ (nth 9 estado))
            (apply #'+ (nth 10 estado))(apply #'+ (nth 11 estado))(apply #'+ (nth 12 estado)))
         (+ (apply #'+ (nth 0 estado))(apply #'+ (nth 1 estado))(apply #'+ (nth 2 estado))
-           (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado))))))
-
-;(reiniciarJuego)
-;(imprimirTablero)
-
+           (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado)))))))
 
 (defun dummy ()
   (let* ((algo nil))
@@ -212,33 +207,7 @@
 
 ;(dummy)
 
-
-;[Main] Programando minimax
-(trace minMax)
-(defun minMax (estado profundidad maximizarJugador)
-  (let ((mejorValor nil)
-        (nuevoEstado nil)
-        (valorActual nil))
-    (imprimirTablero)
-  (if ( = profundidad 0)
-;      ;Retornar la heuristica del nodo
-      (heuristicaMancala (first estado)))
-  (progn
-    (if maximizarJugador (setq mejorValor most-negative-fixnum) (setq mejorValor most-positive-fixnum))
-    (loop for operador in *operadores* do
-         (if (operadorValido? operador estado)
-             (progn
-               (setq nuevoEstado (aplicarOperador operador estado))
-               (if (not (null (second nuevoEstado)))
-                   (progn
-                     (setq maximizarJugador T))
-                   (setq maximizarJugador nil))
-               (setq valorActual (minMax nuevoEstado (1- profundidad) maximizarJugador))
-               (setq mejorValor (max mejorValor valorActual)))))
-    )mejorValor))
-
-
-
+(trace minimax-alpha-beta)
 (defun minimax-alpha-beta (board depth max-depth player use-thresh pass-thresh)
   (if (= depth max-depth)
       (heuristicaMancala (first board))
@@ -256,7 +225,7 @@
                         (car successors)
                         (1+ depth)
                         max-depth
-                        0
+                        (cambiarJugador player)
                         (- pass-thresh)
                         (- use-thresh))))
               (when (> new-value pass-thresh)
@@ -267,6 +236,10 @@
                   (setf successors (cdr successors))))))))
 
 ;[Funcion] Permite cambiar de jugador
+(defun cambiarJugador (jugador)
+  (case jugador
+    (0 1)
+    (1 0)))
 
 ;[Funcion] Definimos una funcion que nos va a retornar todos los nodos cada uno ya aplicado el operador
 (defun aplicarOperadores (tableroN)
@@ -290,9 +263,21 @@
        finally (return listaDeEstados))))
 
 ;El tercer uno es que es la pc
-(print (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*)))
+;(print (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*)))
+(defparameter testing 0)
+;[Maain] Permite jugar
+(defun jugar()
+  (reiniciarJuego)
+  (loop until (= testing 2) do
+       (turnoHumano)
+       (setq *tirarDeNuevo* T)
+       (print (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*)))
+       (print "/*/*/*/*/*/*/* DEBERIA DE JUGAR")
+       (print "/*/*/*/*/*/*/*")
+       (setq testing (1+ testing))))
 
-;(turnoHumano)
+
+(jugar)
 
 
 
