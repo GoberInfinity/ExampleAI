@@ -210,9 +210,8 @@
     (print "/*/*/*/**")
   (imprimirTablero)))
 
-(dummy)
+;(dummy)
 
-;
 
 ;[Main] Programando minimax
 (trace minMax)
@@ -238,43 +237,60 @@
                (setq mejorValor (max mejorValor valorActual)))))
     )mejorValor))
 
-;; El tercer uno es que es la pc
-;; (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*))
-
-;; (defun minimax-alpha-beta (board depth max-depth player use-thresh pass-thresh)
-;;   (if (= depth max-depth)
-;;       (heuristicaMancala (first board))
-;;       (let ((successors (aplicarOperadores board)))
-;;       )
 
 
+(defun minimax-alpha-beta (board depth max-depth player use-thresh pass-thresh)
+  (if (= depth max-depth)
+      (heuristicaMancala (first board))
+      (let ((successors (aplicarOperadores board)))
+        (if (null successors)
+            (heuristicaMancala (first board))
+            (do ((new-value nil)
+                 (best-move (car successors)))
+                ((null successors)
+                 (if (= depth 0)
+                     best-move
+                     pass-thresh))
+              (setf new-value
+                    (- (minimax-alpha-beta
+                        (car successors)
+                        (1+ depth)
+                        max-depth
+                        0
+                        (- pass-thresh)
+                        (- use-thresh))))
+              (when (> new-value pass-thresh)
+                (setf pass-thresh new-value)
+                (setf best-move (car successors)))
+              (if (>= pass-thresh use-thresh)
+                  (setf successors nil)
+                  (setf successors (cdr successors))))))))
+
+;[Funcion] Permite cambiar de jugador
+
+;[Funcion] Definimos una funcion que nos va a retornar todos los nodos cada uno ya aplicado el operador
 (defun aplicarOperadores (tableroN)
   (let* ((listaDeEstados nil)
          (nuevoEstado nil)
          (copiaTablero nil)
          (estadoRespaldo nil))
-    (reiniciarJuego)
+
+    ;Por cuestiones de seguridad creamos una copia del tablero
     (loop for elemento in tableroN do
          (setq copiaTablero (cons elemento copiaTablero)))
     (setq copiaTablero  (reverse copiaTablero))
-    (print "///////////////////////////////////////////////////////////")
-    (print copiaTablero)
-    (print tableroN)
+
+    ;Para cada operador que ya hemos definido le aplicamos todos los operadores si son validos
     (loop for operador in *operadores* do
          (setq tableroN copiaTablero)
          (if (operadorValido? operador tableroN)
              (progn
-               (print "/*/*/*/*/*/*/*/*/*/*/*")
-               (print "Estado en el respaldo")
-               (print copiaTablero)
                (setq nuevoEstado (aplicarOperador operador tableroN))
-               (push nuevoEstado listaDeEstados)
-               (print "//// NUEVO ESTADO ////")
-               (print nuevoEstado)
-               (print "ACABAO NUEVO ESTADO  ////////////")))
+               (push nuevoEstado listaDeEstados)))
        finally (return listaDeEstados))))
 
-;(print (aplicarOperadores *tablero*))
+;El tercer uno es que es la pc
+(print (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*)))
 
 ;(turnoHumano)
 
