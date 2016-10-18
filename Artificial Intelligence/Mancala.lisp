@@ -206,11 +206,11 @@
 ;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
 ;TODO Recursividad
 (defun heuristicaMancala (estado)
-  (-(+ (- (apply #'+ (nth 13 estado)) (apply #'+ (nth 6 estado)))
+  (+ (- (apply #'+ (nth 13 estado)) (apply #'+ (nth 6 estado)))
      (- (+ (apply #'+ (nth 7 estado))(apply #'+ (nth 8 estado))(apply #'+ (nth 9 estado))
            (apply #'+ (nth 10 estado))(apply #'+ (nth 11 estado))(apply #'+ (nth 12 estado)))
         (+ (apply #'+ (nth 0 estado))(apply #'+ (nth 1 estado))(apply #'+ (nth 2 estado))
-           (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado)))))))
+           (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado))))))
 
 (defun minimax-alpha-beta (board depth max-depth player use-thresh pass-thresh)
   (if (= depth max-depth)
@@ -271,10 +271,16 @@
 
 ;[Funcion] Permite tirar a la maquina
 (defun turnoMaquina ()
-  (let* ((movimientoMaquina nil))
-  (setq movimientoMaquina (first (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*))))
-  (setq *tablero* movimientoMaquina)
-  (imprimirTablero)))
+  (let* ((movimientoMaquina nil)
+         (movimientoFinal nil)
+         (vuelveATirarMaquina T))
+    (loop until (null vuelveATirarMaquina) do
+         (setq movimientoMaquina (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*)))
+         (setq vuelveATirarMaquina (second movimientoMaquina))
+         (setq movimientoFinal (first movimientoMaquina))
+         (setq *tablero* movimientoFinal)
+         (imprimirTablero))
+    ))
 
 
 ;El tercer uno es que es la pc
@@ -283,7 +289,7 @@
 ;[Maain] Permite jugar
 (defun jugar()
   (reiniciarJuego)
-    (loop until (= testing 9) do
+    (loop until (= testing 15) do
        (imprimirTablero)
        (turnoHumano)
        (setq *tirarDeNuevo* T)
