@@ -133,10 +133,6 @@
            (if(null (nth 12 estado)) nil T))
           (T nil))))
 
-
-;TODO FALTA HACER NUESTRA HEURISTICA
-(defun heuristicaMancaa (estado))
-
 ;[Funcion] Permite hacer el movimiento no destructivo, eso devuelve del loop
 ; Falta validar que si cae en su base vuelve a tirar
 (defun aplicarOperador (operador estado)
@@ -155,31 +151,56 @@
     estadoFinal))
 
 ;[Auxiliar] Para evitar que se repita codigo creamos una funcion auxiliar que nos permita mover las casillas
-;TODO Cambiar los valores de la otra funcion a esta
 (defun aplicarOperadorAux (estado casillaActual canicas)
   (let* ((seguirTirando nil)
          (canicaAux nil)
+         (contador 0)
+         (canicaMayorEnBase -1)
          (casillaAMeter (1+ casillaActual)))
+    (print "Esto es mi resta para saber las casillas")
+    (setq canicas(sort canicas #'>))
+    (if ( >= (length canicas) (- 13 casillaActual))
+        (progn
+          (setq canicaMayorEnBase (first canicas))
+          (push canicaMayorEnBase (nth 13 estado))
+         (setq seguirTirando T)))
+
+    (print "ESTA SON MIS CANICAS /*/*/*/*/*")
+    (print canicas)
+
+    (print "ESTE ES MI ESTADO")
+    (print estado)
+
+
     (loop for canica in canicas do
-         (print casillaAMeter)
          (setq canicaAux (pop (nth casillaActual estado)))
-         (if (= casillaAMeter 13)
-             (setq seguirTirando T))
-         (if (> casillaAMeter 13)
-             (setq casillaAMeter 0))
-         (push canica (nth casillaAMeter estado))
-         (setq casillaAMeter (1+ casillaAMeter))
+         (print canicaAux)
+         (if (and ( = contador 0 ) ( = canicaMayorEnBase canicaAux))
+             (setq contador (1+ contador))
+             (progn
+               (if (> casillaAMeter 12)
+                   (setq casillaAMeter 0))
+               (push canicaAux (nth casillaAMeter estado))
+               (setq casillaAMeter (1+ casillaAMeter))))
        finally (return (list estado seguirTirando)))))
+
+;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
+;(defun heuristicaMancala (estado)
+;  )
+
+;[Funcion] Permite ordenar mis canicas
 
 ;(reiniciarJuego)
 ;(imprimirTablero)
 
+(first (member 2 '(1 3 2)))
+
 (defun dummy ()
   (let* ((algo nil))
-  (reiniciarJuego)
-  (setq algo (aplicarOperador '(:Quinto 11) *tablero*))
+    (reiniciarJuego)
+    (print "LO ANDA HACIENDO")
+  (setq algo (aplicarOperador '(:Cuarto 10) *tablero*))
   (print algo)
-  (print "WTF")
   (print (first algo))
   (print (second algo))
   (imprimirTablero)))
