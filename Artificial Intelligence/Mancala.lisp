@@ -8,6 +8,7 @@
 ;[Parametros] Definimos los operadores
 (defparameter *id* 0)
 (defparameter *ancestro* nil)
+(defparameter *infinito* most-positive-fixnum)
 (defparameter *operadores* '((:Primero 7)
                              (:Segundo 8)
                              (:Tercero 9)
@@ -151,13 +152,20 @@
     estadoFinal))
 
 ;[Auxiliar] Para evitar que se repita codigo creamos una funcion auxiliar que nos permita mover las casillas
-(defun aplicarOperadorAux (estado casillaActual canicas)
+(defun aplicarOperadorAux (tablero casillaActual canicas)
   (let* ((seguirTirando nil)
          (canicaAux nil)
          (contador 0)
+         (estado nil)
          (canicaMayorEnBase -1)
          (casillaAMeter (1+ casillaActual)))
-    (print "Esto es mi resta para saber las casillas")
+
+    ;Usamos funciones destructivas por lo que es recomendable trabajar con copias totalmente separadas de lo por
+    ; lo que estado es una copia de el estado actual de nuestro tablero
+    (setq estado (copy-list tablero))
+
+    ;Realizamos una resta para saber el numero de canicas que le vamos a dar al humano, quedandonos siempre
+    ; las de mejor valor asi como insertando la de mayor valor en nuestra base
     (setq canicas(sort canicas #'>))
     (if ( >= (length canicas) (- 13 casillaActual))
         (progn
@@ -165,16 +173,11 @@
           (push canicaMayorEnBase (nth 13 estado))
          (setq seguirTirando T)))
 
-    (print "ESTA SON MIS CANICAS /*/*/*/*/*")
-    (print canicas)
-
-    (print "ESTE ES MI ESTADO")
-    (print estado)
-
-
+    ;Anteriormente ya hemos insertado la canica de mayor valor en nuestra base por lo que detectamos cuando
+    ; se repitela canica para no insertarla, asi como debemos reiniciar la cuenta para insertar las otras
+    ; canicas en la base enemiga
     (loop for canica in canicas do
          (setq canicaAux (pop (nth casillaActual estado)))
-         (print canicaAux)
          (if (and ( = contador 0 ) ( = canicaMayorEnBase canicaAux))
              (setq contador (1+ contador))
              (progn
@@ -185,45 +188,95 @@
        finally (return (list estado seguirTirando)))))
 
 ;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
-;(defun heuristicaMancala (estado)
-;  )
-
-;[Funcion] Permite ordenar mis canicas
+;TODO Recursividad
+(defun heuristicaMancala (estado)
+  (+ (- (apply #'+ (nth 13 estado)) (apply #'+ (nth 6 estado)))
+     (- (+ (apply #'+ (nth 7 estado))(apply #'+ (nth 8 estado))(apply #'+ (nth 9 estado))
+           (apply #'+ (nth 10 estado))(apply #'+ (nth 11 estado))(apply #'+ (nth 12 estado)))
+        (+ (apply #'+ (nth 0 estado))(apply #'+ (nth 1 estado))(apply #'+ (nth 2 estado))
+           (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado))))))
 
 ;(reiniciarJuego)
 ;(imprimirTablero)
 
-(first (member 2 '(1 3 2)))
 
 (defun dummy ()
   (let* ((algo nil))
     (reiniciarJuego)
     (print "LO ANDA HACIENDO")
-  (setq algo (aplicarOperador '(:Cuarto 10) *tablero*))
-  (print algo)
-  (print (first algo))
-  (print (second algo))
+    (setq algo (aplicarOperador '(:Cuarto 10) *tablero*))
+    (print "ESTO IMPRIRMIO ALGO")
+    (print algo)
+    (print "/*/*/*/**")
   (imprimirTablero)))
 
 (dummy)
 
+;
 
 ;[Main] Programando minimax
-;(defun minMax (estado profundidad maximizarJugador)
-;  (if ( = profundidad 0)
+(trace minMax)
+(defun minMax (estado profundidad maximizarJugador)
+  (let ((mejorValor nil)
+        (nuevoEstado nil)
+        (valorActual nil))
+    (imprimirTablero)
+  (if ( = profundidad 0)
 ;      ;Retornar la heuristica del nodo
-;      (return-from minMax (heuristicaMancaa estado)))
-;  (if maximizarJugador (setq mejorValor most-negative-fixnum) (setq mejorValor most-positive-fixnum))
-;  (loop for operador in *operadores* do
-;       (if (operadorValido? operador estado)
-;           (progn
-;             (setq nuevoEstado (aplicaOperador operador estado))
-;             (setq valorActual (miniMax nuevoEstado (1- profundidad) nil))
-;             (setq mejorValor (max mejorValor valorActual)))))
-;  (list mejorValor nuevoEstado)
-;
-;           ;Falta regresar cual es el mejor
-;))
+      (heuristicaMancala (first estado)))
+  (progn
+    (if maximizarJugador (setq mejorValor most-negative-fixnum) (setq mejorValor most-positive-fixnum))
+    (loop for operador in *operadores* do
+         (if (operadorValido? operador estado)
+             (progn
+               (setq nuevoEstado (aplicarOperador operador estado))
+               (if (not (null (second nuevoEstado)))
+                   (progn
+                     (setq maximizarJugador T))
+                   (setq maximizarJugador nil))
+               (setq valorActual (minMax nuevoEstado (1- profundidad) maximizarJugador))
+               (setq mejorValor (max mejorValor valorActual)))))
+    )mejorValor))
+
+;; El tercer uno es que es la pc
+;; (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*))
+
+;; (defun minimax-alpha-beta (board depth max-depth player use-thresh pass-thresh)
+;;   (if (= depth max-depth)
+;;       (heuristicaMancala (first board))
+;;       (let ((successors (aplicarOperadores board)))
+;;       )
+
+
+(defun aplicarOperadores (tableroN)
+  (let* ((listaDeEstados nil)
+         (nuevoEstado nil)
+         (copiaTablero nil)
+         (estadoRespaldo nil))
+    (reiniciarJuego)
+    (loop for elemento in tableroN do
+         (setq copiaTablero (cons elemento copiaTablero)))
+    (setq copiaTablero  (reverse copiaTablero))
+    (print "///////////////////////////////////////////////////////////")
+    (print copiaTablero)
+    (print tableroN)
+    (loop for operador in *operadores* do
+         (setq tableroN copiaTablero)
+         (if (operadorValido? operador tableroN)
+             (progn
+               (print "/*/*/*/*/*/*/*/*/*/*/*")
+               (print "Estado en el respaldo")
+               (print copiaTablero)
+               (setq nuevoEstado (aplicarOperador operador tableroN))
+               (push nuevoEstado listaDeEstados)
+               (print "//// NUEVO ESTADO ////")
+               (print nuevoEstado)
+               (print "ACABAO NUEVO ESTADO  ////////////")))
+       finally (return listaDeEstados))))
+
+;(print (aplicarOperadores *tablero*))
 
 ;(turnoHumano)
+
+
 
