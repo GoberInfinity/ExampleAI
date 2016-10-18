@@ -5,6 +5,8 @@
 (defparameter *tirarDeNuevo* T)
 (defparameter *casillasTiradas* nil)
 
+(defparameter *tableroUniversal* '())
+
 ;[Parametros] Definimos los operadores
 (defparameter *id* 0)
 (defparameter *ancestro* nil)
@@ -140,6 +142,9 @@
          (casillaActual (second operador))
          (canicas (canicasEnCasilla casillaActual))
          (estadoFinal nil))
+
+    (setq *tableroUniversal* estado)
+
     (case operadorEtiqueta
       (:Primero (setq estadoFinal (aplicarOperadorAux estado casillaActual canicas)))
       (:Segundo (setq estadoFinal (aplicarOperadorAux estado casillaActual canicas)))
@@ -151,40 +156,52 @@
     estadoFinal))
 
 ;[Auxiliar] Para evitar que se repita codigo creamos una funcion auxiliar que nos permita mover las casillas
-(defun aplicarOperadorAux (tablero casillaActual canicas)
+(defun aplicarOperadorAux (tablero casillaActual canicasAux)
   (let* ((seguirTirando nil)
          (canicaAux nil)
          (contador 0)
          (estado nil)
+         (canicas nil)
+         (copiaTablero nil)
          (canicaMayorEnBase -1)
          (casillaAMeter (1+ casillaActual)))
+
+
 
     ;Usamos funciones destructivas por lo que es recomendable trabajar con copias totalmente separadas de lo por
     ; lo que estado es una copia de el estado actual de nuestro tablero
     (setq estado (copy-list tablero))
 
+    (loop for elemento in tablero do
+         (setq copiaTablero (cons elemento copiaTablero)))
+    (setq copiaTablero  (reverse copiaTablero))
+
+    (loop for can in canicasAux do
+         (setq canicas (cons can canicas)))
+
     ;Realizamos una resta para saber el numero de canicas que le vamos a dar al humano, quedandonos siempre
     ; las de mejor valor asi como insertando la de mayor valor en nuestra base
     (setq canicas(sort canicas #'>))
+
     (if ( >= (length canicas) (- 13 casillaActual))
         (progn
           (setq canicaMayorEnBase (first canicas))
-          (push canicaMayorEnBase (nth 13 estado))
-         (setq seguirTirando T)))
+          (push canicaMayorEnBase (nth 13 copiaTablero))
+          (setq seguirTirando T)))
 
     ;Anteriormente ya hemos insertado la canica de mayor valor en nuestra base por lo que detectamos cuando
     ; se repitela canica para no insertarla, asi como debemos reiniciar la cuenta para insertar las otras
     ; canicas en la base enemiga
     (loop for canica in canicas do
-         (setq canicaAux (pop (nth casillaActual estado)))
+         (setq canicaAux (pop (nth casillaActual copiaTablero)))
          (if (and ( = contador 0 ) ( = canicaMayorEnBase canicaAux))
              (setq contador (1+ contador))
              (progn
                (if (> casillaAMeter 12)
                    (setq casillaAMeter 0))
-               (push canicaAux (nth casillaAMeter estado))
+               (push canicaAux (nth casillaAMeter copiaTablero))
                (setq casillaAMeter (1+ casillaAMeter))))
-       finally (return (list estado seguirTirando)))))
+       finally (return (list copiaTablero seguirTirando)))))
 
 ;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
 ;TODO Recursividad
@@ -195,19 +212,6 @@
         (+ (apply #'+ (nth 0 estado))(apply #'+ (nth 1 estado))(apply #'+ (nth 2 estado))
            (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado)))))))
 
-(defun dummy ()
-  (let* ((algo nil))
-    (reiniciarJuego)
-    (print "LO ANDA HACIENDO")
-    (setq algo (aplicarOperador '(:Cuarto 10) *tablero*))
-    (print "ESTO IMPRIRMIO ALGO")
-    (print algo)
-    (print "/*/*/*/**")
-  (imprimirTablero)))
-
-;(dummy)
-
-(trace minimax-alpha-beta)
 (defun minimax-alpha-beta (board depth max-depth player use-thresh pass-thresh)
   (if (= depth max-depth)
       (heuristicaMancala (first board))
@@ -252,15 +256,26 @@
     (loop for elemento in tableroN do
          (setq copiaTablero (cons elemento copiaTablero)))
     (setq copiaTablero  (reverse copiaTablero))
-
     ;Para cada operador que ya hemos definido le aplicamos todos los operadores si son validos
     (loop for operador in *operadores* do
-         (setq tableroN copiaTablero)
+        ; (print "ESTO ES MI COPIA TABLERO")
+        ; (print copiaTablero)
+        ; (print "ESTO ES MI TABLERON")
+        ; (setq tableroN copiaTablero)
+        ; (print tableroN)
          (if (operadorValido? operador tableroN)
              (progn
                (setq nuevoEstado (aplicarOperador operador tableroN))
                (push nuevoEstado listaDeEstados)))
        finally (return listaDeEstados))))
+
+;[Funcion] Permite tirar a la maquina
+(defun turnoMaquina ()
+  (let* ((movimientoMaquina nil))
+  (setq movimientoMaquina (first (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*))))
+  (setq *tablero* movimientoMaquina)
+  (imprimirTablero)))
+
 
 ;El tercer uno es que es la pc
 ;(print (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*)))
@@ -268,13 +283,12 @@
 ;[Maain] Permite jugar
 (defun jugar()
   (reiniciarJuego)
-  (loop until (= testing 2) do
+    (loop until (= testing 9) do
+       (imprimirTablero)
        (turnoHumano)
        (setq *tirarDeNuevo* T)
-       (print (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*)))
-       (print "/*/*/*/*/*/*/* DEBERIA DE JUGAR")
-       (print "/*/*/*/*/*/*/*")
-       (setq testing (1+ testing))))
+       (turnoMaquina)
+         (setq testing (1+ testing))))
 
 
 (jugar)
