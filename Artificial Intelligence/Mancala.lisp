@@ -54,19 +54,20 @@
 ;[Predicado]Permite saber si ya se termino el juego
 ;TODO: Hacer recursiva esta
 (defun juegoTerminado? ()
-  (and
+  (return-from juegoTerminado? (or (and
          (null (nth 0 *tablero*))
          (null (nth 1 *tablero*))
          (null (nth 2 *tablero*))
          (null (nth 3 *tablero*))
          (null (nth 4 *tablero*))
-         (null (nth 5 *tablero*))
+         (null (nth 5 *tablero*)))
+      (and
          (null (nth 7 *tablero*))
          (null (nth 8 *tablero*))
          (null (nth 9 *tablero*))
          (null (nth 10 *tablero*))
          (null (nth 11 *tablero*))
-         (null (nth 12 *tablero*))))
+         (null (nth 12 *tablero*))))))
 
 ;[Predicate] Permite validar si se puede escoger la casilla
 (defun casillaValida? (casillaEscogida)
@@ -87,6 +88,7 @@
          (casillaAMover nil))
 
     (loop until (null *tirarDeNuevo*) do
+
          ;Primero validamos que la casilla que va atirar tenga al menos una canica
          ; y si es asi, obtenermos el total de ellas en esa casilla
          (loop until casillaValida do
@@ -111,7 +113,9 @@
          (imprimirTablero)
          (setq casillaEscogida nil)
          (setq casillaValida nil)
-         (setq *casillasTiradas* nil))))
+         (setq *casillasTiradas* nil)
+         (if (juegoTerminado?)(progn (setq *finDelJuego* (juegoTerminado?))
+                                     (setq *tirarDeNuevo* nil))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -249,8 +253,7 @@
 (defun aplicarOperadores (tableroN)
   (let* ((listaDeEstados nil)
          (nuevoEstado nil)
-         (copiaTablero nil)
-         (estadoRespaldo nil))
+         (copiaTablero nil))
 
     ;Por cuestiones de seguridad creamos una copia del tablero
     (loop for elemento in tableroN do
@@ -279,25 +282,29 @@
          (setq vuelveATirarMaquina (second movimientoMaquina))
          (setq movimientoFinal (first movimientoMaquina))
          (setq *tablero* movimientoFinal)
+         (if (juegoTerminado?)(progn (setq *finDelJuego* (juegoTerminado?))
+                                     (setq vuelveATirarMaquina nil)))
          (imprimirTablero))
     ))
 
+(defparameter *finDelJuego* nil)
 
 ;El tercer uno es que es la pc
 ;(print (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*)))
 (defparameter testing 0)
 ;[Maain] Permite jugar
 (defun jugar()
-  (reiniciarJuego)
-    (loop until (= testing 15) do
+ ; (reiniciarJuego)
+  (loop until (not (null *finDelJuego*)) do
        (imprimirTablero)
+       (juegoTerminado?)
        (turnoHumano)
        (setq *tirarDeNuevo* T)
        (turnoMaquina)
-         (setq testing (1+ testing))))
-
+       (print *finDelJuego*))
+    (format t "~& La puntuacion de la Inteligencia Artificial ~A ~%" (apply #'+ (nth 13 *tablero*)))
+    (format t "~& La puntuacion del jugador humano ~A  ~%" (apply #'+ (nth 6 *tablero*))))
 
 (jugar)
-
 
 
