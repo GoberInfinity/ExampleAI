@@ -6,6 +6,7 @@
 (defparameter *casillasTiradas* nil)
 
 (defparameter *tableroUniversal* '())
+(defparameter *jugadorGanador* nil)
 
 ;[Parametros] Definimos los operadores
 (defparameter *id* 0)
@@ -115,6 +116,7 @@
          (setq casillaValida nil)
          (setq *casillasTiradas* nil)
          (if (juegoTerminado?)(progn (setq *finDelJuego* (juegoTerminado?))
+                                     (setq *jugadorGanador* 0)
                                      (setq *tirarDeNuevo* nil))))))
 
 
@@ -283,6 +285,7 @@
          (setq movimientoFinal (first movimientoMaquina))
          (setq *tablero* movimientoFinal)
          (if (juegoTerminado?)(progn (setq *finDelJuego* (juegoTerminado?))
+                                     (setq *jugadorGanador* 1)
                                      (setq vuelveATirarMaquina nil)))
          (imprimirTablero))
     ))
@@ -292,19 +295,53 @@
 ;El tercer uno es que es la pc
 ;(print (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*)))
 (defparameter testing 0)
+
+
 ;[Maain] Permite jugar
 (defun jugar()
- ; (reiniciarJuego)
+  (format t "~%Mancala Inteligencia Artificial.~%")
+  (format t "~%Tablero: El talbero tiene la siguiente composicion, las casillas de la 0-5 es las que puede tirar.~%")
+  (format t "~%         La 6ta casilla es su base, tiene que acumular el mayor numero de puntos en su base.~%")
+  (format t "~%Reglas: Cada turno usted puede escoger una casilla que contenga al menos 1 canica en la casilla .~%")
+  (format t "~%        La canica debe moverla a las casillas consecuentes, solo colocando 1 canica en las siguientes .~%")
+  (format t "~%        Solo puede moverse hacia adelante y no puede colocar canicas en la base del enemigo .~%")
+  (format t "~%        Si sobran casillas despues de hacer su movimiento se pasan a la base del enemigo.~%")
+  (format t "~%        Al final el jugador que ya no tenga mas canicas en sus casillas, se apodera de las del otro.~%")
+  (format t "~%        Gana el jugador con mejor puntuacion al final.~%")
+  ;(reiniciarJuego)
   (loop until (not (null *finDelJuego*)) do
        (imprimirTablero)
        (juegoTerminado?)
        (turnoHumano)
        (setq *tirarDeNuevo* T)
-       (turnoMaquina)
-       (print *finDelJuego*))
-    (format t "~& La puntuacion de la Inteligencia Artificial ~A ~%" (apply #'+ (nth 13 *tablero*)))
-    (format t "~& La puntuacion del jugador humano ~A  ~%" (apply #'+ (nth 6 *tablero*))))
+       (print "ESTO ES MI FIN DE MI JUEGO")
+       (print *finDelJuego*)
+       (if (null *finDelJuego*)
+           (turnoMaquina)))
+  (print "JUGADOR GANADOR ES")
+  (print *jugadorGanador*)
+  (format t "~& La puntuacion de la Inteligencia Artificial ~A ~%"
+          (if (= *jugadorGanador* 1)
+              (progn
+                (+ (apply #'+ (nth 0 *tablero*))(apply #'+ (nth 1 *tablero*))(apply #'+ (nth 2 *tablero*))
+                   (apply #'+ (nth 3 *tablero*))(apply #'+ (nth 4 *tablero*))(apply #'+ (nth 5 *tablero*))
+                   (apply #'+ (nth 13 *tablero*))))
+              (apply #'+ (nth 13 *tablero*))))
+  (format t "~& La puntuacion del jugador humano ~A  ~%"
+          (if (= *jugadorGanador* 0)
+              (progn
+                (+ (apply #'+ (nth 7 *tablero*))(apply #'+ (nth 8 *tablero*))(apply #'+ (nth 9 *tablero*))
+                   (apply #'+ (nth 10 *tablero*))(apply #'+ (nth 11 *tablero*))(apply #'+ (nth 12 *tablero*))
+                   (apply #'+ (nth 6 *tablero*))))
+              (apply #'+ (nth 6 *tablero*)))))
+
+;Suma 24
+(setq *tablero* '((2) NIL NIL NIL NIL NIL (2 3 2 2 1 1 2 1 1 2 2 3) NIL NIL (2) (1) NIL NIL (3 3 1 2 1 1 2 1 3 2 3 3 1 2 3 3 1 2 3 1 3 3)))
 
 (jugar)
+
+;TODO falta sumar todos los puntos sobrantes del tablero
+                                        ;TODO Que la inteligencia ya no tire cuando ya acabo el juego
+
 
 
