@@ -217,7 +217,7 @@
                    (setq casillaAMeter 0))
                (push canicaAux (nth casillaAMeter copiaTablero))
                (setq casillaAMeter (1+ casillaAMeter))))
-         (setq contadorParaTurno (1+ contadorParaTurno))
+       ;  (setq contadorParaTurno (1+ contadorParaTurno))
        finally (return (list copiaTablero seguirTirando)))))
 
 ;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
