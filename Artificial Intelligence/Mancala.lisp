@@ -37,15 +37,11 @@
   (nth casilla *tablero*))
 
 ;[Funcion] Te permite mover la canica a una nueva casilla
-(defun moverCanicaACasilla (casillaEscogida casillaAMover numeroCasillas)
+(defun moverCanicaACasilla (casillaEscogida casillaAMover)
   (let* ((canica (pop (nth casillaEscogida *tablero*))))
                                         ;    (format t "~& Mover a:  ~A ~%" (nth casillaAMover *tablero*))
     (push canica (nth casillaAMover *tablero*))
-    (setq *contadorParaCanicas* (1+ *contadorParaCanicas*))
-                                        ;Detectamos cuando puede volver a tirar la persona, en este caso cuando sea la casilla 6
-    (if (and (= casillaAMover 6) ( = numeroCasillas *contadorParaCanicas*))
-        (setq *tirarDeNuevo* T)
-        (setq *tirarDeNuevo* nil))
+
     (format t "~& Canica Escogida:  ~A ~%" canica)
     (format t "~& Casilla Escogida  ~A ~%" casillaEscogida)
     (format t "~& Casilla A Mover  ~A ~%" casillaAMover)
@@ -101,7 +97,16 @@
                     (setq casillaValida T))
                   (print "La casilla que escogiste no tiene canicas")))
 
-      (setq longitudCanicas (length canicas))
+         (setq longitudCanicas (length canicas))
+
+         (if ( > (length canicas) (- 6 casillaEscogida))
+             (setq *tirarDeNuevo* nil))
+
+         (if (= 0 (- (length canicas) (- 6 casillaEscogida)))
+             (setq *tirarDeNuevo* T))
+
+         (if (> 0 (- (length canicas) (- 6 casillaEscogida)))
+             (setq *tirarDeNuevo* nil))
 
     ;Despues para cada canica en esa casilla, le permitimos al usuario mover cada una.
     ;Asi como tambien validamos que si cae en su base alguna canica vuelve a tirar
@@ -111,7 +116,8 @@
               (loop until (null (seRepiteMovimiento? (setq casillaAMover(read)))) do
                    (format t "~& No se puede mover ~%"))
               (push casillaAMover *casillasTiradas*)
-              (moverCanicaACasilla casillaEscogida casillaAMover longitudCanicas))
+              (moverCanicaACasilla casillaEscogida casillaAMover))
+
 
          ;Limpiamos las variables tomando la precaucion de si el usuario puede volver
          ; a tirar
@@ -166,8 +172,7 @@
 
 ;[Auxiliar] Para evitar que se repita codigo creamos una funcion auxiliar que nos permita mover las casillas
 (defun aplicarOperadorAux (tablero casillaActual canicasAux)
-  (let* ((seguirTirando nil)
-         (canicaAux nil)
+  (let* ((canicaAux nil)
          (contador 0)
          (estado nil)
          (canicas nil)
@@ -175,13 +180,14 @@
          (contadorParaTurno 0)
          (copiaTablero nil)
          (canicaMayorEnBase -1)
+         (maquinaSeguirTirando nil)
          (casillaAMeter (1+ casillaActual)))
 
     ;Usamos funciones destructivas por lo que es recomendable trabajar con copias totalmente separadas de lo por
     ; lo que estado es una copia de el estado actual de nuestro tablero
     (setq estado (copy-list tablero))
 
-    ;Por seguridad y para que no guarde referencias a otras celdas de la lista, creamos una copia de los elementos 
+    ;Por seguridad y para que no guarde referencias a otras celdas de la lista, creamos una copia de los elementos
     ; originales
     (loop for elemento in tablero do
          (setq copiaTablero (cons elemento copiaTablero)))
@@ -189,11 +195,10 @@
     (loop for can in canicasAux do
          (setq canicas (cons can canicas)))
 
-    (setq longitudParaTurno (length canicas))
-
     ;Realizamos una resta para saber el numero de canicas que le vamos a dar al humano, quedandonos siempre
     ; las de mejor valor asi como insertando la de mayor valor en nuestra base
     (setq canicas(sort canicas #'>))
+    (setq longitudParaTurno (length canicas))
     (if ( >= (length canicas) (- 13 casillaActual))
         (progn
           (setq canicaMayorEnBase (first canicas))
@@ -201,24 +206,32 @@
                                         ;(setq seguirTirando T)
           ))
 
+    (if ( > (length canicas) (- 13 casillaActual))
+        (setq maquinaSeguirTirando nil))
+
+     (if (= 0 (- (length canicas) (- 13 casillaActual)))
+         (setq maquinaSeguirTirando T))
+
+     (if (> 0 (- (length canicas) (- 13 casillaActual)))
+         (setq maquinaSeguirTirando nil))
+
+
     ;Anteriormente ya hemos insertado la canica de mayor valor en nuestra base por lo que detectamos cuando
     ; se repitela canica para no insertarla, asi como debemos reiniciar la cuenta para insertar las otras
     ; canicas en la base enemiga
     (loop for canica in canicas do
          (setq contadorParaTurno (1+ contadorParaTurno))
          (setq canicaAux (pop (nth casillaActual copiaTablero)))
-         (if (and ( = contadorParaTurno longitudParaTurno) (= casillaAMeter 13))
-             (setq seguirTirando T)
-             (setq seguirTirando nil))
          (if (and ( = contador 0 ) ( = canicaMayorEnBase canicaAux))
-             (setq contador (1+ contador))
+             (progn
+               (setq contador (1+ contador)))
              (progn
                (if (> casillaAMeter 12)
                    (setq casillaAMeter 0))
                (push canicaAux (nth casillaAMeter copiaTablero))
                (setq casillaAMeter (1+ casillaAMeter))))
        ;  (setq contadorParaTurno (1+ contadorParaTurno))
-       finally (return (list copiaTablero seguirTirando)))))
+       finally (return (list copiaTablero maquinaSeguirTirando)))))
 
 ;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
 (defun heuristicaMancala (estado)
