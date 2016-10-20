@@ -211,32 +211,54 @@
            (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado))))))
 
 ;[Funcion] Permite hacer la logica para poder hacer que la maquina de su mejor tiro
-(defun minimax-alpha-beta (board depth max-depth player use-thresh pass-thresh)
-  (if (= depth max-depth)
-      (heuristicaMancala (first board))
-      (let ((successors (aplicarOperadores board)))
-        (if (null successors)
-            (heuristicaMancala (first board))
-            (do ((new-value nil)
-                 (best-move (car successors)))
-                ((null successors)
-                 (if (= depth 0)
-                     best-move
-                     pass-thresh))
-              (setf new-value
+(defun minimax-alpha-beta (tablero profundidad max-profundidad jugador alpha beta)
+  ;Si llegamos a la profundidad maxima retornamos la evaluacion de la heuristica
+  (if (= profundidad max-profundidad)
+      (heuristicaMancala (first tablero))
+      ;Si aun no hemos llegado a la profundidad maxima continuamos
+      ;Primero recuperamos como sucesores la aplicacion de los operadores al tablero
+      (let ((sucesores (aplicarOperadores tablero)))
+        ;Si ya no tenemos sucesores que analizar llamamos a la heuristica del Mancala
+        ; second de tablero es si puede volver a tirar la maquina o no
+        (if (null sucesores)
+            (heuristicaMancala (first tablero))
+            ;Supones que nuestro mejor movimiento es el primero de nuestro sucesor ya que
+            ; second es si puede volver a tirar la maquina o no
+            (do ((nuevoValor nil)
+                 (mejorMovimiento (car sucesores)))
+
+                ;Cuando ya no hay mas sucesores y su profundidad es 0 retornamos el mejor movimiento
+                ((null sucesores)
+                 (if (= profundidad 0)
+                     mejorMovimiento
+                     beta))
+
+              ;Seteamos el nuevo Valor y llamamos recursivamente a minimax
+              (setf nuevoValor
                     (- (minimax-alpha-beta
-                        (car successors)
-                        (1+ depth)
-                        max-depth
-                        (cambiarJugador player)
-                        (- pass-thresh)
-                        (- use-thresh))))
-              (when (> new-value pass-thresh)
-                (setf pass-thresh new-value)
-                (setf best-move (car successors)))
-              (if (>= pass-thresh use-thresh)
-                  (setf successors nil)
-                  (setf successors (cdr successors))))))))
+                        ;Le pasamos el sucesor que fue el resultado de aplicar el operador
+                        ; es decir le enviamos el tablero ya con un operador ya hecho
+                        (car sucesores)
+                        ;Mandamos 1+ profundidad
+                        (1+ profundidad)
+                        ;Le pasamos la maxima profundidad
+                        max-profundidad
+                        ;Cambiamos de jugador a humano
+                        (cambiarJugador jugador)
+                        ;Cambiamos el signo por que ahora necesitamos usar minimax
+                        (- beta)
+                        (- alpha))))
+
+              ;Si nuevoValor > beta entonces encontramos un sucesor que es mejor que cualquiera
+              ; que haya sido examinado, por lo que ahora nuestro beta va a ser nuestro nuevo
+              ; valor y nuestro mejor movimiento el primer elemento de los sucesores
+              (when (> nuevoValor beta)
+                (setf beta nuevoValor)
+                (setf mejorMovimiento (car sucesores)))
+              ;Si beta >= alpha dejamos de examinar esa rama
+              (if (>= beta alpha)
+                  (setf sucesores nil) ;Si es verdadero terminamos el loop
+                  (setf sucesores (cdr sucesores)))))))) ;Si no, seguimos
 
 ;[Funcion] Permite cambiar de jugador
 (defun cambiarJugador (jugador)
@@ -317,9 +339,7 @@
                    (apply #'+ (nth 6 *tablero*))))
               (apply #'+ (nth 6 *tablero*)))))
 
-;Suma 24
-;(setq *tablero* '((2) NIL NIL NIL NIL NIL (2 3 2 2 1 1 2 1 1 2 2 3) NIL NIL (2) (1) NIL NIL (3 3 1 2 1 1 2 1 3 2 3 3 1 2 3 3 1 2 3 1 3 3)))
-
 (jugar)
+
 
 
