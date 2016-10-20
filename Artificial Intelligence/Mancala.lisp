@@ -1,12 +1,13 @@
 ;Reyes Fragoso Roberto
 
 ;[Parametros] Definicion del tablero del enemigo y el nuestro para el juego
-(defparameter *tablero* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()))
+(defparameter *tablero* '((1 5 10)(1 5 10)(1 5 10)(1 5 10)(1 5 10)(1 5 10)()(1 5 10)(1 5 10)(1 5 10)(1 5 10)(1 5 10)(1 5 10)()))
 (defparameter *tirarDeNuevo* T)
 (defparameter *casillasTiradas* nil)
 (defparameter *tableroUniversal* '())
 (defparameter *jugadorGanador* nil)
 (defparameter *finDelJuego* nil)
+(defparameter *contadorParaCanicas* 0)
 
 ;[Parametros] Definimos los operadores
 (defparameter *id* 0)
@@ -29,20 +30,20 @@
 
 ;[Funcion] Permite resetear el juego
 (defun reiniciarJuego ()
-  (setq *tablero* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)())))
+  (setq *tablero* '((1 5 10)(1 5 10)(1 5 10)(1 5 10)(1 5 10)(1 5 10)()(1 5 10)(1 5 10)(1 5 10)(1 5 10)(1 5 10)(1 5 10)())))
 
 ;[Funcion] Le permite saber el numero de casillas en la posicion que eligio el usuario
 (defun canicasEnCasilla (casilla)
   (nth casilla *tablero*))
 
 ;[Funcion] Te permite mover la canica a una nueva casilla
-(defun moverCanicaACasilla (casillaEscogida casillaAMover)
+(defun moverCanicaACasilla (casillaEscogida casillaAMover numeroCasillas)
   (let* ((canica (pop (nth casillaEscogida *tablero*))))
-;    (format t "~& Mover a:  ~A ~%" (nth casillaAMover *tablero*))
+                                        ;    (format t "~& Mover a:  ~A ~%" (nth casillaAMover *tablero*))
     (push canica (nth casillaAMover *tablero*))
-
-    ;Detectamos cuando puede volver a tirar la persona, en este caso cuando sea la casilla 6
-    (if (= casillaAMover 6)
+    (setq *contadorParaCanicas* (1+ *contadorParaCanicas*))
+                                        ;Detectamos cuando puede volver a tirar la persona, en este caso cuando sea la casilla 6
+    (if (and (= casillaAMover 6) ( = numeroCasillas *contadorParaCanicas*))
         (setq *tirarDeNuevo* T)
         (setq *tirarDeNuevo* nil))
     (format t "~& Canica Escogida:  ~A ~%" canica)
@@ -79,9 +80,11 @@
   (if (member casillaEscogida *casillasTiradas*) T nil))
 
 ;[Funcion] Permite hacer toda la logica y validaciones para que tire el ser humano
+;[Funcion] Permite hacer toda la logica y validaciones para que tire el ser humano
 (defun turnoHumano ()
   (let* ((casillaEscogida nil)
          (canicas 0)
+         (longitudCanicas nil)
          (casillaValida nil)
          (casillaAMover nil))
 
@@ -98,15 +101,17 @@
                     (setq casillaValida T))
                   (print "La casilla que escogiste no tiene canicas")))
 
+      (setq longitudCanicas (length canicas))
+
     ;Despues para cada canica en esa casilla, le permitimos al usuario mover cada una.
     ;Asi como tambien validamos que si cae en su base alguna canica vuelve a tirar
     ;Y finalmente validamos que no se repitan sus movimientos por cada turno
          (loop for canica in canicas do
-              (format t "~& ¿Para donde mover la canica?  ~A ~%" canica)
+              (format t "~& Para donde mover la canica?  ~A ~%" canica)
               (loop until (null (seRepiteMovimiento? (setq casillaAMover(read)))) do
                    (format t "~& No se puede mover ~%"))
               (push casillaAMover *casillasTiradas*)
-              (moverCanicaACasilla casillaEscogida casillaAMover))
+              (moverCanicaACasilla casillaEscogida casillaAMover longitudCanicas))
 
          ;Limpiamos las variables tomando la precaucion de si el usuario puede volver
          ; a tirar
@@ -116,7 +121,10 @@
          (setq *casillasTiradas* nil)
          (if (juegoTerminado?)(progn (setq *finDelJuego* (juegoTerminado?))
                                      (setq *jugadorGanador* 0)
-                                     (setq *tirarDeNuevo* nil))))))
+                                     (setq *tirarDeNuevo* nil))))
+          (setq *contadorParaCanicas* 0)
+          ))
+
 
 ;[Predicate] Permite saber si el operador es valido
 (defun operadorValido? (operador estado)
@@ -163,6 +171,8 @@
          (contador 0)
          (estado nil)
          (canicas nil)
+         (longitudParaTurno 0)
+         (contadorParaTurno 0)
          (copiaTablero nil)
          (canicaMayorEnBase -1)
          (casillaAMeter (1+ casillaActual)))
@@ -179,6 +189,8 @@
     (loop for can in canicasAux do
          (setq canicas (cons can canicas)))
 
+    (setq longitudParaTurno (length canicas))
+
     ;Realizamos una resta para saber el numero de canicas que le vamos a dar al humano, quedandonos siempre
     ; las de mejor valor asi como insertando la de mayor valor en nuestra base
     (setq canicas(sort canicas #'>))
@@ -186,13 +198,18 @@
         (progn
           (setq canicaMayorEnBase (first canicas))
           (push canicaMayorEnBase (nth 13 copiaTablero))
-          (setq seguirTirando T)))
+                                        ;(setq seguirTirando T)
+          ))
 
     ;Anteriormente ya hemos insertado la canica de mayor valor en nuestra base por lo que detectamos cuando
     ; se repitela canica para no insertarla, asi como debemos reiniciar la cuenta para insertar las otras
     ; canicas en la base enemiga
     (loop for canica in canicas do
+         (setq contadorParaTurno (1+ contadorParaTurno))
          (setq canicaAux (pop (nth casillaActual copiaTablero)))
+         (if (and ( = contadorParaTurno longitudParaTurno) (= casillaAMeter 13))
+             (setq seguirTirando T)
+             (setq seguirTirando nil))
          (if (and ( = contador 0 ) ( = canicaMayorEnBase canicaAux))
              (setq contador (1+ contador))
              (progn
@@ -200,6 +217,7 @@
                    (setq casillaAMeter 0))
                (push canicaAux (nth casillaAMeter copiaTablero))
                (setq casillaAMeter (1+ casillaAMeter))))
+         (setq contadorParaTurno (1+ contadorParaTurno))
        finally (return (list copiaTablero seguirTirando)))))
 
 ;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
