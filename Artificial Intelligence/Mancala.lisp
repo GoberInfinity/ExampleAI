@@ -4,13 +4,12 @@
 (defparameter *tablero* '((1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)(1 2 3)()))
 (defparameter *tirarDeNuevo* T)
 (defparameter *casillasTiradas* nil)
-
 (defparameter *tableroUniversal* '())
 (defparameter *jugadorGanador* nil)
+(defparameter *finDelJuego* nil)
 
 ;[Parametros] Definimos los operadores
 (defparameter *id* 0)
-(defparameter *ancestro* nil)
 (defparameter *infinito* most-positive-fixnum)
 (defparameter *operadores* '((:Primero 7)
                              (:Segundo 8)
@@ -22,9 +21,10 @@
 ;[Funcion] Permite imprimir el tablero, mostrando arriba la base del oponente
 ; y abajo la base del jugador
 (defun imprimirTablero()
-  (format  t  "~& ~A ~A ~A ~A ~A ~A ~A~%"
+  (format t "~%---------Tablero--------~%")
+  (format  t   "~&~% |~A| |~A| |~A| |~A| |~A| |~A| |~A| ~%"
            (nth 13 *tablero*)(nth 12 *tablero*)(nth 11 *tablero*)(nth 10 *tablero*)(nth 9 *tablero*)(nth 8 *tablero*)(nth 7 *tablero*))
-  (format  t  "~& ~A ~A ~A ~A ~A ~A ~A~%"
+  (format  t   "~& |~A| |~A| |~A| |~A| |~A| |~A| |~A| ~%~%"
            (nth 0 *tablero*)(nth 1 *tablero*)(nth 2 *tablero*)(nth 3 *tablero*)(nth 4 *tablero*)(nth 5 *tablero*)(nth 6 *tablero*)))
 
 ;[Funcion] Permite resetear el juego
@@ -38,19 +38,17 @@
 ;[Funcion] Te permite mover la canica a una nueva casilla
 (defun moverCanicaACasilla (casillaEscogida casillaAMover)
   (let* ((canica (pop (nth casillaEscogida *tablero*))))
-    (format t "~& CANICA  ~A ~%" canica)
-    (format t "~& MOVER A   ~A ~%" (nth casillaAMover *tablero*))
+;    (format t "~& Mover a:  ~A ~%" (nth casillaAMover *tablero*))
     (push canica (nth casillaAMover *tablero*))
 
-    ;TODO Validar tambien la inteligencia artificial si cae en contrario no tire
-
+    ;Detectamos cuando puede volver a tirar la persona, en este caso cuando sea la casilla 6
     (if (= casillaAMover 6)
         (setq *tirarDeNuevo* T)
         (setq *tirarDeNuevo* nil))
-
-  (format t "~& CasillaEscogida  ~A ~%" casillaEscogida)
-  (format t "~& CasillaAMover  ~A ~%" casillaAMover)
-  (imprimirTablero)))
+    (format t "~& Canica Escogida:  ~A ~%" canica)
+    (format t "~& Casilla Escogida  ~A ~%" casillaEscogida)
+    (format t "~& Casilla A Mover  ~A ~%" casillaAMover)
+    (imprimirTablero)))
 
 ;[Predicado]Permite saber si ya se termino el juego
 ;TODO: Hacer recursiva esta
@@ -76,23 +74,24 @@
         ((null (canicasEnCasilla casillaEscogida)) nil)
         (T T)))
 
+;[Predicate] Permite validar que no repita el mismo movimiento 2 veces
 (defun seRepiteMovimiento? (casillaEscogida)
-  (print *casillasTiradas*)
-  (print casillaEscogida)
   (if (member casillaEscogida *casillasTiradas*) T nil))
 
-
+;[Funcion] Permite hacer toda la logica y validaciones para que tire el ser humano
 (defun turnoHumano ()
   (let* ((casillaEscogida nil)
          (canicas 0)
          (casillaValida nil)
          (casillaAMover nil))
 
+    ;Hacemos un loop hasta que ya no pueda tirar de nuevo
     (loop until (null *tirarDeNuevo*) do
 
          ;Primero validamos que la casilla que va atirar tenga al menos una canica
          ; y si es asi, obtenermos el total de ellas en esa casilla
          (loop until casillaValida do
+              (print "Escoge una casica")
               (if (casillaValida? (setq casillaEscogida (read)))
                   (progn
                     (setq canicas (canicasEnCasilla casillaEscogida))
@@ -119,12 +118,7 @@
                                      (setq *jugadorGanador* 0)
                                      (setq *tirarDeNuevo* nil))))))
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;[Funcion] Permite saber si el operador es valido
+;[Predicate] Permite saber si el operador es valido
 (defun operadorValido? (operador estado)
   (let* ((operador (second operador)))
     (cond ((= operador 7)
@@ -149,6 +143,7 @@
          (canicas (canicasEnCasilla casillaActual))
          (estadoFinal nil))
 
+    ;Por seguridad creamos una tabla de respaldo, ya que usamos funciones destructivas
     (setq *tableroUniversal* estado)
 
     (case operadorEtiqueta
@@ -172,23 +167,21 @@
          (canicaMayorEnBase -1)
          (casillaAMeter (1+ casillaActual)))
 
-
-
     ;Usamos funciones destructivas por lo que es recomendable trabajar con copias totalmente separadas de lo por
     ; lo que estado es una copia de el estado actual de nuestro tablero
     (setq estado (copy-list tablero))
 
+    ;Por seguridad y para que no guarde referencias a otras celdas de la lista, creamos una copia de los elementos 
+    ; originales
     (loop for elemento in tablero do
          (setq copiaTablero (cons elemento copiaTablero)))
     (setq copiaTablero  (reverse copiaTablero))
-
     (loop for can in canicasAux do
          (setq canicas (cons can canicas)))
 
     ;Realizamos una resta para saber el numero de canicas que le vamos a dar al humano, quedandonos siempre
     ; las de mejor valor asi como insertando la de mayor valor en nuestra base
     (setq canicas(sort canicas #'>))
-
     (if ( >= (length canicas) (- 13 casillaActual))
         (progn
           (setq canicaMayorEnBase (first canicas))
@@ -210,7 +203,6 @@
        finally (return (list copiaTablero seguirTirando)))))
 
 ;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
-;TODO Recursividad
 (defun heuristicaMancala (estado)
   (+ (- (apply #'+ (nth 13 estado)) (apply #'+ (nth 6 estado)))
      (- (+ (apply #'+ (nth 7 estado))(apply #'+ (nth 8 estado))(apply #'+ (nth 9 estado))
@@ -218,6 +210,7 @@
         (+ (apply #'+ (nth 0 estado))(apply #'+ (nth 1 estado))(apply #'+ (nth 2 estado))
            (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado))))))
 
+;[Funcion] Permite hacer la logica para poder hacer que la maquina de su mejor tiro
 (defun minimax-alpha-beta (board depth max-depth player use-thresh pass-thresh)
   (if (= depth max-depth)
       (heuristicaMancala (first board))
@@ -261,13 +254,9 @@
     (loop for elemento in tableroN do
          (setq copiaTablero (cons elemento copiaTablero)))
     (setq copiaTablero  (reverse copiaTablero))
+
     ;Para cada operador que ya hemos definido le aplicamos todos los operadores si son validos
     (loop for operador in *operadores* do
-        ; (print "ESTO ES MI COPIA TABLERO")
-        ; (print copiaTablero)
-        ; (print "ESTO ES MI TABLERON")
-        ; (setq tableroN copiaTablero)
-        ; (print tableroN)
          (if (operadorValido? operador tableroN)
              (progn
                (setq nuevoEstado (aplicarOperador operador tableroN))
@@ -280,6 +269,7 @@
          (movimientoFinal nil)
          (vuelveATirarMaquina T))
     (loop until (null vuelveATirarMaquina) do
+         (format t "~& Turno de la Computadora ~%")
          (setq movimientoMaquina (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*)))
          (setq vuelveATirarMaquina (second movimientoMaquina))
          (setq movimientoFinal (first movimientoMaquina))
@@ -287,39 +277,31 @@
          (if (juegoTerminado?)(progn (setq *finDelJuego* (juegoTerminado?))
                                      (setq *jugadorGanador* 1)
                                      (setq vuelveATirarMaquina nil)))
-         (imprimirTablero))
-    ))
+         (imprimirTablero))))
 
-(defparameter *finDelJuego* nil)
-
-;El tercer uno es que es la pc
-;(print (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*)))
-(defparameter testing 0)
-
-
-;[Maain] Permite jugar
-(defun jugar()
+;[Funcion] Permite imprimir las intrucciones
+(defun imprimirInstrucciones()
   (format t "~%Mancala Inteligencia Artificial.~%")
-  (format t "~%Tablero: El talbero tiene la siguiente composicion, las casillas de la 0-5 es las que puede tirar.~%")
+  (format t "~%Tablero: El talbero tiene la siguiente composicion, las casillas de la 0-5 es las que puede tirar.")
   (format t "~%         La 6ta casilla es su base, tiene que acumular el mayor numero de puntos en su base.~%")
-  (format t "~%Reglas: Cada turno usted puede escoger una casilla que contenga al menos 1 canica en la casilla .~%")
-  (format t "~%        La canica debe moverla a las casillas consecuentes, solo colocando 1 canica en las siguientes .~%")
-  (format t "~%        Solo puede moverse hacia adelante y no puede colocar canicas en la base del enemigo .~%")
-  (format t "~%        Si sobran casillas despues de hacer su movimiento se pasan a la base del enemigo.~%")
-  (format t "~%        Al final el jugador que ya no tenga mas canicas en sus casillas, se apodera de las del otro.~%")
-  (format t "~%        Gana el jugador con mejor puntuacion al final.~%")
-  ;(reiniciarJuego)
+  (format t "~%Reglas: Cada turno usted puede escoger una casilla que contenga al menos 1 canica en la casilla.")
+  (format t "~%        La canica debe moverla a las casillas consecuentes, solo colocando 1 canica en las siguientes.")
+  (format t "~%        Solo puede moverse hacia adelante y no puede colocar canicas en la base del enemigo .")
+  (format t "~%        Si sobran casillas despues de hacer su movimiento se pasan a la base del enemigo.")
+  (format t "~%        Al final el jugador que ya no tenga mas canicas en sus casillas, se apodera de las del otro.")
+  (format t "~%        Gana el jugador con mejor puntuacion al final.~%~%"))
+
+;[Main] Permite jugar
+(defun jugar()
+  (imprimirInstrucciones)
+  (reiniciarJuego)
   (loop until (not (null *finDelJuego*)) do
        (imprimirTablero)
        (juegoTerminado?)
        (turnoHumano)
        (setq *tirarDeNuevo* T)
-       (print "ESTO ES MI FIN DE MI JUEGO")
-       (print *finDelJuego*)
        (if (null *finDelJuego*)
            (turnoMaquina)))
-  (print "JUGADOR GANADOR ES")
-  (print *jugadorGanador*)
   (format t "~& La puntuacion de la Inteligencia Artificial ~A ~%"
           (if (= *jugadorGanador* 1)
               (progn
@@ -336,12 +318,8 @@
               (apply #'+ (nth 6 *tablero*)))))
 
 ;Suma 24
-(setq *tablero* '((2) NIL NIL NIL NIL NIL (2 3 2 2 1 1 2 1 1 2 2 3) NIL NIL (2) (1) NIL NIL (3 3 1 2 1 1 2 1 3 2 3 3 1 2 3 3 1 2 3 1 3 3)))
+;(setq *tablero* '((2) NIL NIL NIL NIL NIL (2 3 2 2 1 1 2 1 1 2 2 3) NIL NIL (2) (1) NIL NIL (3 3 1 2 1 1 2 1 3 2 3 3 1 2 3 3 1 2 3 1 3 3)))
 
 (jugar)
-
-;TODO falta sumar todos los puntos sobrantes del tablero
-                                        ;TODO Que la inteligencia ya no tire cuando ya acabo el juego
-
 
 
