@@ -234,25 +234,44 @@
        finally (return (list copiaTablero maquinaSeguirTirando casillaActual)))))
 
 ;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
-(defun heuristicaMancala (estado)
-  (+ (- (apply #'+ (nth 13 estado)) (apply #'+ (nth 6 estado)))
-     (- (+ (apply #'+ (nth 7 estado))(apply #'+ (nth 8 estado))(apply #'+ (nth 9 estado))
-           (apply #'+ (nth 10 estado))(apply #'+ (nth 11 estado))(apply #'+ (nth 12 estado)))
-        (+ (apply #'+ (nth 0 estado))(apply #'+ (nth 1 estado))(apply #'+ (nth 2 estado))
-           (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado))))))
+(defun heuristicaMancala (tablero)
+  (let* ((movimiento 0)
+         (estado (first tablero)))
+    (setq movimiento
+          (+ (- (apply #'+ (nth 13 estado)) (apply #'+ (nth 6 estado)))
+             (- (+ (apply #'+ (nth 7 estado))(apply #'+ (nth 8 estado))(apply #'+ (nth 9 estado))
+                   (apply #'+ (nth 10 estado))(apply #'+ (nth 11 estado))(apply #'+ (nth 12 estado)))
+                (+ (apply #'+ (nth 0 estado))(apply #'+ (nth 1 estado))(apply #'+ (nth 2 estado))
+                   (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado))))))
+
+    (cond ((not (null (second tablero)))
+           (setq movimiento -10000))
+          ((> (+(apply #'+ (nth 7 estado))(apply #'+ (nth 8 estado))(apply #'+ (nth 9 estado)))
+              (+(apply #'+ (nth 10 estado))(apply #'+ (nth 11 estado))(apply #'+ (nth 12 estado))))
+           (setq movimiento (-  -1000 (- movimiento))))
+          (T movimiento))
+
+
+   ; (if (not (null (second tablero)))
+    ;    (progn
+     ;     (setq movimiento -10000)))
+
+    (format t "~& ESTO FUE MI VALOR ~A ~%" movimiento)
+
+    movimiento))
 
 ;[Funcion] Permite hacer la logica para poder hacer que la maquina de su mejor tiro
 (defun minimax-alpha-beta (tablero profundidad max-profundidad jugador alpha beta)
   ;Si llegamos a la profundidad maxima retornamos la evaluacion de la heuristica
   (if (= profundidad max-profundidad)
-      (heuristicaMancala (first tablero))
+      (heuristicaMancala  tablero)
       ;Si aun no hemos llegado a la profundidad maxima continuamos
       ;Primero recuperamos como sucesores la aplicacion de los operadores al tablero
       (let ((sucesores (aplicarOperadores tablero)))
         ;Si ya no tenemos sucesores que analizar llamamos a la heuristica del Mancala
         ; second de tablero es si puede volver a tirar la maquina o no
         (if (null sucesores)
-            (heuristicaMancala (first tablero))
+            (heuristicaMancala tablero)
             ;Supones que nuestro mejor movimiento es el primero de nuestro sucesor ya que
             ; second es si puede volver a tirar la maquina o no
             (do ((nuevoValor nil)
@@ -286,10 +305,13 @@
               (when (> nuevoValor beta)
                 (setf beta nuevoValor)
                 (setf mejorMovimiento (car sucesores)))
+
               ;Si beta >= alpha dejamos de examinar esa rama
               (if (>= beta alpha)
                   (setf sucesores nil) ;Si es verdadero terminamos el loop
                   (setf sucesores (cdr sucesores)))))))) ;Si no, seguimos
+
+
 
 ;[Funcion] Permite cambiar de jugador
 (defun cambiarJugador (jugador)
@@ -355,7 +377,7 @@
 ;[Main] Permite jugar
 (defun jugar()
   (imprimirInstrucciones)
-  (reiniciarJuego)
+  ;(reiniciarJuego)
   (loop until (not (null *finDelJuego*)) do
        (imprimirTablero)
        (juegoTerminado?)
@@ -379,8 +401,11 @@
                    (apply #'+ (nth 6 *tablero*))))
               (apply #'+ (nth 6 *tablero*)))))
 
+;(setq *tablero* '((5 1 5 10)(1)(1 1 5 1 5 10)()()()(53)(1 1 1 5 10)()()()(5)()(71)))
 
 (jugar)
 
 
-
+;TODO Falta que cuando encuentre chingos mil cosas al final lo desarolle para que tenga mejor oportunidad
+;|71| |NIL| |NIL| |(5)| |NIL| |NIL| |(1 1 1 5 10)| 
+;|(1 5 1 5 10)| |NIL| |(1 1 5 1 5 10)| |NIL| |NIL| |(1)| |52| 
