@@ -23,9 +23,9 @@
 ; y abajo la base del jugador
 (defun imprimirTablero()
   (format t "~%---------Tablero--------~%")
-  (format  t   "~&~% |~A| |~A| |~A| |~A| |~A| |~A| |~A| ~%"
+  (format  t   "~&~% |~A|  |~:A|  |~:A|  |~:A|  |~:A|  |~:A|  |~:A| ~%"
            (apply #'+ (nth 13 *tablero*))(nth 12 *tablero*)(nth 11 *tablero*)(nth 10 *tablero*)(nth 9 *tablero*)(nth 8 *tablero*)(nth 7 *tablero*))
-  (format  t   "~& |~A| |~A| |~A| |~A| |~A| |~A| |~A| ~%~%"
+  (format  t   "~& |~:A|  |~:A|  |~:A|  |~:A|  |~:A|  |~:A|  |~:A| ~%~%"
            (nth 0 *tablero*)(nth 1 *tablero*)(nth 2 *tablero*)(nth 3 *tablero*)(nth 4 *tablero*)(nth 5 *tablero*)(apply #'+ (nth 6 *tablero*))))
 
 ;[Funcion] Permite resetear el juego
@@ -42,7 +42,6 @@
                                         ;    (format t "~& Mover a:  ~A ~%" (nth casillaAMover *tablero*))
     (push canica (nth casillaAMover *tablero*))
 
-    (format t "~& Canica Escogida:  ~A ~%" canica)
     (format t "~& Casilla Escogida  ~A ~%" casillaEscogida)
     (format t "~& Casilla A Mover  ~A ~%" casillaAMover)
     (imprimirTablero)))
@@ -90,7 +89,7 @@
          ;Primero validamos que la casilla que va atirar tenga al menos una canica
          ; y si es asi, obtenermos el total de ellas en esa casilla
          (loop until casillaValida do
-              (print "Escoge una casica")
+              (print "Escoge una casilla")
               (if (casillaValida? (setq casillaEscogida (read)))
                   (progn
                     (setq canicas (canicasEnCasilla casillaEscogida))
@@ -121,7 +120,6 @@
 
          ;Limpiamos las variables tomando la precaucion de si el usuario puede volver
          ; a tirar
-         (imprimirTablero)
          (setq casillaEscogida nil)
          (setq casillaValida nil)
          (setq *casillasTiradas* nil)
@@ -251,13 +249,6 @@
            (setq movimiento (-  -1000 (- movimiento))))
           (T movimiento))
 
-
-   ; (if (not (null (second tablero)))
-    ;    (progn
-     ;     (setq movimiento -10000)))
-
-    (format t "~& ESTO FUE MI VALOR ~A ~%" movimiento)
-
     movimiento))
 
 ;[Funcion] Permite hacer la logica para poder hacer que la maquina de su mejor tiro
@@ -377,9 +368,9 @@
 ;[Main] Permite jugar
 (defun jugar()
   (imprimirInstrucciones)
-  ;(reiniciarJuego)
+  (reiniciarJuego)
+  (imprimirTablero)
   (loop until (not (null *finDelJuego*)) do
-       (imprimirTablero)
        (juegoTerminado?)
        (turnoHumano)
        (setq *tirarDeNuevo* T)
@@ -401,11 +392,11 @@
                    (apply #'+ (nth 6 *tablero*))))
               (apply #'+ (nth 6 *tablero*)))))
 
-;(setq *tablero* '((5 1 5 10)(1)(1 1 5 1 5 10)()()()(53)(1 1 1 5 10)()()()(5)()(71)))
+(setq *tablero* '((5 1 5 10)(1)(1 1 5 1 5 10)()()()(53)(1 1 1 5 10)()()()(5)()(71)))
 
 (jugar)
 
 
 ;TODO Falta que cuando encuentre chingos mil cosas al final lo desarolle para que tenga mejor oportunidad
-;|71| |NIL| |NIL| |(5)| |NIL| |NIL| |(1 1 1 5 10)| 
-;|(1 5 1 5 10)| |NIL| |(1 1 5 1 5 10)| |NIL| |NIL| |(1)| |52| 
+;|71| |NIL| |NIL| |(5)| |NIL| |NIL| |(1 1 1 5 10)|
+;|(1 5 1 5 10)| |NIL| |(1 1 5 1 5 10)| |NIL| |NIL| |(1)| |52|
