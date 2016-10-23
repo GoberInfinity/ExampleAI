@@ -231,7 +231,7 @@
                (push canicaAux (nth casillaAMeter copiaTablero))
                (setq casillaAMeter (1+ casillaAMeter))))
        ;  (setq contadorParaTurno (1+ contadorParaTurno))
-       finally (return (list copiaTablero maquinaSeguirTirando)))))
+       finally (return (list copiaTablero maquinaSeguirTirando casillaActual)))))
 
 ;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
 (defun heuristicaMancala (estado)
@@ -326,6 +326,7 @@
          (setq movimientoMaquina (minimax-alpha-beta *tablero* 0 1 1 *infinito* (- *infinito*)))
          (setq vuelveATirarMaquina (second movimientoMaquina))
          (setq movimientoFinal (first movimientoMaquina))
+         (format t "~& La casilla escogida fue ~A ~%" (third movimientoMaquina))
          (setq *tablero* movimientoFinal)
          (if (juegoTerminado?)(progn (setq *finDelJuego* (juegoTerminado?))
                                      (setq *jugadorGanador* 1)
@@ -344,6 +345,13 @@
   (format t "~%        Al final el jugador que ya no tenga mas canicas en sus casillas, se apodera de las del otro.")
   (format t "~%        Gana el jugador con mejor puntuacion al final.~%~%"))
 
+(defun tableroJuegoFinalizado ()
+  (format t "~%---------Tablero--------~%")
+  (format  t   "~&~% |~A| |~A| |~A| |~A| |~A| |~A| |~A| ~%"
+           (apply #'+ (nth 13 *tablero*))()()()()()())
+  (format  t   "~& |~A| |~A| |~A| |~A| |~A| |~A| |~A| ~%~%"
+           ()()()()()()(apply #'+ (nth 6 *tablero*))))
+
 ;[Main] Permite jugar
 (defun jugar()
   (imprimirInstrucciones)
@@ -355,6 +363,7 @@
        (setq *tirarDeNuevo* T)
        (if (null *finDelJuego*)
            (turnoMaquina)))
+  (tableroJuegoFinalizado)
   (format t "~& La puntuacion de la Inteligencia Artificial ~A ~%"
           (if (= *jugadorGanador* 1)
               (progn
@@ -369,6 +378,7 @@
                    (apply #'+ (nth 10 *tablero*))(apply #'+ (nth 11 *tablero*))(apply #'+ (nth 12 *tablero*))
                    (apply #'+ (nth 6 *tablero*))))
               (apply #'+ (nth 6 *tablero*)))))
+
 
 (jugar)
 
