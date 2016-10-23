@@ -24,9 +24,9 @@
 (defun imprimirTablero()
   (format t "~%---------Tablero--------~%")
   (format  t   "~&~% |~A| |~A| |~A| |~A| |~A| |~A| |~A| ~%"
-           (nth 13 *tablero*)(nth 12 *tablero*)(nth 11 *tablero*)(nth 10 *tablero*)(nth 9 *tablero*)(nth 8 *tablero*)(nth 7 *tablero*))
+           (apply #'+ (nth 13 *tablero*))(nth 12 *tablero*)(nth 11 *tablero*)(nth 10 *tablero*)(nth 9 *tablero*)(nth 8 *tablero*)(nth 7 *tablero*))
   (format  t   "~& |~A| |~A| |~A| |~A| |~A| |~A| |~A| ~%~%"
-           (nth 0 *tablero*)(nth 1 *tablero*)(nth 2 *tablero*)(nth 3 *tablero*)(nth 4 *tablero*)(nth 5 *tablero*)(nth 6 *tablero*)))
+           (nth 0 *tablero*)(nth 1 *tablero*)(nth 2 *tablero*)(nth 3 *tablero*)(nth 4 *tablero*)(nth 5 *tablero*)(apply #'+ (nth 6 *tablero*))))
 
 ;[Funcion] Permite resetear el juego
 (defun reiniciarJuego ()
