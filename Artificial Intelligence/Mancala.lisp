@@ -8,6 +8,8 @@
 (defparameter *jugadorGanador* nil)
 (defparameter *finDelJuego* nil)
 (defparameter *contadorParaCanicas* 0)
+(defparameter *puntuacionFinalHumano* 0)
+(defparameter *puntuacionFinalMaquina* 0)
 
 ;[Parametros] Definimos los operadores
 (defparameter *id* 0)
@@ -30,6 +32,8 @@
 
 ;[Funcion] Permite resetear el juego
 (defun reiniciarJuego ()
+  (setq *puntuacionFinalHumano* 0)
+  (setq *puntuacionFinalMaquina* 0)
   (setq *tablero* '((1 5 10)(1 5 10)(1 5 10)(1 5 10)(1 5 10)(1 5 10)()(1 5 10)(1 5 10)(1 5 10)(1 5 10)(1 5 10)(1 5 10)())))
 
 ;[Funcion] Le permite saber el numero de casillas en la posicion que eligio el usuario
@@ -234,7 +238,9 @@
 ;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
 (defun heuristicaMancala (tablero)
   (let* ((movimiento 0)
-         (estado (first tablero)))
+         (estado (first tablero))
+         (valorExpandirFinal nil)
+         (operador (third tablero)))
     (setq movimiento
           (+ (- (apply #'+ (nth 13 estado)) (apply #'+ (nth 6 estado)))
              (- (+ (apply #'+ (nth 7 estado))(apply #'+ (nth 8 estado))(apply #'+ (nth 9 estado))
@@ -242,14 +248,24 @@
                 (+ (apply #'+ (nth 0 estado))(apply #'+ (nth 1 estado))(apply #'+ (nth 2 estado))
                    (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado))))))
 
+    (if (and (>= (+(length (nth 7 estado))(length (nth 8 estado)))
+                 (+(length (nth 10 estado))(length (nth 11 estado))(length (nth 12 estado))))
+             (or (= operador 12)
+                 (= operador 9)
+                  (= operador 11)
+                  (= operador 10)))
+        (setq movimiento -1000))
+
+
     (cond ((not (null (second tablero)))
            (setq movimiento -10000))
-          ((> (+(apply #'+ (nth 7 estado))(apply #'+ (nth 8 estado))(apply #'+ (nth 9 estado)))
-              (+(apply #'+ (nth 10 estado))(apply #'+ (nth 11 estado))(apply #'+ (nth 12 estado))))
-           (setq movimiento (-  -1000 (- movimiento))))
+         ; ((not (null valorExpandirFinal))
+          ; (setq movimiento (-  -1000 (- movimiento))))
           (T movimiento))
 
+
     movimiento))
+
 
 ;[Funcion] Permite hacer la logica para poder hacer que la maquina de su mejor tiro
 (defun minimax-alpha-beta (tablero profundidad max-profundidad jugador alpha beta)
@@ -361,9 +377,9 @@
 (defun tableroJuegoFinalizado ()
   (format t "~%---------Tablero--------~%")
   (format  t   "~&~% |~A| |~A| |~A| |~A| |~A| |~A| |~A| ~%"
-           (apply #'+ (nth 13 *tablero*))()()()()()())
+           *puntuacionFinalMaquina*()()()()()())
   (format  t   "~& |~A| |~A| |~A| |~A| |~A| |~A| |~A| ~%~%"
-           ()()()()()()(apply #'+ (nth 6 *tablero*))))
+           ()()()()()()*puntuacionFinalHumano*))
 
 ;[Main] Permite jugar
 (defun jugar()
@@ -376,27 +392,33 @@
        (setq *tirarDeNuevo* T)
        (if (null *finDelJuego*)
            (turnoMaquina)))
-  (tableroJuegoFinalizado)
-  (format t "~& La puntuacion de la Inteligencia Artificial ~A ~%"
-          (if (= *jugadorGanador* 1)
-              (progn
-                (+ (apply #'+ (nth 0 *tablero*))(apply #'+ (nth 1 *tablero*))(apply #'+ (nth 2 *tablero*))
-                   (apply #'+ (nth 3 *tablero*))(apply #'+ (nth 4 *tablero*))(apply #'+ (nth 5 *tablero*))
-                   (apply #'+ (nth 13 *tablero*))))
-              (apply #'+ (nth 13 *tablero*))))
-  (format t "~& La puntuacion del jugador humano ~A  ~%"
-          (if (= *jugadorGanador* 0)
-              (progn
-                (+ (apply #'+ (nth 7 *tablero*))(apply #'+ (nth 8 *tablero*))(apply #'+ (nth 9 *tablero*))
-                   (apply #'+ (nth 10 *tablero*))(apply #'+ (nth 11 *tablero*))(apply #'+ (nth 12 *tablero*))
-                   (apply #'+ (nth 6 *tablero*))))
-              (apply #'+ (nth 6 *tablero*)))))
 
-(setq *tablero* '((5 1 5 10)(1)(1 1 5 1 5 10)()()()(53)(1 1 1 5 10)()()()(5)()(71)))
+  (if (= *jugadorGanador* 1)
+      (setq *puntuacionFinalMaquina*
+            (+ (apply #'+ (nth 0 *tablero*))(apply #'+ (nth 1 *tablero*))(apply #'+ (nth 2 *tablero*))
+               (apply #'+ (nth 3 *tablero*))(apply #'+ (nth 4 *tablero*))(apply #'+ (nth 5 *tablero*))
+               (apply #'+ (nth 13 *tablero*))))
+      (setq *puntuacionFinalMaquina* (apply #'+ (nth 13 *tablero*))))
+
+  (if (= *jugadorGanador* 0)
+      (setq *puntuacionFinalHumano*
+        (+ (apply #'+ (nth 7 *tablero*))(apply #'+ (nth 8 *tablero*))(apply #'+ (nth 9 *tablero*))
+           (apply #'+ (nth 10 *tablero*))(apply #'+ (nth 11 *tablero*))(apply #'+ (nth 12 *tablero*))
+           (apply #'+ (nth 6 *tablero*))))
+      (setq *puntuacionFinalHumano* (apply #'+ (nth 6 *tablero*))))
+
+  (tableroJuegoFinalizado)
+
+  (format t "~& La puntuacion de la Inteligencia Artificial ~A ~%" *puntuacionFinalMaquina*)
+  (format t "~& La puntuacion del jugador humano ~A  ~%" *puntuacionFinalHumano*))
+
+(setq *tablero* '(()(1 1)(5 5 5)()(1 5)()(67)(1 5 1 5 10)()()(1)(1)()(78)))
 
 (jugar)
 
 
 ;TODO Falta que cuando encuentre chingos mil cosas al final lo desarolle para que tenga mejor oportunidad
-;|71| |NIL| |NIL| |(5)| |NIL| |NIL| |(1 1 1 5 10)|
-;|(1 5 1 5 10)| |NIL| |(1 1 5 1 5 10)| |NIL| |NIL| |(1)| |52|
+;|79| |NIL| |NIL| |(5)| |NIL| |NIL| |(1 1 1 5 10)|
+                                        ;|(1 5 1 5 10)| |NIL| |(1 1 5 1 5 10)| |NIL| |NIL| |(1)| |52|
+
+
