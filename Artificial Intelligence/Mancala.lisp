@@ -238,9 +238,7 @@
 ;[Funcion] Creamos nuestra propia heuristica que nos permitira saber cual es la mejor casilla
 (defun heuristicaMancala (tablero)
   (let* ((movimiento 0)
-         (estado (first tablero))
-         (valorExpandirFinal nil)
-         (operador (third tablero)))
+         (estado (first tablero)))
     (setq movimiento
           (+ (- (apply #'+ (nth 13 estado)) (apply #'+ (nth 6 estado)))
              (- (+ (apply #'+ (nth 7 estado))(apply #'+ (nth 8 estado))(apply #'+ (nth 9 estado))
@@ -248,19 +246,23 @@
                 (+ (apply #'+ (nth 0 estado))(apply #'+ (nth 1 estado))(apply #'+ (nth 2 estado))
                    (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado))))))
 
-    (if (and (>= (+(length (nth 7 estado))(length (nth 8 estado)))
-                 (+(length (nth 10 estado))(length (nth 11 estado))(length (nth 12 estado))))
-             (or (= operador 12)
-                 (= operador 9)
-                  (= operador 11)
-                  (= operador 10)))
-        (setq movimiento -1000))
+    ;; (if (and (>= (+(length (nth 7 estado))(length (nth 8 estado)))
+    ;;              (+(length (nth 10 estado))(length (nth 11 estado))(length (nth 12 estado))))
+    ;;          (or (= operador 12)
+    ;;              (= operador 9)
+    ;;               (= operador 11)
+    ;;               (= operador 10)))
+    ;;     (setq movimiento -1000))
 
 
     (cond ((not (null (second tablero)))
            (setq movimiento -10000))
-         ; ((not (null valorExpandirFinal))
-          ; (setq movimiento (-  -1000 (- movimiento))))
+          ((and (or (null (nth 12 estado)) (null(nth 11 estado)) (null (nth 10 estado)))
+                (or ( > (length (nth 7 estado)) 3)( > (length(nth 8 estado)) 3)))
+           (setq movimiento 0))
+          ((and (or (null (nth 12 estado)) (null(nth 11 estado)) (null (nth 10 estado)))
+                (or ( > (length (nth 7 estado)) 3)( > (length(nth 8 estado)) 3)))
+           (setq movimiento 0))
           (T movimiento))
 
 
@@ -384,7 +386,7 @@
 ;[Main] Permite jugar
 (defun jugar()
   (imprimirInstrucciones)
-  (reiniciarJuego)
+ ; (reiniciarJuego)
   (imprimirTablero)
   (loop until (not (null *finDelJuego*)) do
        (juegoTerminado?)
@@ -412,13 +414,13 @@
   (format t "~& La puntuacion de la Inteligencia Artificial ~A ~%" *puntuacionFinalMaquina*)
   (format t "~& La puntuacion del jugador humano ~A  ~%" *puntuacionFinalHumano*))
 
-(setq *tablero* '(()(1 1)(5 5 5)()(1 5)()(67)(1 5 1 5 10)()()(1)(1)()(78)))
-
+;(setq *tablero* '(()(1)(5)()(1)(1)(87)(1 1)(1 5)()(1)()(5)(83)))
+;(trace minimax-alpha-beta)
 (jugar)
 
 
 ;TODO Falta que cuando encuentre chingos mil cosas al final lo desarolle para que tenga mejor oportunidad
-;|79| |NIL| |NIL| |(5)| |NIL| |NIL| |(1 1 1 5 10)|
+;|65| |NIL| |NIL| |(5)| |NIL| |NIL| |(1 1 1 5 10)|
                                         ;|(1 5 1 5 10)| |NIL| |(1 1 5 1 5 10)| |NIL| |NIL| |(1)| |52|
 
 
