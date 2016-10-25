@@ -257,12 +257,12 @@
 
     (cond ((not (null (second tablero)))
            (setq movimiento -10000))
-          ((and (or (null (nth 12 estado)) (null(nth 11 estado)) (null (nth 10 estado)))
-                (or ( > (length (nth 7 estado)) 3)( > (length(nth 8 estado)) 3)))
-           (setq movimiento 0))
-          ((and (or (null (nth 12 estado)) (null(nth 11 estado)) (null (nth 10 estado)))
-                (or ( > (length (nth 7 estado)) 3)( > (length(nth 8 estado)) 3)))
-           (setq movimiento 0))
+          ;; ((and (or (null (nth 12 estado)) (null(nth 11 estado)) (null (nth 10 estado)))
+          ;;       (or ( > (length (nth 7 estado)) 3)( > (length(nth 8 estado)) 3)))
+          ;;  (setq movimiento 0))
+          ;; ((and (or (null (nth 12 estado)) (null(nth 11 estado)) (null (nth 10 estado)))
+          ;;       (or ( > (length (nth 7 estado)) 3)( > (length(nth 8 estado)) 3)))
+          ;;  (setq movimiento 0))
           (T movimiento))
 
 
