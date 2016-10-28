@@ -41,10 +41,10 @@
   (nth casilla *tablero*))
 
 ;[Funcion] Te permite mover la canica a una nueva casilla
-(defun moverCanicaACasilla (casillaEscogida casillaAMover)
+(defun moverCanicaACasilla (casillaEscogida casillaAMover casillaSuperAuxiliar)
   (let* ((canica (pop (nth casillaEscogida *tablero*))))
                                         ;    (format t "~& Mover a:  ~A ~%" (nth casillaAMover *tablero*))
-    (push canica (nth casillaAMover *tablero*))
+    (push casillaSuperAuxiliar (nth casillaAMover *tablero*))
 
     (format t "~& Casilla Escogida  ~A ~%" casillaEscogida)
     (format t "~& Casilla A Mover  ~A ~%" casillaAMover)
@@ -79,10 +79,12 @@
   (if (member casillaEscogida *casillasTiradas*) T nil))
 
 ;[Funcion] Permite hacer toda la logica y validaciones para que tire el ser humano
-;[Funcion] Permite hacer toda la logica y validaciones para que tire el ser humano
 (defun turnoHumano ()
   (let* ((casillaEscogida nil)
          (canicas 0)
+         (casillasAMoverPeticiones nil)
+         (casillaEscogidaPeticiones -1)
+         (canicaSuperAuxiliar nil)
          (longitudCanicas nil)
          (casillaValida nil)
          (casillaAMover nil))
@@ -111,15 +113,20 @@
          (if (> 0 (- (length canicas) (- 6 casillaEscogida)))
              (setq *tirarDeNuevo* nil))
 
+
+         (format t "~& Para donde mover las canicas?  ~A ~%" (setq casillasAMoverPeticiones (read)))
+         (setq casillaEscogidaPeticiones casillaEscogida)
+
+
     ;Despues para cada canica en esa casilla, le permitimos al usuario mover cada una.
     ;Asi como tambien validamos que si cae en su base alguna canica vuelve a tirar
     ;Y finalmente validamos que no se repitan sus movimientos por cada turno
          (loop for canica in canicas do
-              (format t "~& Para donde mover la canica?  ~A ~%" canica)
-              (loop until (null (seRepiteMovimiento? (setq casillaAMover(read)))) do
-                   (format t "~& No se puede mover ~%"))
-              (push casillaAMover *casillasTiradas*)
-              (moverCanicaACasilla casillaEscogida casillaAMover))
+              (if ( > casillaEscogidaPeticiones 12)
+                  (setq casillaEscogidaPeticiones -1))
+              (setq casillaEscogidaPeticiones (1+ casillaEscogidaPeticiones))
+              (setq canicaSuperAuxiliar (pop casillasAMoverPeticiones))
+              (moverCanicaACasilla casillaEscogida casillaEscogidaPeticiones canicaSuperAuxiliar))
 
 
          ;Limpiamos las variables tomando la precaucion de si el usuario puede volver
@@ -239,6 +246,8 @@
 (defun heuristicaMancala (tablero)
   (let* ((movimiento 0)
          (estado (first tablero)))
+
+    ;La formula de la heuristica es (Mi Mancala-MancalaDelContrincante) + (Canicas en mis casillas-Canicas en casillas del contricante)
     (setq movimiento
           (+ (- (apply #'+ (nth 13 estado)) (apply #'+ (nth 6 estado)))
              (- (+ (apply #'+ (nth 7 estado))(apply #'+ (nth 8 estado))(apply #'+ (nth 9 estado))
@@ -246,23 +255,9 @@
                 (+ (apply #'+ (nth 0 estado))(apply #'+ (nth 1 estado))(apply #'+ (nth 2 estado))
                    (apply #'+ (nth 3 estado))(apply #'+ (nth 4 estado))(apply #'+ (nth 5 estado))))))
 
-    ;; (if (and (>= (+(length (nth 7 estado))(length (nth 8 estado)))
-    ;;              (+(length (nth 10 estado))(length (nth 11 estado))(length (nth 12 estado))))
-    ;;          (or (= operador 12)
-    ;;              (= operador 9)
-    ;;               (= operador 11)
-    ;;               (= operador 10)))
-    ;;     (setq movimiento -1000))
-
-
+    ;Cuando nos permita un nuevo movimiento le decimos que sea nuestra nueva mejor evaluacion
     (cond ((not (null (second tablero)))
            (setq movimiento -10000))
-          ;; ((and (or (null (nth 12 estado)) (null(nth 11 estado)) (null (nth 10 estado)))
-          ;;       (or ( > (length (nth 7 estado)) 3)( > (length(nth 8 estado)) 3)))
-          ;;  (setq movimiento 0))
-          ;; ((and (or (null (nth 12 estado)) (null(nth 11 estado)) (null (nth 10 estado)))
-          ;;       (or ( > (length (nth 7 estado)) 3)( > (length(nth 8 estado)) 3)))
-          ;;  (setq movimiento 0))
           (T movimiento))
 
 
@@ -414,13 +409,7 @@
   (format t "~& La puntuacion de la Inteligencia Artificial ~A ~%" *puntuacionFinalMaquina*)
   (format t "~& La puntuacion del jugador humano ~A  ~%" *puntuacionFinalHumano*))
 
-;(setq *tablero* '(()(1)(5)()(1)(1)(87)(1 1)(1 5)()(1)()(5)(83)))
-;(trace minimax-alpha-beta)
 (jugar)
 
-
-;TODO Falta que cuando encuentre chingos mil cosas al final lo desarolle para que tenga mejor oportunidad
-;|65| |NIL| |NIL| |(5)| |NIL| |NIL| |(1 1 1 5 10)|
-                                        ;|(1 5 1 5 10)| |NIL| |(1 1 5 1 5 10)| |NIL| |NIL| |(1)| |52|
 
 
