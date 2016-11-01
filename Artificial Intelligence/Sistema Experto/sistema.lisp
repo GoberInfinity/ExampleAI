@@ -4,7 +4,7 @@
 (defparameter *vector-conocimiento* (make-array 100
                                             :adjustable T
                                             :element-type 'list))
-(defparameter *inicio* '((T.T)))											
+(defparameter *inicio* '((T.T)))
 (defconstant fail nil
   "Indicates pat-match failure")
   
@@ -19,12 +19,25 @@
 
 (leerConocimiento "baseDeConocimiento.txt")
 
+;[Principal} Permite comenzar con el sistema Experto
 (defun miniSistemaExperto ()
 	(loop
 		(print "Escriba la consulta que desea realizar")
-		(let* ((entrada (read))
-           (salida (patternMatch input))))
-      (if (equal entrada '(Salir)) (RETURN))))
+     (let* ((entrada nil))
+       (setq entrada (read))
+       (motorIntefencia entrada))))
+
+;[Funcion] Permite hacer el motor de Inferencia
+(defun motorIntefencia (entrada)
+  (let ((clase (first entrada))
+        (etiquetas (rest entrada)))
+    
+
+    ))
+  ;  (cond ((eql clase +)
+   ;        (print "FUNCIONA"))
+    ;      (T (print "NO FUNCIONA")))))
+
 	#|  
 (defun patternMatch (patron expresion &optional(alist *inicio*))
 		(cond ((esVariable? patron)
@@ -48,7 +61,18 @@
        (equal (char (symbol-name (car pat)) 0) #\?)
        (equal (char (symbol-name (car pat)) 1) #\*)))			  
 
+
+
+
 		|#	  
 
-(print *vector-conocimiento*)
+(miniSistemaExperto)
 
+;; (print *vector-conocimiento*)
+
+;; (setq perro '(perro . terrier))
+;; (first perro)
+;; (rest perro)
+; (setq usuario '( - (clase . persona) (edad . [>120]) ))
+;(eql (first usuario) '- )
+;(length (rest usuario))
