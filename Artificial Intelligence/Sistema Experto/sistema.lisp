@@ -53,24 +53,41 @@
 ;[Funcion] Nos permite hacer el motor de inferencia para la etiqueta existencial
 (defun etiquetaExistencial (etiquetas)
   (let* ((clase (first etiquetas))
+         (atributos (rest etiquetas))
          (valorClase (rest clase))
          (indiceClase (obtenerIndiceDeClase valorClase *indice*))
          (inicioIndice (first indiceClase))
          (finalIndice (second indiceClase)))
 
+    (if (null atributos)
+        (consultaABaseDeConocimiento inicioIndice finalIndice nil)
+        (progn
+          (loop for atributo in atributos do
+               (consultaABaseDeConocimiento inicioIndice finalIndice atributo)
+               (print (first atributo))
+               (print (rest atributo))
 
-    (format t "~& ESTO ES MI ETIQUETA ~A ~%"  valorClase)
-    (format t "~& ESTO ES MI Indice Completo ~A ~%"  indiceClase)
-    (format t "~& ESTO ES MI Inicio ~A ~%"  inicioIndice)
-    (format t "~& ESTO ES MI Final ~A ~%"  finalIndice)
-    (consultaABaseDeConocimiento inicioIndice finalIndice)
+
+               )))
+
     ))
 
 
-(defun consultaABaseDeConocimiento (inicioIndice finalIndice)
+(defun consultaABaseDeConocimiento (inicioIndice finalIndice atributo)
+  (let ((atributoNombre (first atributo))
+        (atributoValor (rest atributo)))
+    (print "llego hasta aqui")
+    (loop for i from inicioIndice to finalIndice do
+         (if (null atributo)
+             (print (aref *vector-conocimiento* i))
+             (progn
+               (loop for j from 1 to (1- (length (aref *vector-conocimiento* i))) do
+                    (let ((tuplaNombre (first (nth j (aref *vector-conocimiento* i))))
+                           (tuplaValor (rest (nth j (aref *vector-conocimiento* i)))))
+                      (if (and (equal atributoNombre tuplaNombre)(equal atributoValor tuplaValor))
+                          (print (aref *vector-conocimiento* i)))))
+               )))))
 
-  (loop for i from inicioIndice to finalIndice do
-                              (print (aref *vector-conocimiento* i))))
 
 ;[Funcion] Permite saber cual es el indice de donde vamos a revisar la clase
 (defun obtenerIndiceDeClase (valorDeClase indice)
