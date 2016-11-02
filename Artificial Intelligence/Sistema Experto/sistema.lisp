@@ -11,6 +11,10 @@
                          (simbolo (47 58))
                          (relacion (59 100))))
 
+;; Nos permite ir filtrando la respuesta para aplicarle los valores de verdad
+(defparameter *respuesta* nil)
+(defparameter *respuestaFinal* nil)
+
 (defparameter *inicio* '((T.T)))
 (defconstant fail nil
   "Indicates pat-match failure")
@@ -40,6 +44,8 @@
 (defun motorIntefencia (entrada)
   (let ((operador (first entrada))
         (etiquetas (rest entrada)))
+    (setq *respuesta* nil)
+    (setq *respuestaFinal* nil)
     (cond ((eql operador '+)
            (etiquetaExistencial etiquetas))
           ((eql operador '-)
@@ -57,36 +63,47 @@
          (valorClase (rest clase))
          (indiceClase (obtenerIndiceDeClase valorClase *indice*))
          (inicioIndice (first indiceClase))
-         (finalIndice (second indiceClase)))
+         (finalIndice (second indiceClase))
+         (contadorFiltro 0))
 
     (if (null atributos)
-        (consultaABaseDeConocimiento inicioIndice finalIndice nil)
+        (consultaABaseDeConocimiento inicioIndice finalIndice nil *vector-conocimiento*)
         (progn
-          (loop for atributo in atributos do
-               (consultaABaseDeConocimiento inicioIndice finalIndice atributo)
-               (print (first atributo))
-               (print (rest atributo))
+  ;        (loop for atributo in atributos do
+   ;            (if (= 0 contadorFiltro)
+          (consultaABaseDeConocimiento inicioIndice finalIndice atributos *vector-conocimiento*)
+          (print *respuesta*)
+          (print *respuestaFinal*)
+     ;              (consultaABaseFiltrada *respuesta*))
+
+      ;         (setq contadorFiltro (1+ contadorFiltro))
+               ))))
 
 
-               )))
-
-    ))
 
 
-(defun consultaABaseDeConocimiento (inicioIndice finalIndice atributo)
-  (let ((atributoNombre (first atributo))
-        (atributoValor (rest atributo)))
-    (print "llego hasta aqui")
+(defun consultaABaseDeConocimiento (inicioIndice finalIndice atributos baseDeConocomiento)
+ ; (let ((atributoNombre (first atributo))
+  ;      (atributoValor (rest atributo)))
     (loop for i from inicioIndice to finalIndice do
-         (if (null atributo)
-             (print (aref *vector-conocimiento* i))
+         (if (null atributos)
+             (print (aref baseDeConocomiento i))
              (progn
-               (loop for j from 1 to (1- (length (aref *vector-conocimiento* i))) do
-                    (let ((tuplaNombre (first (nth j (aref *vector-conocimiento* i))))
-                           (tuplaValor (rest (nth j (aref *vector-conocimiento* i)))))
-                      (if (and (equal atributoNombre tuplaNombre)(equal atributoValor tuplaValor))
-                          (print (aref *vector-conocimiento* i)))))
-               )))))
+               (loop for j from 1 to (1- (length (aref baseDeConocomiento i))) do
+                    (let ((tuplaNombre (first (nth j (aref baseDeConocomiento i))))
+                          (tuplaValor (rest (nth j (aref baseDeConocomiento i)))))
+                      (loop for atributo in atributos do
+                           (if (and (equal (first atributo) tuplaNombre)(equal (rest atributo) tuplaValor))
+                               (push 1 *respuesta*)))
+                      (if (= (apply #'+ *respuesta*) (length atributos))
+                          (push (aref baseDeConocomiento i) *respuestaFinal*))
+                      (setq *respuesta* '(0))
+
+                      ))))))
+
+(defun consultaABaseFiltrada (baseDeConocomientoFiltrada)
+  (print "PASO N VECES")
+  (print baseDeConocomientoFiltrada))
 
 
 ;[Funcion] Permite saber cual es el indice de donde vamos a revisar la clase
