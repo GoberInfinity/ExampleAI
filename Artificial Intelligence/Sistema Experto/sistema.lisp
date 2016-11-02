@@ -4,20 +4,17 @@
 (defparameter *vector-conocimiento* (make-array 100
                                             :adjustable T
                                             :element-type 'list))
+
 ;; Definimos un indice con el proposito de no recorrer todo el arreglo y ser mas rapidos en nuestra busqueda
 (defparameter *indice* '((dios (0 24))
                          (semidios (25 45))
                          (humano (46 46))
                          (simbolo (47 58))
-                         (relacion (59 100))))
+                         (relacion (59 99))))
 
 ;; Nos permite ir filtrando la respuesta para aplicarle los valores de verdad
 (defparameter *respuesta* nil)
 (defparameter *respuestaFinal* nil)
-
-(defparameter *inicio* '((T.T)))
-(defconstant fail nil
-  "Indicates pat-match failure")
 
 ;;[Funcion] Permite leer de archivo nuestra base de conocimiento
 (defun leerConocimiento (filename)
@@ -40,24 +37,17 @@
        (if (equal entrada 'Salir) (RETURN))
        (motorIntefencia entrada))))
 
+;TODO Crear funcion para limpiar las variables globales 
 ;[Funcion] Permite hacer el motor de Inferencia
 (defun motorIntefencia (entrada)
   (let ((operador (first entrada))
         (etiquetas (rest entrada)))
     (setq *respuesta* nil)
     (setq *respuestaFinal* nil)
-    (cond ((eql operador '+)
-           (etiquetaExistencial etiquetas))
-          ((eql operador '-)
-           (print "ES -"))
-          ((eql operador '*)
-           (print "ES *"))
-          ((eql operador '/)
-           (print "ES /"))
-          (T (print "Error")))))
+    (motorIntefenciaAux operador etiquetas)))
 
 ;[Funcion] Nos permite hacer el motor de inferencia para la etiqueta existencial
-(defun etiquetaExistencial (etiquetas)
+(defun motorIntefenciaAux (operador etiquetas)
   (let* ((clase (first etiquetas))
          (atributos (rest etiquetas))
          (valorClase (rest clase))
@@ -66,25 +56,28 @@
          (finalIndice (second indiceClase))
          (contadorFiltro 0))
 
-    (if (null atributos)
-        (consultaABaseDeConocimiento inicioIndice finalIndice nil *vector-conocimiento*)
-        (progn
-  ;        (loop for atributo in atributos do
-   ;            (if (= 0 contadorFiltro)
-          (consultaABaseDeConocimiento inicioIndice finalIndice atributos *vector-conocimiento*)
-          (print *respuesta*)
-          (print *respuestaFinal*)
-     ;              (consultaABaseFiltrada *respuesta*))
+    (cond ((eql operador '+)
+           (progn
+             ;;Si el usuario no teclea ningun atributo, solo vamos a obtener los datos filtrados por clase
+             (if (null atributos)
+                 (consultaABaseDeConocimiento inicioIndice finalIndice nil *vector-conocimiento*)
+                 ;;En caso contrario, le enviamos a nuestra consulta los atriburos que el usuario desea
+                 (progn
+                   (consultaABaseDeConocimiento inicioIndice finalIndice atributos *vector-conocimiento*)
+                   (print *respuestaFinal*)))))
+          ((eql operador '-)
+           (print "ES -"))
+          ((eql operador '*)
+           (print "ES *"))
+          ((eql operador '/)
+           (print "ES /"))
+          (T (print "Error")))))
 
-      ;         (setq contadorFiltro (1+ contadorFiltro))
-               ))))
 
-
-
-
+;TODO No repetir valores el desplegar al final
+;[Funcion] Permite obtener de la base de conocimiento los datos correspondientes a la consulta
 (defun consultaABaseDeConocimiento (inicioIndice finalIndice atributos baseDeConocomiento)
- ; (let ((atributoNombre (first atributo))
-  ;      (atributoValor (rest atributo)))
+
     (loop for i from inicioIndice to finalIndice do
          (if (null atributos)
              (print (aref baseDeConocomiento i))
@@ -95,16 +88,13 @@
                       (loop for atributo in atributos do
                            (if (and (equal (first atributo) tuplaNombre)(equal (rest atributo) tuplaValor))
                                (push 1 *respuesta*)))
+
                       (if (= (apply #'+ *respuesta*) (length atributos))
                           (push (aref baseDeConocomiento i) *respuestaFinal*))
-                      (setq *respuesta* '(0))
+                      (if (= (length atributos) 1)
+                          (setq *respuesta* '(0)))
 
-                      ))))))
-
-(defun consultaABaseFiltrada (baseDeConocomientoFiltrada)
-  (print "PASO N VECES")
-  (print baseDeConocomientoFiltrada))
-
+                      ))  (setq *respuesta* '(0)) ))))
 
 ;[Funcion] Permite saber cual es el indice de donde vamos a revisar la clase
 (defun obtenerIndiceDeClase (valorDeClase indice)
@@ -114,49 +104,6 @@
          (second (first indice)))
         (T (obtenerIndiceDeClase valorDeClase (rest indice)))))
 
-  ;  (cond ((eql clase +)
-   ;        (print "FUNCIONA"))
-    ;      (T (print "NO FUNCIONA")))))
 
-	#|  
-(defun patternMatch (patron expresion &optional(alist *inicio*))
-		(cond ((esVariable? patron)
-				(matchearVariable patron expresion alist))
-			  ((esConstante? patron)
-				(matchearConstante patron expresion alist))
-		((and (consp pat) (consp exp))
-(patternMatch (rest pat) (rest exp)
-(patternMatch (first pat) (first exp) alist))
-(T alist))))
-
-(defun esVariable? (x)
-  (and (symbolp x)
-       (equal (char (symbol-name x) 0)
-              #\?)))
-			  
-(defun segment-pattern-p (pat)
-  "Is this a segment-matching pattern: (?*var ...)"
-  (and (listp pat)
-       (>= (length (symbol-name (car pat))) 2)
-       (equal (char (symbol-name (car pat)) 0) #\?)
-       (equal (char (symbol-name (car pat)) 1) #\*)))			  
-
-
-
-
-		|#	  
 
 (miniSistemaExperto)
-(first (aref *vector-conocimiento* 0))
-(aref *vector-conocimiento* 1)
-(first (first *indice*))
-(second (first *indice*))
-(second *indice*)
-;; (print *vector-conocimiento*)
-
-;; (setq perro '(perro . terrier))
-;; (first perro)
-;; (rest perro)
-; (setq usuario '( - (clase . persona) (edad . [>120]) ))
-;(eql (first usuario) '- )
-;(length (rest usuario))
