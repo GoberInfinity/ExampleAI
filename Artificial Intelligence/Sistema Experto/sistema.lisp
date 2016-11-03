@@ -109,12 +109,12 @@
                       (loop for atributo in atributos do
                            (if (and (equal (first atributo) tuplaNombre)(equal (rest atributo) tuplaValor))
                                (push 1 *respuesta*)))
-
-                      (if (= (apply #'+ *respuesta*) (length atributos))
-                          (push (aref baseDeConocomiento i) *respuestaFinal*))
-                      (if (= (length atributos) 1)
-                          (setq *respuesta* '(0)))
-                      ))  (setq *respuesta* '(0)) ))))
+               ;       (if (= (length atributos) 1)
+                ;          (setq *respuesta* '(0)))
+                      ))
+               (if (= (apply #'+ *respuesta*) (length atributos))
+                   (push (aref baseDeConocomiento i) *respuestaFinal*))
+               (setq *respuesta* '(0)) ))))
 
 ;;TODO Juntar el universal y el existencial
 ;;TODO Agregar por si no tiene clase
@@ -127,12 +127,10 @@
                       (loop for atributo in atributos do
                            (if (equal (first atributo) tuplaNombre)
                                (if (not (equal (rest atributo) tuplaValor))
-                                   (setq *respuesta* t))))
-
-                      (if (not (null *respuesta*))
-                          (push (aref baseDeConocomiento i) *respuestaFinal*))
-
-                      ))  (setq *respuesta* nil) ))
+                                   (setq *respuesta* t))))))
+         (if (not (null *respuesta*))
+             (push (aref baseDeConocomiento i) *respuestaFinal*))
+         (setq *respuesta* nil)))
 
 ;[Funcion] Permite saber cual es el indice de donde vamos a revisar la clase
 (defun obtenerIndiceDeClase (valorDeClase indice)
