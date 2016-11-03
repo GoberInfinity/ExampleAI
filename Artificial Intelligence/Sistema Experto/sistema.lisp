@@ -37,7 +37,7 @@
        (if (equal entrada 'Salir) (RETURN))
        (motorIntefencia entrada))))
 
-;TODO Crear funcion para limpiar las variables globales 
+;TODO Crear funcion para limpiar las variables globales
 ;[Funcion] Permite hacer el motor de Inferencia
 (defun motorIntefencia (entrada)
   (let ((operador (first entrada))
@@ -64,9 +64,19 @@
                  ;;En caso contrario, le enviamos a nuestra consulta los atriburos que el usuario desea
                  (progn
                    (consultaABaseDeConocimiento inicioIndice finalIndice atributos *vector-conocimiento*)
-                   (print *respuestaFinal*)))))
+                   (if (null *respuestaFinal*)
+                       (print "False")
+                       (progn
+                         (print "True")
+                         (print *respuestaFinal*)))))))
           ((eql operador '-)
-           (print "ES -"))
+           (progn
+             (consultaABaseDeConocimiento inicioIndice finalIndice atributos *vector-conocimiento*)
+             (if (null *respuestaFinal*)
+                 (print "True")
+                 (progn
+                   (print "False")
+                   (print *respuestaFinal*)))))
           ((eql operador '*)
            (print "ES *"))
           ((eql operador '/)
