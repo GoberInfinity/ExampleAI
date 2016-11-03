@@ -16,6 +16,10 @@
 (defparameter *respuesta* nil)
 (defparameter *respuestaFinal* nil)
 
+;;Permiten hacer de forma mas sencilla la obtencion de los valores y operadores a evaular
+(defparameter *operador* nil)
+(defparameter *valor* nil)
+
 ;;[Funcion] Permite leer de archivo nuestra base de conocimiento
 (defun leerConocimiento (filename)
   (with-open-file (stream filename)
@@ -38,6 +42,7 @@
        (motorIntefencia entrada))))
 
 ;TODO Crear funcion para limpiar las variables globales
+;TODO Si no existe la clase muere
 ;[Funcion] Permite hacer el motor de Inferencia
 (defun motorIntefencia (entrada)
   (let ((operador (first entrada))
@@ -47,6 +52,7 @@
     (motorIntefenciaAux operador etiquetas)))
 
 ;;TODO Validar bien cuando solo el usuario ponga la clase
+;;TODO Validar que si la clase no existe de nulo 
 ;[Funcion] Nos permite hacer el motor de inferencia para la etiqueta existencial
 (defun motorIntefenciaAux (operador etiquetas)
   (let* ((clase (first etiquetas))
@@ -107,14 +113,20 @@
                     (let ((tuplaNombre (first (nth j (aref baseDeConocomiento i))))
                           (tuplaValor (rest (nth j (aref baseDeConocomiento i)))))
                       (loop for atributo in atributos do
-                           (if (and (equal (first atributo) tuplaNombre)(equal (rest atributo) tuplaValor))
-                               (push 1 *respuesta*)))
-               ;       (if (= (length atributos) 1)
-                ;          (setq *respuesta* '(0)))
-                      ))
-               (if (= (apply #'+ *respuesta*) (length atributos))
-                   (push (aref baseDeConocomiento i) *respuestaFinal*))
-               (setq *respuesta* '(0)) ))))
+                           (patternMatching (rest atributo))
+                           (if (equal (first atributo) tuplaNombre)
+                               (if (null *operador*)
+                                   (if (equal (rest atributo) tuplaValor)
+                                       (push 1 *respuesta*))
+                                   (progn
+                                     (if (funcall *operador* tuplaValor *valor*)
+                                         (push 1 *respuesta*))))))))
+
+                   (if (= (apply #'+ *respuesta*) (length atributos))
+                       (push (aref baseDeConocomiento i) *respuestaFinal*))
+                   (setq *respuesta* '(0))
+                   (setq *operador* nil)
+                   (setq *valor* nil)))))
 
 ;;TODO Juntar el universal y el existencial
 ;;TODO Agregar por si no tiene clase
@@ -125,12 +137,23 @@
                     (let ((tuplaNombre (first (nth j (aref baseDeConocomiento i))))
                           (tuplaValor (rest (nth j (aref baseDeConocomiento i)))))
                       (loop for atributo in atributos do
+                           (patternMatching (rest atributo))
                            (if (equal (first atributo) tuplaNombre)
-                               (if (not (equal (rest atributo) tuplaValor))
-                                   (setq *respuesta* t))))))
+                               (if (null *operador*)
+                                   (if (not (equal (rest atributo) tuplaValor))
+                                       (setq *respuesta* t))
+                                   (progn
+                                     (if (not (funcall *operador* tuplaValor *valor*))
+                                         (progn
+                                           (setq *respuesta* t)
+                                        ;(print (funcall *operador* tuplaValor *valor*))
+                                           )
+                                         (setq *respuesta* nil))))))))
          (if (not (null *respuesta*))
              (push (aref baseDeConocomiento i) *respuestaFinal*))
-         (setq *respuesta* nil)))
+         (setq *respuesta* nil)
+         (setq *operador* nil)
+         (setq *valor* nil)))
 
 ;[Funcion] Permite saber cual es el indice de donde vamos a revisar la clase
 (defun obtenerIndiceDeClase (valorDeClase indice)
@@ -140,5 +163,39 @@
          (second (first indice)))
         (T (obtenerIndiceDeClase valorDeClase (rest indice)))))
 
+(defun patternMatching (expresion)
+  (let* ((stringExpresion (string expresion))
+         (longitudExpresion (length stringExpresion))
+         (subPrimera (subseq stringExpresion 0 3))
+         (subSegunda (subseq stringExpresion 0 2)))
+
+    (cond ((string-equal subPrimera '[>=)
+           (progn
+             (setq *operador* #'>=)
+             (setq *valor* (parse-integer(subseq stringExpresion 3 (1- longitudExpresion))))))
+          ((string-equal subPrimera '[<=)
+           (progn
+             (setq *operador* #'<=)
+             (setq *valor* (parse-integer(subseq stringExpresion 3 (1- longitudExpresion))))))
+          ((string-equal subSegunda '[>)
+           (progn
+             (setq *operador* #'>)
+             (setq *valor* (parse-integer(subseq stringExpresion 2 (1- longitudExpresion))))))
+           ((string-equal subSegunda '[<)
+            (progn
+              (setq *operador* #'<)
+              (setq *valor* (parse-integer(subseq stringExpresion 2 (1- longitudExpresion))))))
+           (T (progn (setq *operador* nil)
+                     (setq *valor* nil))))))
 
 (miniSistemaExperto)
+;;(+ (clase . dios)(lugar . [>=5]))
+;(length(string 'perro))
+                                        ;(+ (clase . dios)(lugar . [>=25]))
+;(STRING-EQUAL "[>" (subseq "[>20]" 0 2))
+                                        ;(subseq "[>20]" 0 1)
+;(setq f #'>)
+;(setq f '>)
+;(funcall f 8 10)
+;(funcall #'f 8 10)
+;(intern (string-upcase "value-of-a"))
