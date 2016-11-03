@@ -46,6 +46,7 @@
     (setq *respuestaFinal* nil)
     (motorIntefenciaAux operador etiquetas)))
 
+;;TODO Validar bien cuando solo el usuario ponga la clase
 ;[Funcion] Nos permite hacer el motor de inferencia para la etiqueta existencial
 (defun motorIntefenciaAux (operador etiquetas)
   (let* ((clase (first etiquetas))
@@ -53,8 +54,7 @@
          (valorClase (rest clase))
          (indiceClase (obtenerIndiceDeClase valorClase *indice*))
          (inicioIndice (first indiceClase))
-         (finalIndice (second indiceClase))
-         (contadorFiltro 0))
+         (finalIndice (second indiceClase)))
 
     (cond ((eql operador '+)
            (progn
@@ -78,16 +78,27 @@
                    (print "False")
                    (print *respuestaFinal*)))))
           ((eql operador '*)
-           (print "ES *"))
+           (progn
+             (consultaABaseDeConocimientoUniversal inicioIndice finalIndice atributos *vector-conocimiento*)
+             (if (null *respuestaFinal*)
+                 (print "True")
+                 (progn
+                   (print "False")
+                   (print *respuestaFinal*)))))
           ((eql operador '/)
-           (print "ES /"))
+           (progn
+             (consultaABaseDeConocimientoUniversal inicioIndice finalIndice atributos *vector-conocimiento*)
+             (if (null *respuestaFinal*)
+                 (print "False")
+                 (progn
+                   (print "True")
+                   (print *respuestaFinal*)))))
           (T (print "Error")))))
 
 
 ;TODO No repetir valores el desplegar al final
 ;[Funcion] Permite obtener de la base de conocimiento los datos correspondientes a la consulta
 (defun consultaABaseDeConocimiento (inicioIndice finalIndice atributos baseDeConocomiento)
-
     (loop for i from inicioIndice to finalIndice do
          (if (null atributos)
              (print (aref baseDeConocomiento i))
@@ -103,8 +114,25 @@
                           (push (aref baseDeConocomiento i) *respuestaFinal*))
                       (if (= (length atributos) 1)
                           (setq *respuesta* '(0)))
-
                       ))  (setq *respuesta* '(0)) ))))
+
+;;TODO Juntar el universal y el existencial
+;;TODO Agregar por si no tiene clase
+;;[Funcion] Permite obtener de la base de conocimiento los datos para universal y universal negado
+(defun consultaABaseDeConocimientoUniversal (inicioIndice finalIndice atributos baseDeConocomiento)
+    (loop for i from inicioIndice to finalIndice do
+               (loop for j from 1 to (1- (length (aref baseDeConocomiento i))) do
+                    (let ((tuplaNombre (first (nth j (aref baseDeConocomiento i))))
+                          (tuplaValor (rest (nth j (aref baseDeConocomiento i)))))
+                      (loop for atributo in atributos do
+                           (if (equal (first atributo) tuplaNombre)
+                               (if (not (equal (rest atributo) tuplaValor))
+                                   (setq *respuesta* t))))
+
+                      (if (not (null *respuesta*))
+                          (push (aref baseDeConocomiento i) *respuestaFinal*))
+
+                      ))  (setq *respuesta* nil) ))
 
 ;[Funcion] Permite saber cual es el indice de donde vamos a revisar la clase
 (defun obtenerIndiceDeClase (valorDeClase indice)
@@ -113,7 +141,6 @@
         ((equal (first (first indice)) valorDeClase)
          (second (first indice)))
         (T (obtenerIndiceDeClase valorDeClase (rest indice)))))
-
 
 
 (miniSistemaExperto)
