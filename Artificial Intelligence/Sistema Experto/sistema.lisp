@@ -44,6 +44,11 @@
        (if (equal entrada 'Salir) (RETURN))
        (motorIntefencia entrada))))
 
+
+
+
+
+
 ;;[Funcion] Permite hacer el motor de Inferencia
 (defun motorIntefencia (entrada)
   ;;Como recibimos una lista propia obtenermos como primer argumento el cuantificados y despues los atributos
@@ -52,7 +57,13 @@
     ;;Limpiamos nuestras variables para cada busqueda que ralice el usuario
     (setq *respuesta* nil)
     (setq *respuestaFinal* nil)
-    (motorIntefenciaAux operador etiquetas)))
+    ;;Si detectamos que nuestra segunda etiqueta es un OR, hacemos la logica del or.
+    (if (equal (third entrada) 'OR)
+        (format t "~& ESTO ES PARA MI OR ~%")
+        (motorIntefenciaAux operador etiquetas))))
+
+;;( * (clase . dios) OR ((edad . [<=120]) (ciudad . [!=Toronto])) )
+
 
 ;;[Funcion] Nos permite hacer el motor de inferencia para la etiqueta existencial
 (defun motorIntefenciaAux (operador etiquetas)
@@ -142,11 +153,6 @@
                                    ;; Cuando sea necesario evaluar una funcion, ya la obtenemos gracias a nuestro patternMatching.
                                    (if (funcall *operador* tuplaValor *valor*)
                                        (progn
-                                         (format t "~& Esto es el tipo de tupla ~A ~%" (type-of tuplaValor))
-                                         (format t "~& Esto es el tipo de tupla ~A ~%"  (type-of *valor*))
-                                         (format t "~& Esto es el resultado de evaluar ~A != ~A = ~A ~%" tuplaValor *valor* (funcall *operador* tuplaValor *valor*))
-                                         (format t "~& ESTO ES HARDCORE ~A ~%" (equal *valor* tuplaValor))
-
                                          (push 1 *respuesta*))
                                          )))))))
 
