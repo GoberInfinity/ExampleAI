@@ -16,6 +16,10 @@
 (defparameter *respuesta* nil)
 (defparameter *respuestaFinal* nil)
 
+;;Permite manejar la logica del or
+(defparameter *valorVerdadOr1* nil)
+(defparameter *valorVerdadOr2* nil)
+
 ;;Permiten hacer de forma mas sencilla la obtencion de los valores y operadores a evaular
 (defparameter *operador* nil)
 (defparameter *valor* nil)
@@ -44,11 +48,6 @@
        (if (equal entrada 'Salir) (RETURN))
        (motorIntefencia entrada))))
 
-
-
-
-
-
 ;;[Funcion] Permite hacer el motor de Inferencia
 (defun motorIntefencia (entrada)
   ;;Como recibimos una lista propia obtenermos como primer argumento el cuantificados y despues los atributos
@@ -57,12 +56,50 @@
     ;;Limpiamos nuestras variables para cada busqueda que ralice el usuario
     (setq *respuesta* nil)
     (setq *respuestaFinal* nil)
+    (setq *valorVerdadOr1* nil)
+    (setq *valorVerdadOr2* nil)
+
     ;;Si detectamos que nuestra segunda etiqueta es un OR, hacemos la logica del or.
     (if (equal (third entrada) 'OR)
-        (format t "~& ESTO ES PARA MI OR ~%")
+        (progn
+          (format t "~& ESTO ES PARA MI OR ~%")
+          (setq *or* t)
+          (format t  "~& Operador: ~A Etiquetas: ~A ~%" operador etiquetas)
+          (format t  "~& Clase: ~A ~%" (first etiquetas))
+          (format t  "~& ESTO ES MI SUPER RESTO DE ETIQUETAS ~A ~%" (first(rest (rest etiquetas))))
+          (motorInferenciaAuxOr operador (first etiquetas) (first(rest (rest etiquetas)))))
         (motorIntefenciaAux operador etiquetas))))
 
-;;( * (clase . dios) OR ((edad . [<=120]) (ciudad . [!=Toronto])) )
+;;   ( * (clase . dios) OR ((habitat . olimpo) (habitat . inframundo)))
+(defun motorInferenciaAuxOr (operador clase etiquetas)
+  (let* ((atributos etiquetas)
+         (valorClase (rest clase))
+         (indiceClase (obtenerIndiceDeClase valorClase *indice*))
+         (inicioIndice (first indiceClase))
+         (finalIndice (second indiceClase)))
+
+    (if (null indiceClase)
+        (print "No existe la Clase")
+        (progn
+          (cond ((eql operador '*)
+                 (progn
+                   (consultaABaseDeConocimientoUniversal inicioIndice finalIndice (list(first atributos)) *vector-conocimiento*)
+                   (setq *valorVerdadOr1* *respuestaFinal*)
+                   (setq *respuestaFinal* nil)
+                   (consultaABaseDeConocimientoUniversal inicioIndice finalIndice (list(second atributos)) *vector-conocimiento*)
+                   (setq *valorVerdadOr2* *respuestaFinal*)
+
+                   (if (or (null *valorVerdadOr1*) (null *valorVerdadOr2*))
+                           (print "True")
+                           (progn
+                             (print "False")
+                             (format t "~& Esto es el valor de mi primer or ~A ~%" *valorVerdadOr1*)
+                             (format t "~& Esto es el valor de mi primer or ~A ~%" *valorVerdadOr2*)
+                             )
+                           )
+
+                   ))))
+  )))
 
 
 ;;[Funcion] Nos permite hacer el motor de inferencia para la etiqueta existencial
@@ -210,6 +247,8 @@
 ;;[Funcion] Permite usar patternMatching para obtener los valores de las expresiones
 (defun patternMatching (expresion)
   (let* ((stringExpresion (string expresion))
+         (valorAuxiliar nil)
+         (valorAuxiliar2 nil)
          (longitudExpresion (length stringExpresion))
          (subPrimera (subseq stringExpresion 0 3))
          (subSegunda (subseq stringExpresion 0 2)))
@@ -217,11 +256,21 @@
     (cond  ((string-equal subPrimera '[==)
             (progn
               (setq *operador* #'equal)
-              (setq *valor* (intern(subseq stringExpresion 3 (1- longitudExpresion))))))
+              (setq valorAuxiliar (read-from-string (subseq stringExpresion 3 (1- longitudExpresion))))
+              (if (numberp valorAuxiliar)
+                  (progn
+                    (setq *operador* #'=)
+                    (setq *valor* (parse-integer(subseq stringExpresion 3 (1- longitudExpresion)))))
+                  (setq *valor* (intern(subseq stringExpresion 3 (1- longitudExpresion)))))))
            ((string-equal subPrimera '[!=)
             (progn
-              (setq *operador* #'noEqual)
-              (setq *valor* (intern(subseq stringExpresion 3 (1- longitudExpresion))))))
+              (setq *operador* #'notEqual)
+              (setq valorAuxiliar (read-from-string (subseq stringExpresion 3 (1- longitudExpresion))))
+              (if (numberp valorAuxiliar)
+                  (progn
+                    (setq *operador* #'/=)
+                    (setq *valor* (parse-integer(subseq stringExpresion 3 (1- longitudExpresion)))))
+                  (setq *valor* (intern(subseq stringExpresion 3 (1- longitudExpresion)))))))
            ((string-equal subPrimera '[>=)
            (progn
              (setq *operador* #'>=)
@@ -244,7 +293,7 @@
 ;;Permite iniciar el motor basico de consultas
 (miniSistemaExperto)
 
-;;(+ (clase . dios)(nombre . [!=zeus]))
+;;  (+ (clase . dios)(lugar . [==0]))
 
 
 
