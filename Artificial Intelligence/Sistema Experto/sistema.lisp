@@ -141,7 +141,14 @@
                                  (progn
                                    ;; Cuando sea necesario evaluar una funcion, ya la obtenemos gracias a nuestro patternMatching.
                                    (if (funcall *operador* tuplaValor *valor*)
-                                       (push 1 *respuesta*))))))))
+                                       (progn
+                                         (format t "~& Esto es el tipo de tupla ~A ~%" (type-of tuplaValor))
+                                         (format t "~& Esto es el tipo de tupla ~A ~%"  (type-of *valor*))
+                                         (format t "~& Esto es el resultado de evaluar ~A != ~A = ~A ~%" tuplaValor *valor* (funcall *operador* tuplaValor *valor*))
+                                         (format t "~& ESTO ES HARDCORE ~A ~%" (equal *valor* tuplaValor))
+
+                                         (push 1 *respuesta*))
+                                         )))))))
 
              ;;Finalmente aplicamos una suma sobre lo que obtuvimos al iterar sobre nuestras tuplas, si es igual a la longitud de los atributos
              ;; la consulta se satisface
@@ -150,6 +157,10 @@
              (setq *respuesta* '(0))
              (setq *operador* nil)
              (setq *valor* nil)))))
+
+
+;;(+ (clase . dios)(nombre . [!=zeus]))
+
 
 ;;[Funcion] Permite obtener de la base de conocimiento los datos para universal y universal negado
 (defun consultaABaseDeConocimientoUniversal (inicioIndice finalIndice atributos baseDeConocomiento)
@@ -186,6 +197,10 @@
          (second (first indice)))
         (T (obtenerIndiceDeClase valorDeClase (rest indice)))))
 
+;;[Funcion] Permite hacer != como una funcion
+(defun notEqual (valor1 valor2)
+  (not (equal valor1 valor1)))
+
 ;;[Funcion] Permite usar patternMatching para obtener los valores de las expresiones
 (defun patternMatching (expresion)
   (let* ((stringExpresion (string expresion))
@@ -193,24 +208,37 @@
          (subPrimera (subseq stringExpresion 0 3))
          (subSegunda (subseq stringExpresion 0 2)))
 
-    (cond ((string-equal subPrimera '[>=)
+    (cond  ((string-equal subPrimera '[==)
+            (progn
+              (setq *operador* #'equal)
+              (setq *valor* (intern(subseq stringExpresion 3 (1- longitudExpresion))))))
+           ((string-equal subPrimera '[!=)
+            (progn
+              (setq *operador* #'noEqual)
+              (setq *valor* (intern(subseq stringExpresion 3 (1- longitudExpresion))))))
+           ((string-equal subPrimera '[>=)
            (progn
              (setq *operador* #'>=)
              (setq *valor* (parse-integer(subseq stringExpresion 3 (1- longitudExpresion))))))
-          ((string-equal subPrimera '[<=)
+           ((string-equal subPrimera '[<=)
            (progn
              (setq *operador* #'<=)
              (setq *valor* (parse-integer(subseq stringExpresion 3 (1- longitudExpresion))))))
-          ((string-equal subSegunda '[>)
+           ((string-equal subSegunda '[>)
            (progn
              (setq *operador* #'>)
              (setq *valor* (parse-integer(subseq stringExpresion 2 (1- longitudExpresion))))))
-          ((string-equal subSegunda '[<)
+           ((string-equal subSegunda '[<)
            (progn
              (setq *operador* #'<)
              (setq *valor* (parse-integer(subseq stringExpresion 2 (1- longitudExpresion))))))
-          (T (progn (setq *operador* nil)
+           (T (progn (setq *operador* nil)
                     (setq *valor* nil))))))
 
 ;;Permite iniciar el motor basico de consultas
 (miniSistemaExperto)
+
+;;(+ (clase . dios)(nombre . [!=zeus]))
+
+
+
