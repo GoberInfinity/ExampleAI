@@ -203,7 +203,7 @@
 
 
 ;;(+ (clase . dios)(nombre . [!=zeus]))
-
+;;  (+ (clase . dios)(habitat . [!=olimpo]))
 
 ;;[Funcion] Permite obtener de la base de conocimiento los datos para universal y universal negado
 (defun consultaABaseDeConocimientoUniversal (inicioIndice finalIndice atributos baseDeConocomiento)
@@ -242,13 +242,12 @@
 
 ;;[Funcion] Permite hacer != como una funcion
 (defun notEqual (valor1 valor2)
-  (not (equal valor1 valor1)))
+  (not (equal valor1 valor2)))
 
 ;;[Funcion] Permite usar patternMatching para obtener los valores de las expresiones
 (defun patternMatching (expresion)
   (let* ((stringExpresion (string expresion))
          (valorAuxiliar nil)
-         (valorAuxiliar2 nil)
          (longitudExpresion (length stringExpresion))
          (subPrimera (subseq stringExpresion 0 3))
          (subSegunda (subseq stringExpresion 0 2)))
@@ -295,5 +294,5 @@
 
 ;;  (+ (clase . dios)(lugar . [==0]))
 
-
+;;  (+ (clase . dios)(habitat . [!=olimpo]))
 
