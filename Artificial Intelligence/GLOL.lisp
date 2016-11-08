@@ -50,7 +50,7 @@
       (= oveja (third (second operador)))
       (= lechuga (fourth (second operador))))))
 
-;Para validar nuestro estado vemos que no exista oveja con zorro, ni lechuga con oveja
+;Para  validar nuestro estado vemos que no exista oveja con zorro, ni lechuga con oveja
 (defun estadoValido? (estado)
 	(let ((zorroOrigen (second (first estado)))
         (ovejaOrigen (third (first estado)))
