@@ -23,6 +23,7 @@
 ;;Permiten hacer de forma mas sencilla la obtencion de los valores y operadores a evaular
 (defparameter *operador* nil)
 (defparameter *valor* nil)
+(defparameter *contadorRepuesta* 0)
 
 ;;[Funcion] Permite leer de archivo nuestra base de conocimiento
 (defun leerConocimiento (filename)
@@ -58,6 +59,7 @@
     (setq *respuestaFinal* nil)
     (setq *valorVerdadOr1* nil)
     (setq *valorVerdadOr2* nil)
+    (setq *contadorRepuesta* 0)
 
     ;;Si detectamos que nuestra segunda etiqueta es un OR, hacemos la logica del or.
     (if (equal (third entrada) 'OR)
@@ -71,6 +73,8 @@
          (valorClase (rest clase))
          (indiceClase (obtenerIndiceDeClase valorClase *indice*))
          (inicioIndice (first indiceClase))
+         (auxContador 0)
+         (auxContador2 0)
          (finalIndice (second indiceClase)))
 
     (if (null indiceClase)
@@ -97,18 +101,27 @@
                  (progn
                    (consultaABaseDeConocimientoUniversal inicioIndice finalIndice (list(first atributos)) *vector-conocimiento*)
                    (setq *valorVerdadOr1* *respuestaFinal*)
+                   (setq auxContador *contadorRepuesta*)
                    (setq *respuestaFinal* nil)
+                   (setq *contadorRepuesta* 0)
                    (consultaABaseDeConocimientoUniversal inicioIndice finalIndice (list(second atributos)) *vector-conocimiento*)
                    (setq *valorVerdadOr2* *respuestaFinal*)
+                   (setq auxContador2 *contadorRepuesta*)
 
                    (if (or (null *valorVerdadOr1*) (null *valorVerdadOr2*))
                        (print "False")
                        (progn
-                         (cond ((null *valorVerdadOr1*)
-                                (format t "~& ~A ~%" *valorVerdadOr2*))
-                               ((null *valorVerdadOr2*)
-                                (format t "~& ~A ~%" *valorVerdadOr1*))
-                               (T (format t "~& ~A ~%" *valorVerdadOr1*)))))))
+                         (if (/= auxContador (1+ (- finalIndice inicioIndice )))
+                             (print "False")
+                             (if (/= auxContador2 (1+ (- finalIndice inicioIndice )))
+                                 (print "False")
+                                 (progn
+                                   (print "True")
+                                   (cond ((null *valorVerdadOr1*)
+                                          (format t "~& ~A ~%" *valorVerdadOr2*))
+                                         ((null *valorVerdadOr2*)
+                                          (format t "~& ~A ~%" *valorVerdadOr1*))
+                                         (T (format t "~& ~A ~%" *valorVerdadOr1*))))))))))
                 ((eql operador '+)
                  (progn
                    (consultaABaseDeConocimiento inicioIndice finalIndice (list(first atributos)) *vector-conocimiento*)
@@ -116,10 +129,10 @@
                    (setq *respuestaFinal* nil)
                    (consultaABaseDeConocimiento inicioIndice finalIndice (list(second atributos)) *vector-conocimiento*)
                    (setq *valorVerdadOr2* *respuestaFinal*)
-
-                   (if (or (null *valorVerdadOr1*) (null *valorVerdadOr2*))
+                   (if (and (null *valorVerdadOr1*) (null *valorVerdadOr2*))
                        (print "False")
                        (progn
+                         (print "True")
                          (cond ((null *valorVerdadOr1*)
                                 (format t "~& ~A ~%" *valorVerdadOr2*))
                                ((null *valorVerdadOr2*)
@@ -133,17 +146,18 @@
                    (consultaABaseDeConocimiento inicioIndice finalIndice (list(second atributos)) *vector-conocimiento*)
                    (setq *valorVerdadOr2* *respuestaFinal*)
 
-                   (if (or (null *valorVerdadOr1*) (null *valorVerdadOr2*))
+                   (if (and (null *valorVerdadOr1*) (null *valorVerdadOr2*))
                        (print "True")
                        (progn
+                         (print "Flase")
                          (cond ((null *valorVerdadOr1*)
                                 (format t "~& ~A ~%" *valorVerdadOr2*))
                                ((null *valorVerdadOr2*)
                                 (format t "~& ~A ~%" *valorVerdadOr1*))
                                (T (format t "~& ~A ~%" *valorVerdadOr1*)))))))   ))  )))
 
-
 ;;[Funcion] Nos permite hacer el motor de inferencia para la etiqueta existencial
+
 (defun motorIntefenciaAux (operador etiquetas)
   ;;Usamos let* por que necesitamos crear nuetras otras variables apartir de la primera
   ;;Para las etiquetas usamos first y rest para obtener los valores de la lista propia (argumento . valor)
@@ -197,8 +211,11 @@
                    (if (null *respuestaFinal*)
                        (print "False")
                        (progn
-                         (print "True")
-                         (print *respuestaFinal*)))))
+                         (if (/= *contadorRepuesta* (1+ (- finalIndice inicioIndice )))
+                             (print "False")
+                             (progn
+                               (print "True")
+                               (print *respuestaFinal*)))))))
                 ;;Incluimos la opcion de error por si el usuario escribio mal alguno de los cuantificadores
                 (T (print "Error")))))))
 
@@ -243,9 +260,6 @@
              (setq *valor* nil)))))
 
 
-;;(+ (clase . dios)(nombre . [!=zeus]))
-;;  (+ (clase . dios)(habitat . [!=olimpo]))
-;; ( * (clase . dios) OR ((habitat . olimpo) (habitat . inframundo)))
 
 ;;[Funcion] Permite obtener de la base de conocimiento los datos para universal y universal negado
 (defun consultaABaseDeConocimientoUniversal (inicioIndice finalIndice atributos baseDeConocomiento)
@@ -259,7 +273,9 @@
                        (if (null *operador*)
                            ;;Para el existencial lo que hacemos es que si todos los valores se cumplen regresamos falso
                            (if (not (equal (rest atributo) tuplaValor))
-                               (setq *respuesta* t))
+                               (progn
+                                 (setq *respuesta* t)
+                                 (setq *contadorRepuesta* (1+ *contadorRepuesta*))))
                            (progn
                              (if (not (funcall *operador* tuplaValor *valor*))
                                  (progn
@@ -334,7 +350,13 @@
 ;;Permite iniciar el motor basico de consultas
 (miniSistemaExperto)
 
+;; Para numeros siempre usar []
 ;;  (+ (clase . dios)(lugar . [==0]))
-
 ;;  (+ (clase . dios)(habitat . [!=olimpo]))
+;;  (+ (clase . dios)(nombre . [!=zeus]))
+;;  (+ (clase . dios)(habitat . [!=olimpo]))
+;;  ( * (clase . dios) OR ((habitat . olimpo) (habitat . inframundo)))
+;;  (* (clase . dios)(habitat . tierra))
+;; ( + (clase . dios) OR ((habitat . tierra) (habitat . inframundo)))
+;; ( / (clase . dios)(habitat . olimpo))
 
