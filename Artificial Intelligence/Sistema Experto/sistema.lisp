@@ -108,20 +108,18 @@
                    (setq *valorVerdadOr2* *respuestaFinal*)
                    (setq auxContador2 *contadorRepuesta*)
 
-                   (if (or (null *valorVerdadOr1*) (null *valorVerdadOr2*))
-                       (print "False")
+
+                   (if (or (= auxContador (1+ (- finalIndice inicioIndice ))) (= auxContador2 (1+ (- finalIndice inicioIndice ))))
                        (progn
-                         (if (/= auxContador (1+ (- finalIndice inicioIndice )))
-                             (print "False")
-                             (if (/= auxContador2 (1+ (- finalIndice inicioIndice )))
-                                 (print "False")
-                                 (progn
-                                   (print "True")
-                                   (cond ((null *valorVerdadOr1*)
-                                          (format t "~& ~A ~%" *valorVerdadOr2*))
-                                         ((null *valorVerdadOr2*)
-                                          (format t "~& ~A ~%" *valorVerdadOr1*))
-                                         (T (format t "~& ~A ~%" *valorVerdadOr1*))))))))))
+                         (print "True")
+                         (cond ((null *valorVerdadOr1*)
+                                (format t "~& ~A ~%" *valorVerdadOr2*))
+                               ((null *valorVerdadOr2*)
+                                (format t "~& ~A ~%" *valorVerdadOr1*))
+                               (T (format t "~& ~A ~%" *valorVerdadOr1*))))
+                       (print "False"))))
+
+
                 ((eql operador '+)
                  (progn
                    (consultaABaseDeConocimiento inicioIndice finalIndice (list(first atributos)) *vector-conocimiento*)
