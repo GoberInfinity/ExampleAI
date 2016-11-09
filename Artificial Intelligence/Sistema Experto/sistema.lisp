@@ -109,15 +109,15 @@
                    (setq auxContador2 *contadorRepuesta*)
 
 
-                   (if (or (= auxContador (1+ (- finalIndice inicioIndice ))) (= auxContador2 (1+ (- finalIndice inicioIndice ))))
+                   (if (or (null *valorVerdadOr1*) (null *valorVerdadOr2*))
+                       (print "False")
                        (progn
                          (print "True")
                          (cond ((null *valorVerdadOr1*)
                                 (format t "~& ~A ~%" *valorVerdadOr2*))
                                ((null *valorVerdadOr2*)
                                 (format t "~& ~A ~%" *valorVerdadOr1*))
-                               (T (format t "~& ~A ~%" *valorVerdadOr1*))))
-                       (print "False"))))
+                               (T (format t "~& ~A ~%" *valorVerdadOr1*)))))))
 
 
                 ((eql operador '+)
@@ -209,11 +209,8 @@
                    (if (null *respuestaFinal*)
                        (print "False")
                        (progn
-                         (if (/= *contadorRepuesta* (1+ (- finalIndice inicioIndice )))
-                             (print "False")
-                             (progn
-                               (print "True")
-                               (print *respuestaFinal*)))))))
+                         (print "True")
+                         (print *respuestaFinal*)))))
                 ;;Incluimos la opcion de error por si el usuario escribio mal alguno de los cuantificadores
                 (T (print "Error")))))))
 
