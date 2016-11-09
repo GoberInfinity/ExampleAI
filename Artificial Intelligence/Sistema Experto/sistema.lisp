@@ -62,15 +62,10 @@
     ;;Si detectamos que nuestra segunda etiqueta es un OR, hacemos la logica del or.
     (if (equal (third entrada) 'OR)
         (progn
-          (format t "~& ESTO ES PARA MI OR ~%")
-          (setq *or* t)
-          (format t  "~& Operador: ~A Etiquetas: ~A ~%" operador etiquetas)
-          (format t  "~& Clase: ~A ~%" (first etiquetas))
-          (format t  "~& ESTO ES MI SUPER RESTO DE ETIQUETAS ~A ~%" (first(rest (rest etiquetas))))
           (motorInferenciaAuxOr operador (first etiquetas) (first(rest (rest etiquetas)))))
         (motorIntefenciaAux operador etiquetas))))
 
-;;   ( * (clase . dios) OR ((habitat . olimpo) (habitat . inframundo)))
+;;  
 (defun motorInferenciaAuxOr (operador clase etiquetas)
   (let* ((atributos etiquetas)
          (valorClase (rest clase))
@@ -93,13 +88,59 @@
                            (print "True")
                            (progn
                              (print "False")
-                             (format t "~& Esto es el valor de mi primer or ~A ~%" *valorVerdadOr1*)
-                             (format t "~& Esto es el valor de mi primer or ~A ~%" *valorVerdadOr2*)
-                             )
-                           )
+                             (cond ((null *valorVerdadOr1*)
+                                    (format t "~& ~A ~%" *valorVerdadOr2*))
+                                   ((null *valorVerdadOr2*)
+                                    (format t "~& ~A ~%" *valorVerdadOr1*))
+                                   (T (format t "~& ~A ~%" *valorVerdadOr1*)))))))
+                ((eql operador '/)
+                 (progn
+                   (consultaABaseDeConocimientoUniversal inicioIndice finalIndice (list(first atributos)) *vector-conocimiento*)
+                   (setq *valorVerdadOr1* *respuestaFinal*)
+                   (setq *respuestaFinal* nil)
+                   (consultaABaseDeConocimientoUniversal inicioIndice finalIndice (list(second atributos)) *vector-conocimiento*)
+                   (setq *valorVerdadOr2* *respuestaFinal*)
 
-                   ))))
-  )))
+                   (if (or (null *valorVerdadOr1*) (null *valorVerdadOr2*))
+                       (print "False")
+                       (progn
+                         (cond ((null *valorVerdadOr1*)
+                                (format t "~& ~A ~%" *valorVerdadOr2*))
+                               ((null *valorVerdadOr2*)
+                                (format t "~& ~A ~%" *valorVerdadOr1*))
+                               (T (format t "~& ~A ~%" *valorVerdadOr1*)))))))
+                ((eql operador '+)
+                 (progn
+                   (consultaABaseDeConocimiento inicioIndice finalIndice (list(first atributos)) *vector-conocimiento*)
+                   (setq *valorVerdadOr1* *respuestaFinal*)
+                   (setq *respuestaFinal* nil)
+                   (consultaABaseDeConocimiento inicioIndice finalIndice (list(second atributos)) *vector-conocimiento*)
+                   (setq *valorVerdadOr2* *respuestaFinal*)
+
+                   (if (or (null *valorVerdadOr1*) (null *valorVerdadOr2*))
+                       (print "False")
+                       (progn
+                         (cond ((null *valorVerdadOr1*)
+                                (format t "~& ~A ~%" *valorVerdadOr2*))
+                               ((null *valorVerdadOr2*)
+                                (format t "~& ~A ~%" *valorVerdadOr1*))
+                               (T (format t "~& ~A ~%" *valorVerdadOr1*)))))))
+                ((eql operador '-)
+                 (progn
+                   (consultaABaseDeConocimiento inicioIndice finalIndice (list(first atributos)) *vector-conocimiento*)
+                   (setq *valorVerdadOr1* *respuestaFinal*)
+                   (setq *respuestaFinal* nil)
+                   (consultaABaseDeConocimiento inicioIndice finalIndice (list(second atributos)) *vector-conocimiento*)
+                   (setq *valorVerdadOr2* *respuestaFinal*)
+
+                   (if (or (null *valorVerdadOr1*) (null *valorVerdadOr2*))
+                       (print "True")
+                       (progn
+                         (cond ((null *valorVerdadOr1*)
+                                (format t "~& ~A ~%" *valorVerdadOr2*))
+                               ((null *valorVerdadOr2*)
+                                (format t "~& ~A ~%" *valorVerdadOr1*))
+                               (T (format t "~& ~A ~%" *valorVerdadOr1*)))))))   ))  )))
 
 
 ;;[Funcion] Nos permite hacer el motor de inferencia para la etiqueta existencial
@@ -204,6 +245,7 @@
 
 ;;(+ (clase . dios)(nombre . [!=zeus]))
 ;;  (+ (clase . dios)(habitat . [!=olimpo]))
+;; ( * (clase . dios) OR ((habitat . olimpo) (habitat . inframundo)))
 
 ;;[Funcion] Permite obtener de la base de conocimiento los datos para universal y universal negado
 (defun consultaABaseDeConocimientoUniversal (inicioIndice finalIndice atributos baseDeConocomiento)
