@@ -75,10 +75,21 @@
          (inicioIndice (first indiceClase))
          (auxContador 0)
          (auxContador2 0)
+         (atributoAix nil)
          (finalIndice (second indiceClase)))
 
     (if (null indiceClase)
-        (print "No existe la Clase")
+        (progn
+          (if (null (rest etiquetas))
+              (setq atributos (list (first etiquetas)))
+              (progn
+                (setq atributoAix (first etiquetas))
+                (setq atributos (cons atributoAix (rest etiquetas)))
+                ))
+          (print atributos)
+          (setq inicioIndice 0)
+          (setq finalIndice 99)))
+
         (progn
           (cond ((eql operador '*)
                  (progn
@@ -152,7 +163,7 @@
                                 (format t "~& ~A ~%" *valorVerdadOr2*))
                                ((null *valorVerdadOr2*)
                                 (format t "~& ~A ~%" *valorVerdadOr1*))
-                               (T (format t "~& ~A ~%" *valorVerdadOr1*)))))))   ))  )))
+                               (T (format t "~& ~A ~%" *valorVerdadOr1*)))))))   ))  ))
 
 ;;[Funcion] Nos permite hacer el motor de inferencia para la etiqueta existencial
 
@@ -164,11 +175,21 @@
          (valorClase (rest clase))
          (indiceClase (obtenerIndiceDeClase valorClase *indice*))
          (inicioIndice (first indiceClase))
+         (atributoAix nil)
          (finalIndice (second indiceClase)))
 
     ;;Si no existe devolvemos inmediatamente que no existe esa clase
     (if (null indiceClase)
-        (print "No existe la Clase")
+        (progn
+          (if (null (rest etiquetas))
+              (setq atributos (list (first etiquetas)))
+              (progn
+                (setq atributoAix (first etiquetas))
+                (setq atributos (cons atributoAix (rest etiquetas)))
+                ))
+          (setq inicioIndice 0)
+          (setq finalIndice 99)))
+
         (progn
           ;;Cuando nuestro cuantificador sea existencial
           (cond ((eql operador '+)
@@ -212,7 +233,7 @@
                          (print "True")
                          (print *respuestaFinal*)))))
                 ;;Incluimos la opcion de error por si el usuario escribio mal alguno de los cuantificadores
-                (T (print "Error")))))))
+                (T (print "Error"))))))
 
 
 ;;[Funcion] Permite obtener de la base de conocimiento los datos correspondientes a la consulta
@@ -299,11 +320,15 @@
 
 ;;[Funcion] Permite usar patternMatching para obtener los valores de las expresiones
 (defun patternMatching (expresion)
-  (let* ((stringExpresion (string expresion))
+  (let* ((stringExpresion (write-to-string expresion))
          (valorAuxiliar nil)
          (longitudExpresion (length stringExpresion))
-         (subPrimera (subseq stringExpresion 0 3))
-         (subSegunda (subseq stringExpresion 0 2)))
+         (subPrimera nil)
+         (subSegunda nil))
+
+    (if (equal (subseq stringExpresion 0 1) "[")
+               (setq subPrimera (subseq stringExpresion 0 3)
+                     subSegunda (subseq stringExpresion 0 2)))
 
     (cond  ((string-equal subPrimera '[==)
             (progn
@@ -340,18 +365,22 @@
              (setq *operador* #'<)
              (setq *valor* (parse-integer(subseq stringExpresion 2 (1- longitudExpresion))))))
            (T (progn (setq *operador* nil)
-                    (setq *valor* nil))))))
+                     (setq *valor* nil)))
+
+           )))
 
 ;;Permite iniciar el motor basico de consultas
 (miniSistemaExperto)
 
 ;; Para numeros siempre usar []
-;;  (+ (clase . dios)(lugar . [==0]))
+;;  (+ (clase . dios)(lugar . 0))
 ;;  (+ (clase . dios)(habitat . [!=olimpo]))
 ;;  (+ (clase . dios)(nombre . [!=zeus]))
 ;;  (+ (clase . dios)(habitat . [!=olimpo]))
 ;;  ( * (clase . dios) OR ((habitat . olimpo) (habitat . inframundo)))
-;;  (* (clase . dios)(habitat . tierra))
+;;  (* (clase . dios)(habitat . tierra)(lugar . [>=0]))
 ;; ( + (clase . dios) OR ((habitat . tierra) (habitat . inframundo)))
 ;; ( / (clase . dios)(habitat . olimpo))
+;; []
+;; (* (clase . dios)(habitat . tierra)(lugar . [>=0]))
 
