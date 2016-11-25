@@ -1,0 +1,10 @@
+;; *************************************
+;; Base de Conocimiento
+;; *************************************
+;;==== Numero de reglas ===
+4
+;;========== Reglas ================ 
+(<- (can-satisfy-hunger-with ?x ?y)(eats ?x ?y)(can-bite ?x ?y))
+(<- (eats ?y ?x)(predator-of ?x ?y))
+(<- (can-bite ?x ?y)(isa ?x animal)(near ?x ?y))
+(<- (near ?x ?y)(at ?x ?loc)(at ?y ?loc))

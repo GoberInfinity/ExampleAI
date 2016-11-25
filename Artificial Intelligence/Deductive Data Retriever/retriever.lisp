@@ -8,7 +8,7 @@
 ;;;
 ;;; No forward chaining rules.
 ;;;
-;;; No (tell ...) function. Use (with-kb kb (ask ...))
+;;; No (tell ...) function. Use (with-kb kb (ask ...)) 
 ;;; where kb should evaluate to a list of rules. See
 ;;; retriever-tests.lisp for examples.
 ;;;
@@ -17,8 +17,7 @@
 
 (defpackage :retriever
   (:use :common-lisp)
-  (:export #:<- #:ask #:unify #:with-kb)
-  )
+  (:export #:<- #:ask #:unify #:with-kb #:cargar-reglas))
 
 (in-package :retriever)
 
@@ -31,11 +30,19 @@
   (mapcar #'(lambda (blist) (replace-vars form blist))
           (find-blists pat (list nil))))
 
+(trace replace-vars)
+(trace find-blists )
+
 (defun find-blists (pat blists)
   (and blists
        (mapcan #'(lambda (rule)
                    (try-rule pat (rename-vars rule) blists))
                *kb*)))
+
+;; (trace try-rule)
+;; (trace rename-vars)
+;; (trace prove-and)
+;; (trace vars-in)
 
 (defun try-rule (pat rule blists)
   (prove-and (cddr rule)
@@ -61,6 +68,9 @@
 
 ;;; Replace all variables in form with newly generated ones.
 (defun rename-vars (form)
+  (print "//////////////////")
+  (print form)
+  (print "//////////////////")
   (sublis (mapcar #'(lambda (v) (cons v (gensym "?")))
                   (vars-in form))
           form))
@@ -86,14 +96,14 @@
           blists))
 
 (defun bind-var (var pat blist)
-  (if (and (var-p pat) 
+  (if (and (var-p pat)
            (var-equalp var pat blist))
       (list blist)
       (let ((bdg (var-binding var blist)))
         (cond (bdg (unify (binding-value bdg) pat (list blist)))
               ((contained-in-p var pat blist) nil)
               (t (list (add-var-binding var pat blist)))))))
-              
+
 (defun var-equalp (var1 var2 blist)
   (and (var-p var2)
        (or (eql (var-name var1) (var-name var2))
@@ -127,101 +137,46 @@
 (defun binding-value (bdg)
   (cadr bdg))
 
-(defparameter *tiger-kb*
-  '(
-    (<- (can-satisfy-hunger-with ?x ?y)
-     (eats ?x ?y)
-     (can-bite ?x ?y))
+(defun cargar-reglas (filename)
+  (with-open-file (stream filename)
+    (let ((numrows (read stream))
+          (lista nil))
+      (read-line stream nil nil)
+      (dotimes (row numrows lista)
+        (setq lista (cons (read stream nil nil) lista))))))
 
-    (<- (eats ?y ?x)
-     (predator-of ?x ?y))
+;; (defparameter *tiger-kb*
+;;   '(
+    ;; (<- (can-satisfy-hunger-with ?x ?y)
+    ;;  (eats ?x ?y)
+    ;;  (can-bite ?x ?y))
 
-    (<- (can-bite ?x ?y)
-     (isa ?x animal)
-     (near ?x ?y))
+    ;; (<- (eats ?y ?x)
+    ;;  (predator-of ?x ?y))
 
-    (<- (near ?x ?y)
-     (at ?x ?loc)
-     (at ?y ?loc))
+    ;; (<- (can-bite ?x ?y)
+    ;;  (isa ?x animal)
+    ;;  (near ?x ?y))
 
-    (<- (eats antelope grass))
-    (<- (eats antelope ferns))
-    (<- (predator-of antelope tiger))
-    (<- (predator-of zebra tiger))
+    ;; (<- (near ?x ?y)
+    ;;  (at ?x ?loc)
+    ;;  (at ?y ?loc))
 
-    (<- (at antelope savannah))
-    (<- (at tiger savannah))
-    (<- (at grass savannah))
+;;     (<- (eats antelope grass))
+;;     (<- (eats antelope ferns))
+;;     (<- (predator-of antelope tiger))
+;;     (<- (predator-of zebra tiger))
 
-    (<- (isa tiger animal))
-    (<- (isa antelope animal))
-    ))
+;;     (<- (at antelope savannah))
+;;     (<- (at tiger savannah))
+;;     (<- (at grass savannah))
 
-(with-kb *tiger-kb* (ask '(at antelope savannah)))
-(with-kb *tiger-kb* (ask '(can-bite grass antelope)))
+;;     (<- (isa tiger animal))
+;;     (<- (isa antelope animal))
+;;     ))
+
+;; (with-kb *tiger-kb* (ask '(at antelope savannah)))
+;; (with-kb *tiger-kb* (ask '(at tiger savannah)))
+;; (with-kb *tiger-kb* (ask '(can-bite grass antelope)))
 
 
-(defparameter *monkey-kb*
-  '(
-    ;; If the monkey and box are in the center of
-    ;; the room and the monkey is on on the box,
-    ;; then nothing more needs to be done to get the
-    ;; bananas.
-    (<- (can-get (state ?loc ?loc box) done)
-        (at bananas ?loc))
-
-    ;; The monkey can get the bananas in state1 with
-    ;; some sequence of actions, if the first action
-    ;; leads from state1 to state2 and the monkey can
-    ;; get the bananas in state2 by performing the
-    ;; remaining actions.
-    (<- (can-get ?state1 (do ?action ?steps))
-        (results ?state1 ?action ?state2)
-        (can-get ?state2 ?steps))
-   
-    ;; The monkey can climb on the box when they're
-    ;; in the same location.
-    ;; CAUTION: if you add climbing down, then you 
-    ;; need to constrain when the monkey should climb
-    ;; on the box, to avoid an infinite number of
-    ;; solutions.
-    (<- (results (state ?loc ?loc floor)
-                 climb-box
-                 (state ?loc ?loc box)))
-
-    ;; The monkey can push the box to where the 
-    ;; bananas are if the monkey and box are in one
-    ;; place and the bananas are somewhere else.
-    (<- (results (state ?loc1 ?loc1 floor)
-                 (push-box ?loc1 ?loc2)
-                 (state ?loc2 ?loc2 floor))
-        (at bananas ?loc2)
-        (different ?loc1 ?loc2))
-   
-    ;; The monkey can walk to where the box is
-    ;; if theyre in different places.
-    (<- (results (state ?mloc ?bloc floor)
-                 (walk ?mloc ?bloc)
-                 (state ?bloc ?bloc floor))
-        (different ?mloc ?bloc))
-   
-    ;; Every location is different from every other
-    ;; locations
-    (<- (different window center))
-    (<- (different window door))
-
-    (<- (different center window))
-    (<- (different center door))
-
-    (<- (different door window))
-    (<- (different door center))
-
-    (<- (different box floor))
-    (<- (different floor box))
- 
-    ;; The bananas are in the center of the room.
-    (<- (at bananas center))
-   ))
-
-(with-kb *monkey-kb*(ask '(can-get (state center center box) ?steps)))
-(with-kb *monkey-kb*(ask '(can-get (state window window box) ?steps)))
