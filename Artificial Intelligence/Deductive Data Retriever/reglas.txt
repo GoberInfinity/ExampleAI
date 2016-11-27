@@ -1,0 +1,34 @@
+;; *************************************
+;; Reglas para el problema de la Zebra
+;; *************************************
+;;==== Numero de reglas ===
+28
+;;========== Reglas ================
+    (<-(tieneZebra ?colorZ ?personaZ ?bebidaZ ?cigarroZ ?mascotaZ)(personaConZebraTiene ?colorZ ?personaZ ?bebidaZ ?cigarroZ ?mascotaZ))
+    (<-(tomaAgua ?colorZ ?personaZ ?bebidaZ ?cigarroZ ?mascotaZ)(personaQueTomaAgua ?colorZ ?personaZ ?bebidaZ ?cigarroZ ?mascotaZ))
+    (<- (personaConZebraTiene ?colorZ ?personaZ ?bebidaZ ?cigarroZ ?mascotaZ)(vive ?persona1 ?casa1)(viveAlado ?persona1 ?colorCasa2)(aladoDe ?colorZ ?colorCasa4)(fumaKools ?persona1)(casaRoja ?personaCasaRoja ?colorZ ?personaZ ?bebidaZ ?cigarroZ ?mascotaZ))
+	(<- (fumaKools ?persona1)(fuma ?colorCasa1 ?cigarroCasa1)(tieneCaballo ?persona2 ?cigarroCasa1 ))
+    (<- (tieneCaballo ?persona2 ?cigarroCasa1)(aladoFuman ?animalCasa2 ?cigarroCasa1))
+    (<- (casaRoja ?personaCasaRoja ?colorZ ?personaZ ?bebidaZ ?cigarroZ ?mascotaZ)(viveCasa ?persona3 ?colorCasa3)(laZebra ?colorZ ?personaZ ?bebidaZ ?cigarroZ ?mascotaZ))
+    (<- (laZebra ?colorZ ?personaZ ?bebidaZ ?cigarroZ ?mascotaZ)(enmedioSeToma ?bebidaCasa3)(fumaCon ?personaZ ?cigarroZ)(bebe ?persona2 ?bebidaCasa2)(bebeCon ?colorZ ?bebidaZ)(mascotaFuma ?animalCasa3 ?cigarrosCasa3)(aladoDeFuman ?animalCasa1 ?cigarrosCasa2)(tiene ?persona4 ?animalCasa4)(esBebida ?bebidaCasa4 ?cigarrosCasa4)(animal ?mascotaZ))
+    (<- (personaQueTomaAgua ?colorZ ?personaZ ?bebidaZ ?cigarroZ ?mascotaZ)(vive ?personaZ ?casa1)(viveAlado ?personaZ ?colorCasa2)(aladoDe ?colorCasa4 ?colorCasa5)(fumaKools ?personaZ ?colorZ ?cigarroZ)(casaRoja ?personaCasaRoja ?bebidaZ ?mascotaZ))
+    (<- (fumaKools ?personaZ ?colorZ ?cigarroZ)(fuma ?colorZ ?cigarroZ)(tieneCaballo ?persona2 ?cigarroZ ))
+    (<- (tieneCaballo ?persona2 ?cigarroZ)(aladoFuman ?animalCasa2 ?cigarroZ))
+    (<- (casaRoja ?personaCasaRoja ?bebidaZ ?mascotaZ)(viveCasa ?persona3 ?colorCasa3)(tomaAgua ?bebidaZ ?mascotaZ))
+    (<- (tomaAgua ?bebidaZ ?mascotaZ)(enmedioSeToma ?bebidaCasa3)(fumaCon ?persona5 ?cigarrosCasa5)(bebe ?persona2 ?bebidaCasa2)(bebeCon ?colorCasa4 ?bebidaCasa5)(toma ?bebidaZ)(mascotaFuma ?animalCasa3 ?cigarrosCasa3)(aladoDeFuman ?mascotaZ ?cigarrosCasa2)(tiene ?persona4 ?animalCasa4)(esBebida ?bebidaCasa4 ?cigarrosCasa4))
+    (<- (vive Noruego Primera-Casa))
+    (<- (viveAlado Noruego Casa-Azul))
+    (<- (enmedioSeToma Leche))
+    (<- (aladoDe Casa-Verde Casa-Blanca))
+    (<- (bebeCon Casa-Verde Cafe))
+    (<- (viveCasa Ingles Casa-Roja))
+    (<- (bebe Ucraniano Te))
+    (<- (fuma Casa-Amarilla Kools))
+    (<- (esBebida Jugo LuckyStrike ))
+    (<- (fumaCon Japones Parlaments))
+    (<- (aladoFuman Caballo Kools))
+    (<- (mascotaFuma Caracol Old-Gold ))
+    (<- (aladoDeFuman Zorro ChesterFields))
+    (<- (tiene Espanol Perro))
+    (<- (animal zebra))
+    (<- (toma agua))
