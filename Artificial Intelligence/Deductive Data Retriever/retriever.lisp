@@ -13,11 +13,10 @@
 ;;; retriever-tests.lisp for examples.
 ;;;
 ;;; No ASK-TRACE
-
-
 (defpackage :retriever
   (:use :common-lisp)
-  (:export #:<- #:ask #:unify #:with-kb #:cargar-reglas))
+  (:export #:<- #:ask #:unify #:with-kb #:cargar-reglas)
+  )
 
 (in-package :retriever)
 
@@ -30,19 +29,11 @@
   (mapcar #'(lambda (blist) (replace-vars form blist))
           (find-blists pat (list nil))))
 
-(trace replace-vars)
-(trace find-blists )
-
 (defun find-blists (pat blists)
   (and blists
        (mapcan #'(lambda (rule)
                    (try-rule pat (rename-vars rule) blists))
                *kb*)))
-
-;; (trace try-rule)
-;; (trace rename-vars)
-;; (trace prove-and)
-;; (trace vars-in)
 
 (defun try-rule (pat rule blists)
   (prove-and (cddr rule)
@@ -68,9 +59,6 @@
 
 ;;; Replace all variables in form with newly generated ones.
 (defun rename-vars (form)
-  (print "//////////////////")
-  (print form)
-  (print "//////////////////")
   (sublis (mapcar #'(lambda (v) (cons v (gensym "?")))
                   (vars-in form))
           form))
@@ -143,40 +131,5 @@
           (lista nil))
       (read-line stream nil nil)
       (dotimes (row numrows lista)
-        (setq lista (cons (read stream nil nil) lista))))))
-
-;; (defparameter *tiger-kb*
-;;   '(
-    ;; (<- (can-satisfy-hunger-with ?x ?y)
-    ;;  (eats ?x ?y)
-    ;;  (can-bite ?x ?y))
-
-    ;; (<- (eats ?y ?x)
-    ;;  (predator-of ?x ?y))
-
-    ;; (<- (can-bite ?x ?y)
-    ;;  (isa ?x animal)
-    ;;  (near ?x ?y))
-
-    ;; (<- (near ?x ?y)
-    ;;  (at ?x ?loc)
-    ;;  (at ?y ?loc))
-
-;;     (<- (eats antelope grass))
-;;     (<- (eats antelope ferns))
-;;     (<- (predator-of antelope tiger))
-;;     (<- (predator-of zebra tiger))
-
-;;     (<- (at antelope savannah))
-;;     (<- (at tiger savannah))
-;;     (<- (at grass savannah))
-
-;;     (<- (isa tiger animal))
-;;     (<- (isa antelope animal))
-;;     ))
-
-;; (with-kb *tiger-kb* (ask '(at antelope savannah)))
-;; (with-kb *tiger-kb* (ask '(at tiger savannah)))
-;; (with-kb *tiger-kb* (ask '(can-bite grass antelope)))
-
-
+        (setq lista (cons (read stream nil nil) lista))
+        ))))
