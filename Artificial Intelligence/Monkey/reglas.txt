@@ -1,0 +1,21 @@
+ ;; *************************************
+;; Reglas para el problema deL chango
+;; *************************************
+;;==== Numero de reglas ===
+15
+;;========== Reglas ================
+	(<- (puedeTener (estado ?loc ?loc banquito palito) done)(at platanos ?loc))
+    (<- (puedeTener ?estado1 (do ?accion ?pasos))(results ?estado1 ?accion ?estado2)(puedeTener ?estado2 ?pasos))
+	(<- (results (estado ?loc ?loc piso ?palito)sube-banquito(estado ?loc ?loc banquito ?palito)))
+	(<- (results (estado ?loc ?loc piso nopalito)toma-palo(estado ?loc ?loc piso palito)))
+	(<- (results (estado ?loc1 ?loc1 piso ?palito)(empuja-banquito ?loc1 ?loc2)(estado ?loc2 ?loc2 piso ?palito))(at platanos ?loc2)(different ?loc1 ?loc2))
+    (<- (results (estado ?mloc ?bloc piso ?palito)(camina ?mloc ?bloc)(estado ?bloc ?bloc piso ?palito))(different ?mloc ?bloc))	
+    (<- (different ventana centro))
+    (<- (different ventana puerta))
+    (<- (different centro ventana))
+    (<- (different centro puerta))
+    (<- (different puerta ventana))
+    (<- (different puerta centro))
+    (<- (different banquito piso))
+    (<- (different piso banquito))
+    (<- (at platanos centro))

@@ -17,7 +17,7 @@
 
 (defpackage :retriever
   (:use :common-lisp)
-  (:export #:<- #:ask #:unify #:with-kb)
+  (:export #:<- #:ask #:unify #:with-kb #:cargar-reglas)
   )
 
 (in-package :retriever)
@@ -30,7 +30,7 @@
 (defun ask (pat &optional (form pat))
   (mapcar #'(lambda (blist) (replace-vars form blist))
           (find-blists pat (list nil))))
-(trace find-blists)
+
 (defun find-blists (pat blists)
   (and blists
        (mapcan #'(lambda (rule)
@@ -46,7 +46,7 @@
        (if (null conjuncts) blists
          (prove-and (cdr conjuncts)
                     (find-blists (car conjuncts) blists)))))
-(trace replace-vars)
+
 ;;; Recursively all variables with the values, if any. Leave
 ;;; unbound variables alone.
 (defun replace-vars (form blist)
@@ -127,73 +127,12 @@
 (defun binding-value (bdg)
   (cadr bdg))
 
-(defparameter *monkey-kb*
-  '(
-    ;; If the monkey and box are in the center of
-    ;; the room and the monkey is on on the box,
-    ;; then nothing more needs to be done to get the
-    ;; bananas.
-    (<- (can-get (state ?loc ?loc box palito) done)
-        (at bananas ?loc))
-
-    ;; The monkey can get the bananas in state1 with
-    ;; some sequence of actions, if the first action
-    ;; leads from state1 to state2 and the monkey can
-    ;; get the bananas in state2 by performing the
-    ;; remaining actions.
-    (<- (can-get ?state1 (do ?action ?steps))
-        (results ?state1 ?action ?state2)
-        (can-get ?state2 ?steps))
-
-    ;; The monkey can climb on the box when they're
-    ;; in the same location.
-    ;; CAUTION: if you add climbing down, then you
-    ;; need to constrain when the monkey should climb
-    ;; on the box, to avoid an infinite number of
-    ;; solutions.
-    (<- (results (state ?loc ?loc floor ?palito)
-                 climb-box
-         (state ?loc ?loc box ?palito)))
-
-    ;; -- Toma el palito --
-    (<- (results (state ?loc ?loc floor nopalito)
-         toma-palo
-         (state ?loc ?loc floor palito)))
-
-    ;; The monkey can push the box to where the
-    ;; bananas are if the monkey and box are in one
-    ;; place and the bananas are somewhere else.
-    (<- (results (state ?loc1 ?loc1 floor ?palito)
-                 (push-box ?loc1 ?loc2)
-                 (state ?loc2 ?loc2 floor ?palito))
-        (at bananas ?loc2)
-        (different ?loc1 ?loc2))
-
-    ;; The monkey can walk to where the box is
-    ;; if theyre in different places.
-    (<- (results (state ?mloc ?bloc floor ?palito)
-                 (walk ?mloc ?bloc)
-                 (state ?bloc ?bloc floor ?palito))
-        (different ?mloc ?bloc))
-
-    ;; Every location is different from every other
-    ;; locations
-    (<- (different window center))
-    (<- (different window door))
-
-    (<- (different center window))
-    (<- (different center door))
-
-    (<- (different door window))
-    (<- (different door center))
-
-    (<- (different box floor))
-    (<- (different floor box))
-
-    ;; The bananas are in the center of the room.
-    (<- (at bananas center))
-    ))
-
-(with-kb *monkey-kb* (ask '(can-get (state door window floor nopalito) ?steps)))
-(with-kb *monkey-kb* (ask '(can-get (state center center box palito) ?steps)))
+(defun cargar-reglas (filename)
+  (with-open-file (stream filename)
+    (let ((numrows (read stream))
+          (lista nil))
+      (read-line stream nil nil)
+      (dotimes (row numrows lista)
+        (setq lista (cons (read stream nil nil) lista))
+        ))))
 
