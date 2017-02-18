@@ -6,74 +6,89 @@
          (opcionEscogida nil))
 
     (print " Inserte Primera Cadena")
-    (setq primeraCadena (read))
+    (setq primeraCadena (write-to-string (read)))
     (print " Inserte Segunda Cadena")
-    (setq segundaCadena (read))
+    (setq segundaCadena (write-to-string (read)))
 
-    (print " Escoge una opcion
-1.-Calcular longitud de cadena.
-2.-Concatenar cadenas.
-3.-Potencia de cadena.
-4.-Inverso.
-5-Prefijos.
-6.-Sufijos.
-7.-Subcadenas.
-8.-Salir.")
-    (setq opcionEscogida (read))
     (longitud primeraCadena segundaCadena)
     (concatena primeraCadena segundaCadena)
     (inversa primeraCadena segundaCadena)
     (impPalindromo primeraCadena segundaCadena)
-    (prefijo primeraCadena segundaCadena)
 
-    ))
+    (print "Subcadena")
+    (subcadena (stringComoLista primeraCadena))
+    (subcadena (stringComoLista segundaCadena))
+
+    (print "Prefijos")
+    (prefijo (stringComoLista primeraCadena) '())
+    (prefijo (stringComoLista segundaCadena) '())
+
+    (print "Sufijo")
+    (sufijo (reverse (stringComoLista primeraCadena)) '())
+    (sufijo (reverse (stringComoLista segundaCadena)) '())
+
+    (auxPotencia primeraCadena)
+    (auxPotencia segundaCadena)))
 
 (defun palindromo? (cadena1)
-  (equal (write-to-string cadena1) (reverse (write-to-string cadena1))))
+  (equal cadena1 (reverse cadena1)))
 
 (defun impPalindromo (cadena1 cadena2)
   (format t "~& Cadena 1 Palindromo: ~A ~%" (palindromo? cadena1))
   (format t "~& Cadena 1 Palindromo: ~A ~%" (palindromo? cadena2)))
 
 (defun longitud (cadena1 cadena2)
-  (format t "~& Longitud De Cadena 1  ~A ~%" (length (write-to-string cadena1)))
-  (format t "~& Longitud De Cadena 2  ~A ~%" (length (write-to-string cadena2))))
+  (format t "~& Longitud De Cadena 1  ~A ~%" (length cadena1))
+  (format t "~& Longitud De Cadena 2  ~A ~%" (length cadena2)))
 
 (defun concatena (cadena1 cadena2)
   (format t "~& Cadena Concatenada 1  ~A~A ~%" cadena1 cadena2)
   (format t "~& Cadena Concatenada 2  ~A~A ~%" cadena2 cadena1))
 
-(defun potencia ())
+(defun potencia (veces cadena)
+  (loop for i from 1 to veces do
+       (format t "~a" cadena)))
+
+(defun auxPotencia (cadena1)
+  (let* ((potencia nil))
+    (print "Inserte la potencia")
+    (setq potencia (parse-integer (write-to-string (read))))
+
+    (cond ((= potencia 0) (print nil))
+          ((> 0 potencia) (potencia (abs potencia) (reverse cadena1)))
+          (t (potencia potencia  cadena1)))))
 
 (defun inversa (cadena1 cadena2)
   (if (not (palindromo? cadena1))
-      (format t "~& Reversa De Cadena 1  ~A ~%" (reverse (write-to-string cadena1))))
+      (format t "~& Reversa De Cadena 1  ~A ~%" (reverse cadena1)))
   (if (not (palindromo? cadena2))
-      (format t "~& Reversa De Cadena 2  ~A ~%" (reverse (write-to-string cadena2)))))
+      (format t "~& Reversa De Cadena 2  ~A ~%" (reverse cadena2))))
 
-(defun prefijo(cadena1 cadena2)
-  (let* ((listaCadena1 nil)
-         (listaCadena2 nil)
-         (v (make-array 2 :element-type 'character :adjustable t :fill-pointer 0)))
+(defun stringComoLista (cadena)
+  (let* ((listaCadena nil))
+    (loop for caracter across (reverse cadena) do
+         (setq listaCadena (cons caracter listaCadena)))
+    listaCadena))
 
-    (loop for caracter across (reverse (write-to-string cadena1)) do
-         (setq listaCadena1 (cons caracter listaCadena1)))
+(defun prefijo (cadena cprefijo)
+  (cond ((null cadena) (print (reverse cprefijo)))
+        (t (progn
+             (print (reverse cprefijo))
+             (prefijo (rest cadena) (cons (first cadena) cprefijo))))))
 
-         (loop until (null listaCadena1) do
-              (vector-push (first listaCadena1) v)
-              (pop listaCadena1)
-              (loop for elemento in listaCadena1 do
-                   (print elemento)
-                   (vector-push-extend elemento v)
-                   (print v))
-              )
-         ))
+(defun sufijo (cadena csufijo)
+  (cond ((null cadena) (print csufijo))
+        (t (progn
+             (print csufijo)
+             (sufijo (rest cadena) (cons (first cadena) csufijo))))))
 
-(defun sufijo(cadena1 cadena2))
-(defun subcadena(cadena1 cadena2))
+(defun subcadena (cadena)
+  (let* ((primerCaracter nil))
+    (loop until (null cadena) do
+         (setq primerCaracter (cons (first cadena) primerCaracter))
+         (pop cadena)
+         (prefijo cadena primerCaracter)
+         (setq primerCaracter nil))))
 
 (readUser)
-
-
-
 
