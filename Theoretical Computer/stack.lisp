@@ -10,6 +10,7 @@
     listaCadena))
 
 (defun generateNextState (rulesOfProduction input)
+  "Recursively across the rules of production, we produce the next state of the stack machinek"
   (let* ((rule (first (car rulesOfProduction)))
          (production (second (car rulesOfProduction)))
          (stateOfRule (first rule))
@@ -17,7 +18,6 @@
          (stackOfRule (third rule))
          (stateOfProduction (first production))
          (stackOfProduction (second production)))
-
 
     (cond ((null rulesOfProduction)
            nil)
@@ -46,18 +46,13 @@
     (format t "~& -- Stack -- ~A ~%" *stack*)
 
 
-
     (loop for char in listWord do
          (setq generated (generateNextState rulesOfProduction char))
-
          (if (null generated)
              (progn
                (format t "~& String did not accept ~%")
                (return)))
-
-         (format t "~& State: ~A -- Stack -- ~A ~%" *currentState* *stack*)
-
-         )
+         (format t "~& State: ~A -- Stack -- ~A ~%" *currentState* *stack*) )
 
     (format t "~& Final State ~A ~%" *currentState*)
     (if (and (equal finalState *currentState*) (equal *stack* '(z0)))
@@ -76,6 +71,6 @@
                       ((1 a A)(1 lamb))
                       ((1 a AA)(2 lamb))) '(a b) '(z0 A B))
 
-
+;;Accepted: aacaa
 
 
