@@ -27,7 +27,7 @@ FInally, [here is](http://norvig.com/paip-preface.html#whylisp) an explanation w
 5. Press again ```ctrl-c-p``` after the usage of function: ```(Hello)```.
 6. See the result. ```(HELLOW_WORLD)```.
 
-## Usage for Artificial Intelligence
+## Usage for Artificial Intelligence & Theoretical Computer
 1. Open your Spacemacs. <br>
 2. Press ```ctrl x ``` and type ```slime```.  <br>
 3. Open a lisp file.  <br>
