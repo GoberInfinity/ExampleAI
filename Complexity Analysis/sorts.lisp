@@ -11,24 +11,17 @@
   (setq *j* 0)
   (setq *i* 1)
   (let* ((newList (copy-list scenario)))
-    (loop for x from 1 to (1- (length scenario)) do
-         (let*((key (nth *i* newList))
-               (temporalValuei '()))
-           (setq *j* (1- *i*))
-           (loop while (and (>= *j* 0)(> (nth *j* newList) key)) do
-
-                (setf temporalValuei (nth (1+ *j*) newList))
-                (setf (nth (1+ *j*) newList) (nth *j* newList))
-                (setf (nth *j* newList) temporalValuei)
-
-                (setq *j* (1- *j*))
-                (print newList)
-                )
-           (setq *i* (+ 1 *i*))
+    (loop for j from 1 to (1- (length scenario)) do
+         (let*((key (nth j newList)))
+           (setq *i* (1- j))
+           (loop while (and (>= *i* 0)(> (nth *i* newList) key)) do
+                (setf (nth (1+ *i*) newList) (nth *i* newList))
+                (setq *i* (1- *i*)))
+           (setf (nth (1+ *i*) newList) key)
+           (print newList)
            ))
     newList)
   )
 
-(trace Insertion-sort)
-(insertion-sort '(5 4 3 2 1))
+(insertion-sort *worst-case*)
 
