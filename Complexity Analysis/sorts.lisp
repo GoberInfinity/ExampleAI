@@ -51,22 +51,21 @@
                (setf (aref A k) (aref RA jj))
                (setf jj (1+ jj)))
          ))
-    A
     ))
 
 (defun merge-sort (A p r)
   (if (< p r)
       (progn
-        (let ((q (/ (+ p r) 2)))
-          (print q)
+        (let* ((q (first (multiple-value-list (round (/ (+ p r) 2))))))
           (merge-sort A p q)
-         ;; (merge-sort A (1+ q) r)
-         ;; (merge-idea A p q r)
+          (merge-sort A (1+ q) r)
+          (merge-idea A p q r)
         )
-        )
-      (progn 0)))
+        ))
+  
+  )
 
-(merge-sort #(8 7 6 5 4 3 2 1) 0 8 )
+(merge-sort #(6 5 4 3 2 1) 0 5 )
 
 ;;(merge-idea #(2 4 5 7 1 2 3 6) '0 '3 '7)
 
