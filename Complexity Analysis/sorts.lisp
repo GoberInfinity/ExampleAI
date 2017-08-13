@@ -23,7 +23,7 @@
     newList)
   )
 
-(insertion-sort *worst-case*)
+;;(insertion-sort *worst-case*)
 
 (defun merge-idea (A p q r)
   (let* ((n1 (1+ (- q p)))
@@ -54,6 +54,20 @@
     A
     ))
 
-(merge-idea #(2 4 5 7 1 2 3 6) '0 '3 '7)
+(defun merge-sort (A p r)
+  (if (< p r)
+      (progn
+        (let ((q (/ (+ p r) 2)))
+          (print q)
+          (merge-sort A p q)
+         ;; (merge-sort A (1+ q) r)
+         ;; (merge-idea A p q r)
+        )
+        )
+      (progn 0)))
+
+(merge-sort #(8 7 6 5 4 3 2 1) 0 8 )
+
+;;(merge-idea #(2 4 5 7 1 2 3 6) '0 '3 '7)
 
 
