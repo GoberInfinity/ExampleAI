@@ -56,13 +56,13 @@
 (defun merge-sort (A p r)
   (if (< p r)
       (progn
-        (let* ((q (first (multiple-value-list (round (/ (+ p r) 2))))))
+        (let* ((q (truncate (/ (+ p r) 2))))
           (merge-sort A p q)
           (merge-sort A (1+ q) r)
           (merge-idea A p q r)
         )
         ))
-  
+  A
   )
 
 (merge-sort #(6 5 4 3 2 1) 0 5 )
