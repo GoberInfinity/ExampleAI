@@ -25,11 +25,11 @@
 
 (insertion-sort *worst-case*)
 
-(defun merge-sort (A p q r)
+(defun merge-idea (A p q r)
   (let* ((n1 (1+ (- q p)))
          (n2 (- r q))
-         (ii '1)
-         (jj '1)
+         (ii '0)
+         (jj '0)
          (LA (make-array (1+ n1)))
          (RA (make-array (1+ n2))))
 
@@ -43,16 +43,17 @@
     (setf (aref RA n2) MOST-POSITIVE-FIXNUM)
 
     (loop for k from p to r do
-         (progn
-           (if (<= (aref LA ii)(aref RA jj))
-               (print "YOlaso")
-               (print "asfds")))
-         )
-
-
-
+         (if (<= (aref LA ii)(aref RA jj))
+             (progn
+               (setf (aref A k) (aref LA ii))
+               (setf ii (1+ ii)))
+             (progn
+               (setf (aref A k) (aref RA jj))
+               (setf jj (1+ jj)))
+         ))
+    A
     ))
 
-(merge-sort #(9 8 7 6 5 4 3 2 1) '0 '4 '8)
+(merge-idea #(2 4 5 7 1 2 3 6) '0 '3 '7)
 
 
